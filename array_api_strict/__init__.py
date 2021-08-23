@@ -120,11 +120,6 @@ Still TODO in this module are:
 
 import sys
 
-# array_api_strict is 3.8+ because it makes extensive use of positional-only
-# arguments.
-if sys.version_info < (3, 8):
-    raise ImportError("The array_api_strict submodule requires Python 3.8 or greater.")
-
 import warnings
 
 warnings.warn(
