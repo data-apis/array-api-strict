@@ -12,7 +12,7 @@ import array_api_strict as xp
         ([[2, 3]], [0, 0], 0, [[2, 3], [2, 3]]),
     ],
 )
-def test_stable_desc_argsort(x, indices, axis, expected):
+def test_take_function(x, indices, axis, expected):
     """
     Indices respect relative order of a descending stable-sort
 
