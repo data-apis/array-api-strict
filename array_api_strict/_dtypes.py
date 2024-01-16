@@ -18,11 +18,15 @@ class _DType:
         # Avoid the user error of array_api_strict.float32 == numpy.float32,
         # which gives False. Making == error is probably too egregious, so
         # warn instead.
-        if isinstance(other, np.dtype) or (isinstance(other, type) and issubclass(other, np.generic)):
-            warnings.warn("""You are comparing a array_api_strict dtype against \
+        if isinstance(other, np.dtype) or (
+            isinstance(other, type) and issubclass(other, np.generic)
+        ):
+            warnings.warn(
+                """You are comparing a array_api_strict dtype against \
 a NumPy native dtype object, but you probably don't want to do this. \
-array_api_strict dtype objects compare unequal to their NumPy equivalents. Such \
-cross-library comparison is not supported by the standard.""")
+array_api_strict dtype objects compare unequal to their NumPy equivalents. \
+Such cross-library comparison is not supported by the standard."""
+            )
         if not isinstance(other, _DType):
             return NotImplemented
         return self._np_dtype == other._np_dtype
@@ -33,6 +37,7 @@ cross-library comparison is not supported by the standard.""")
         # dtype objects much easier to work with here and elsewhere if they
         # can be used as dict keys.
         return hash(self._np_dtype)
+
 
 int8 = _DType("int8")
 int16 = _DType("int16")
