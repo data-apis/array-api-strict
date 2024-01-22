@@ -13,7 +13,10 @@ from ._manipulation_functions import reshape
 from ._elementwise_functions import conj
 from ._array_object import Array
 
-from numpy._core.numeric import normalize_axis_tuple
+try:
+    from numpy._core.numeric import normalize_axis_tuple
+except ImportError:
+    from numpy.core.numeric import normalize_axis_tuple
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
