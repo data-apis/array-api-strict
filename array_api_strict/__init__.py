@@ -115,11 +115,7 @@ Still TODO in this module are:
 
 """
 
-import warnings
-
-warnings.warn(
-    "The array_api_strict submodule is still experimental. See NEP 47.", stacklevel=2
-)
+__version__ = '1.0'
 
 __array_api_version__ = "2022.12"
 
