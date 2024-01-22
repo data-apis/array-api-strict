@@ -35,7 +35,7 @@ jobs:
         if [[ "${{ matrix.numpy-version }}" == "dev" ]]; then
           python -m pip install --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple numpy;
         else
-          python -m pip install numpy<2.0;
+          python -m pip install 'numpy<2.0';
         fi
     - name: Run the array API testsuite
       env:
