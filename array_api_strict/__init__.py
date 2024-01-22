@@ -115,6 +115,8 @@ Still TODO in this module are:
 
 """
 
+__version__ = '1.0'
+
 __array_api_version__ = "2022.12"
 
 __all__ = ["__array_api_version__"]
