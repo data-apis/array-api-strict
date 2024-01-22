@@ -24,7 +24,7 @@ jobs:
           else
             python -m pip install 'numpy<2.0';
           fi
-          python -m pip install pytest
+          python -m pip install -r requirements-tests.txt
       - name: Run Tests
         run: |
           pytest
