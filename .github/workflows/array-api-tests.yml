@@ -6,7 +6,7 @@ env:
   PYTEST_ARGS: "-v -rxXfE --ci"
 
 jobs:
-  tests:
+  array-api-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
