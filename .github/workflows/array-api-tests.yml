@@ -39,6 +39,8 @@ jobs:
         else
           python -m pip install 'numpy>=1.26,<2.0';
         fi
+        python -m pip install .
+        python -m pip install -r ${GITHUB_WORKSPACE}/array-api-tests/requirements.txt
     - name: Run the array API testsuite
       env:
         ARRAY_API_TESTS_MODULE: array_api_strict
