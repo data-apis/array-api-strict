@@ -1,0 +1,49 @@
+name: Array API Tests
+
+env:
+  PYTEST_ARGS: "-v -rxXfE --ci"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        numpy-version: ['1.26', 'dev']
+        exclude:
+          - python-version: '3.8'
+            numpy-version: 'dev'
+
+    steps:
+    - name: Checkout array-api-strict
+      uses: actions/checkout@v4
+      with:
+        path: array-api-strict
+    - name: Checkout array-api-tests
+      uses: actions/checkout@v4
+      with:
+        repository: data-apis/array-api-tests
+        submodules: 'true'
+        path: array-api-tests
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [[ "${{ matrix.numpy-version }}" == "dev" ]]; then
+          python -m pip install --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple numpy;
+        else
+          python -m pip install 'numpy>=1.26,<2.0';
+        fi
+    - name: Run the array API testsuite
+      env:
+        ARRAY_API_TESTS_MODULE: array_api_strict
+        # This enables the NEP 50 type promotion behavior (without it a lot of
+        # tests fail in numpy 1.26 on bad scalar type promotion behavior)
+        NPY_PROMOTION_STATE: weak
+      run: |
+        export PYTHONPATH="${GITHUB_WORKSPACE}/array-api-compat"
+        cd ${GITHUB_WORKSPACE}/array-api-tests
+        pytest array_api_tests/ --xfails-file ${PYTEST_ARGS}

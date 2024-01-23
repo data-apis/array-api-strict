@@ -115,8 +115,6 @@ Still TODO in this module are:
 
 """
 
-__version__ = '1.0'
-
 __array_api_version__ = "2022.12"
 
 __all__ = ["__array_api_version__"]
@@ -384,3 +382,7 @@ __all__ += ["max", "mean", "min", "prod", "std", "sum", "var"]
 from ._utility_functions import all, any
 
 __all__ += ["all", "any"]
+
+from . import _version
+__version__ = _version.get_versions()['version']
+del _version
