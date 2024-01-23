@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-import array_api_strict
-
 setup(
     name='array_api_strict',
-    version=array_api_strict.__version__,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(include=['array_api_strict*']),
     author="Consortium for Python Data API Standards",
     description="A strict, minimal implementation of the Python array API standard.",
