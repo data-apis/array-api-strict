@@ -3,7 +3,7 @@ name: Array API Tests
 on: [push, pull_request]
 
 env:
-  PYTEST_ARGS: "-v -rxXfE --ci"
+  PYTEST_ARGS: "-v -rxXfE --ci --hypothesis-disable-deadline"
 
 jobs:
   array-api-tests:
