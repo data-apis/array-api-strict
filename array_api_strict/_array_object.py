@@ -471,7 +471,7 @@ class Array:
         if api_version is not None and not api_version.startswith("2021."):
             raise ValueError(f"Unrecognized array API version: {api_version!r}")
         import array_api_strict
-        return array_api
+        return array_api_strict
 
     def __bool__(self: Array, /) -> bool:
         """
