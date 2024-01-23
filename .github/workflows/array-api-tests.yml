@@ -39,7 +39,7 @@ jobs:
         else
           python -m pip install 'numpy>=1.26,<2.0';
         fi
-        python -m pip install .
+        python -m pip install ${GITHUB_WORKSPACE}/array-api-strict
         python -m pip install -r ${GITHUB_WORKSPACE}/array-api-tests/requirements.txt
     - name: Run the array API testsuite
       env:
@@ -48,6 +48,5 @@ jobs:
         # tests fail in numpy 1.26 on bad scalar type promotion behavior)
         NPY_PROMOTION_STATE: weak
       run: |
-        export PYTHONPATH="${GITHUB_WORKSPACE}/array-api-compat"
         cd ${GITHUB_WORKSPACE}/array-api-tests
         pytest array_api_tests/ --xfails-file ${PYTEST_ARGS}
