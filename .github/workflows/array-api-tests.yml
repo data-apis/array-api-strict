@@ -3,7 +3,7 @@ name: Array API Tests
 on: [push, pull_request]
 
 env:
-  PYTEST_ARGS: "-v -rxXfE --ci --xfails-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt"
+  PYTEST_ARGS: "-v -rxXfE --ci"
 
 jobs:
   array-api-tests:
@@ -49,4 +49,4 @@ jobs:
         NPY_PROMOTION_STATE: weak
       run: |
         cd ${GITHUB_WORKSPACE}/array-api-tests
-        pytest array_api_tests/ ${PYTEST_ARGS}
+        pytest array_api_tests/ --xfails-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
