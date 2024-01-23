@@ -24,7 +24,7 @@ jobs:
           else
             python -m pip install 'numpy>=1.26,<2.0';
           fi
-          python -m pip install -r requirements-tests.txt
+          python -m pip install -r requirements-dev.txt
       - name: Run Tests
         run: |
           pytest
