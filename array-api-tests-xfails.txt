@@ -1,4 +1,5 @@
 # copy=False is not yet implemented
+# https://github.com/numpy/numpy/pull/25168
 array_api_tests/test_creation_functions.py::test_asarray_arrays
 
 # Some fft tests are currently wrong
