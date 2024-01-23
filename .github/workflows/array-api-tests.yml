@@ -3,7 +3,7 @@ name: Array API Tests
 on: [push, pull_request]
 
 env:
-  PYTEST_ARGS: "-v -rxXfE --ci"
+  PYTEST_ARGS: "-v -rxXfE --ci --xfails-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt"
 
 jobs:
   array-api-tests:
