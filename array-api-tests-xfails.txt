@@ -1,3 +1,6 @@
+# copy=False is not yet implemented
+array_api_tests/test_creation_functions.py::test_asarray_arrays
+
 # Some fft tests are currently wrong
 # (https://github.com/data-apis/array-api-tests/issues/231)
 array_api_tests/test_fft.py::test_fft
