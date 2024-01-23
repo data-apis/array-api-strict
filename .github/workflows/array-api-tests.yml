@@ -49,4 +49,4 @@ jobs:
         NPY_PROMOTION_STATE: weak
       run: |
         cd ${GITHUB_WORKSPACE}/array-api-tests
-        pytest array_api_tests/ --xfails-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
+        pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
