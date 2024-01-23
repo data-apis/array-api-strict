@@ -30,4 +30,4 @@ jobs:
           pytest
 
           # Make sure it installs
-          python setup.py install
+          pip install .
