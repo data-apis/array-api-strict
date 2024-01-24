@@ -305,10 +305,16 @@ def slogdet(x: Array, /) -> SlogdetResult:
 # To workaround this, the below is the code from np.linalg.solve except
 # only calling solve1 in the exactly 1D case.
 def _solve(a, b):
-    from numpy.linalg._linalg import (
+    try:
+        from numpy.linalg._linalg import (
         _makearray, _assert_stacked_2d, _assert_stacked_square,
         _commonType, isComplexType, _raise_linalgerror_singular
-    )
+        )
+    except ImportError:
+        from numpy.linalg.linalg import (
+        _makearray, _assert_stacked_2d, _assert_stacked_square,
+        _commonType, isComplexType, _raise_linalgerror_singular
+        )
     from numpy.linalg import _umath_linalg
 
     a, _ = _makearray(a)

@@ -11,7 +11,7 @@ class _DType:
         self._np_dtype = np_dtype
 
     def __repr__(self):
-        return f"np.array_api.{self._np_dtype.name}"
+        return f"array_api_strict.{self._np_dtype.name}"
 
     def __eq__(self, other):
         # See https://github.com/numpy/numpy/pull/25370/files#r1423259515.

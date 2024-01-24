@@ -5,8 +5,8 @@ The array API standard defines some behaviors differently than ndarray, in
 particular, type promotion rules are different (the standard has no
 value-based casting). The standard also specifies a more limited subset of
 array methods and functionalities than are implemented on ndarray. Since the
-goal of the array_api namespace is to be a minimal implementation of the array
-API standard, we need to define a separate wrapper class for the array_api
+goal of the array_api_strict namespace is to be a minimal implementation of the array
+API standard, we need to define a separate wrapper class for the array_api_strict
 namespace.
 
 The standard compliant class is only a wrapper class. It is *not* a subclass
@@ -73,7 +73,7 @@ class Array:
         This is a private method for initializing the array API Array
         object.
 
-        Functions outside of the array_api submodule should not use this
+        Functions outside of the array_api_strict module should not use this
         method. Use one of the creation functions instead, such as
         ``asarray``.
 
@@ -86,7 +86,7 @@ class Array:
         _dtype = _DType(x.dtype)
         if _dtype not in _all_dtypes:
             raise TypeError(
-                f"The array_api namespace does not support the dtype '{x.dtype}'"
+                f"The array_api_strict namespace does not support the dtype '{x.dtype}'"
             )
         obj._array = x
         obj._dtype = _dtype
@@ -95,7 +95,7 @@ class Array:
     # Prevent Array() from working
     def __new__(cls, *args, **kwargs):
         raise TypeError(
-            "The array_api Array object should not be instantiated directly. Use an array creation function, such as asarray(), instead."
+            "The array_api_strict Array object should not be instantiated directly. Use an array creation function, such as asarray(), instead."
         )
 
     # These functions are not required by the spec, but are implemented for
@@ -121,7 +121,7 @@ class Array:
         return prefix + mid + suffix
 
     # This function is not required by the spec, but we implement it here for
-    # convenience so that np.asarray(np.array_api.Array) will work.
+    # convenience so that np.asarray(array_api_strict.Array) will work.
     def __array__(self, dtype: None | np.dtype[Any] = None) -> npt.NDArray[Any]:
         """
         Warning: this method is NOT part of the array API spec. Implementers
@@ -338,7 +338,7 @@ class Array:
             if i is not None:
                 nonexpanding_key.append(i)
                 if isinstance(i, np.ndarray):
-                    raise IndexError("Index arrays for np.array_api must be np.array_api arrays")
+                    raise IndexError("Index arrays for array_api_strict must be array_api_strict arrays")
                 if isinstance(i, Array):
                     if i.dtype in _boolean_dtypes:
                         key_has_mask = True
@@ -471,7 +471,7 @@ class Array:
         if api_version is not None and not api_version.startswith("2021."):
             raise ValueError(f"Unrecognized array API version: {api_version!r}")
         import array_api_strict
-        return array_api
+        return array_api_strict
 
     def __bool__(self: Array, /) -> bool:
         """
@@ -571,7 +571,7 @@ class Array:
         # docstring of _validate_index
         self._validate_index(key)
         if isinstance(key, Array):
-            # Indexing self._array with array_api arrays can be erroneous
+            # Indexing self._array with array_api_strict arrays can be erroneous
             key = key._array
         res = self._array.__getitem__(key)
         return self._new(res)
@@ -761,7 +761,7 @@ class Array:
         # docstring of _validate_index
         self._validate_index(key)
         if isinstance(key, Array):
-            # Indexing self._array with array_api arrays can be erroneous
+            # Indexing self._array with array_api_strict arrays can be erroneous
             key = key._array
         self._array.__setitem__(key, asarray(value)._array)
 
