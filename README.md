@@ -81,19 +81,19 @@ Here is an (incomplete) list of the sorts of ways that array-api-strict is
 strict/minimal:
 
 - Only those functions and methods that are [defined in the
-  standard](https://data-apis.org/array-api/draft/API_specification/index.html)
+  standard](https://data-apis.org/array-api/latest/API_specification/index.html)
   are included.
 
 - In those functions, only the keyword-arguments that are defined by the
   standard are included. All signatures in array-api-strict use
   [positional-only
-  arguments](https://data-apis.org/array-api/draft/API_specification/function_and_method_signatures.html#function-and-method-signatures).
+  arguments](https://data-apis.org/array-api/latest/API_specification/function_and_method_signatures.html#function-and-method-signatures).
   As noted above, only array_api_strict array objects are accepted by
   functions, except in the places where the standard allows Python scalars
   (i.e., functions to not automatically call `asarray` on their inputs).
 
 - Only those [dtypes that are defined in the
-  standard](https://data-apis.org/array-api/draft/API_specification/data_types.html)
+  standard](https://data-apis.org/array-api/latest/API_specification/data_types.html)
   are included.
 
 - All functions and methods reject inputs if the standard does not *require*
@@ -101,25 +101,25 @@ strict/minimal:
   aspects of the library. For example, in NumPy, most transcendental functions
   like `sin` will accept integer array inputs, but the [standard only requires
   them to accept floating-point
-  inputs](https://data-apis.org/array-api/draft/API_specification/generated/array_api.sin.html#array_api.sin),
+  inputs](https://data-apis.org/array-api/latest/API_specification/generated/array_api.sin.html#array_api.sin),
   so in array-api-strict, `sin(integer_array)` will raise an exception.
 
 - The
-  [indexing](https://data-apis.org/array-api/draft/API_specification/indexing.html)
+  [indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html)
   semantics required by the standard are not
 
 - There are no distinct "scalar" objects as in NumPy. There are only 0-D
   arrays.
 
 - Dtype objects are just empty objects that only implement [equality
-  comparison](https://data-apis.org/array-api/draft/API_specification/generated/array_api.data_types.__eq__.html).
+  comparison](https://data-apis.org/array-api/latest/API_specification/generated/array_api.data_types.__eq__.html).
   The way to access dtype objects in the standard is by name, like
   `xp.float32`.
 
 - The array object type itself is private and should not be accessed.
   Subclassing or otherwise trying to directly initialize this object is not
   supported. Arrays should created with one of the [array creation
-  functions](https://data-apis.org/array-api/draft/API_specification/creation_functions.html)
+  functions](https://data-apis.org/array-api/latest/API_specification/creation_functions.html)
   such as `asarray`.
 
 ## Caveats
@@ -144,9 +144,9 @@ issue, but this hasn't necessarily been tested thoroughly.
     `NotImplementedError` in that case.
 
 2. Since NumPy is a CPU-only library, the [device
-   support](https://data-apis.org/array-api/draft/design_topics/device_support.html)
+   support](https://data-apis.org/array-api/latest/design_topics/device_support.html)
    in array-api-strict is superficial only. `x.device` is always a (private)
-   `_CPU_DEVICE` object, and `device` keywords to creation functions only
+   `CPU_DEVICE` object, and `device` keywords to creation functions only
    accept either this object or `None`. A future version of array-api-strict
    [may add support for a CuPy
    backend](https://github.com/data-apis/array-api-strict/issues/5) so that
@@ -162,13 +162,13 @@ issue, but this hasn't necessarily been tested thoroughly.
 
 4. There are some behaviors in the standard that are not required to be
    implemented by libraries that cannot support [data dependent
-   shapes](https://data-apis.org/array-api/draft/design_topics/data_dependent_output_shapes.html).
+   shapes](https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html).
    This includes [the `unique_*`
-   functions](https://data-apis.org/array-api/draft/API_specification/set_functions.html),
+   functions](https://data-apis.org/array-api/latest/API_specification/set_functions.html),
    [boolean array
-   indexing](https://data-apis.org/array-api/draft/API_specification/indexing.html#boolean-array-indexing),
+   indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html#boolean-array-indexing),
    and the
-   [`nonzero`](https://data-apis.org/array-api/draft/API_specification/generated/array_api.nonzero.html)
+   [`nonzero`](https://data-apis.org/array-api/latest/API_specification/generated/array_api.nonzero.html)
    function. array-api-strict currently implements all of these. In the
    future, [there may be a way to disable them](https://github.com/data-apis/array-api-strict/issues/7).
 
