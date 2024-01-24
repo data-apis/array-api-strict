@@ -88,9 +88,9 @@ strict/minimal:
   standard are included. All signatures in array-api-strict use
   [positional-only
   arguments](https://data-apis.org/array-api/latest/API_specification/function_and_method_signatures.html#function-and-method-signatures).
-  As noted above, only array_api_strict array objects are accepted by
+  As noted above, only `array_api_strict` array objects are accepted by
   functions, except in the places where the standard allows Python scalars
-  (i.e., functions to not automatically call `asarray` on their inputs).
+  (i.e., functions do not automatically call `asarray` on their inputs).
 
 - Only those [dtypes that are defined in the
   standard](https://data-apis.org/array-api/latest/API_specification/data_types.html)
@@ -106,7 +106,9 @@ strict/minimal:
 
 - The
   [indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html)
-  semantics required by the standard are not
+  semantics required by the standard are limited compared to those implemented
+  by NumPy (e.g., out-of-bounds slices are not supported, integer array
+  indexing is not supported, only a single boolean array index is supported).
 
 - There are no distinct "scalar" objects as in NumPy. There are only 0-D
   arrays.
@@ -118,7 +120,7 @@ strict/minimal:
 
 - The array object type itself is private and should not be accessed.
   Subclassing or otherwise trying to directly initialize this object is not
-  supported. Arrays should created with one of the [array creation
+  supported. Arrays should be created with one of the [array creation
   functions](https://data-apis.org/array-api/latest/API_specification/creation_functions.html)
   such as `asarray`.
 

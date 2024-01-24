@@ -8,7 +8,7 @@ versions prior to 2.0. Note that the commit history in this repository is
 extracted from the git history of numpy/array_api/ (see the [README](README.md)).
 
 Additionally, the following changes are new to `array_api_strict` from
-`numpy.array_api` in NumPy 1.26 (the last major NumPy release to include
+`numpy.array_api` in NumPy 1.26 (the last NumPy feature release to include
 `numpy.array_api`):
 
 - ``array_api_strict`` was made more portable. In particular:
