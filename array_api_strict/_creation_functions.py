@@ -36,7 +36,7 @@ def asarray(
     *,
     dtype: Optional[Dtype] = None,
     device: Optional[Device] = None,
-    copy: Optional[Union[bool, np._CopyMode]] = None,
+    copy: Optional[bool] = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.asarray <numpy.asarray>`.
@@ -53,15 +53,22 @@ def asarray(
         _np_dtype = dtype._np_dtype
     if device not in [CPU_DEVICE, None]:
         raise ValueError(f"Unsupported device {device!r}")
-    if copy in (False, np._CopyMode.IF_NEEDED):
-        # Note: copy=False is not yet implemented in np.asarray
-        raise NotImplementedError("copy=False is not yet implemented")
     if isinstance(obj, Array):
-        if dtype is not None and obj.dtype != dtype:
-            copy = True
-        if copy in (True, np._CopyMode.ALWAYS):
-            return Array._new(np.array(obj._array, copy=True, dtype=_np_dtype))
-        return obj
+        if np.__version__[0] < '2':
+            if copy is False:
+                # Note: copy=False is not yet implemented in np.asarray for
+                # NumPy 1
+
+                # Work around it by creating the new array and seeing if NumPy
+                # copies it.
+                new_array = np.array(obj._array, copy=copy, dtype=_np_dtype)
+                if new_array is not obj._array:
+                    raise ValueError("Unable to avoid copy while creating an array from given array.")
+                return Array._new(new_array)
+            if copy is None:
+                # NumPy 1 treats copy=False the same as the standard copy=None
+                copy = False
+        return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype))
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
         # Give a better error message in this case. NumPy would convert this
         # to an object array. TODO: This won't handle large integers in lists.

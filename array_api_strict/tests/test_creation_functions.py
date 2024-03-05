@@ -50,19 +50,24 @@ def test_asarray_copy():
     a[0] = 0
     assert all(b[0] == 1)
     assert all(a[0] == 0)
+
     a = asarray([1])
-    b = asarray(a, copy=np._CopyMode.ALWAYS)
-    a[0] = 0
-    assert all(b[0] == 1)
-    assert all(a[0] == 0)
-    a = asarray([1])
-    b = asarray(a, copy=np._CopyMode.NEVER)
+    b = asarray(a, copy=False)
     a[0] = 0
     assert all(b[0] == 0)
-    assert_raises(NotImplementedError, lambda: asarray(a, copy=False))
-    assert_raises(NotImplementedError,
-                  lambda: asarray(a, copy=np._CopyMode.IF_NEEDED))
 
+    a = asarray([1])
+    assert_raises(ValueError, lambda: asarray(a, copy=False, dtype=float64))
+
+    a = asarray([1])
+    b = asarray(a, copy=None)
+    a[0] = 0
+    assert all(b[0] == 0)
+
+    a = asarray([1])
+    b = asarray(a, dtype=float64, copy=None)
+    a[0] = 0
+    assert all(b[0] == 1.0)
 
 def test_arange_errors():
     arange(1, device=CPU_DEVICE)  # Doesn't error
