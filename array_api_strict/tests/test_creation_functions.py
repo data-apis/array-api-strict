@@ -69,6 +69,31 @@ def test_asarray_copy():
     a[0] = 0
     assert all(b[0] == 1.0)
 
+    # Python built-in types
+    for obj in [True, 0, 0.0, 0j, [0], [[0]]]:
+        asarray(obj, copy=True) # No error
+        asarray(obj, copy=None) # No error
+        assert_raises(ValueError, lambda: asarray(obj, copy=False))
+
+    # Buffer protocol
+    a = np.array([1])
+    b = asarray(a, copy=True)
+    assert isinstance(b, Array)
+    a[0] = 0
+    assert all(b[0] == 1)
+
+    a = np.array([1])
+    b = asarray(a, copy=False)
+    assert isinstance(b, Array)
+    a[0] = 0
+    assert all(b[0] == 0)
+
+    a = np.array([1])
+    b = asarray(a, copy=None)
+    assert isinstance(b, Array)
+    a[0] = 0
+    assert all(b[0] == 0)
+
 def test_arange_errors():
     arange(1, device=CPU_DEVICE)  # Doesn't error
     assert_raises(ValueError, lambda: arange(1, device="cpu"))
