@@ -1,6 +1,16 @@
 # array-api-strict Changelog
 
-## 1.0 (????)
+## 1.1 (2024-04-08)
+
+- Fix the `copy` flag in `__array__` for NumPy 2.0.
+
+- Add full `copy=False` support to `asarray()`. This is emulated in NumPy 1.26 by creating
+  the array and seeing if it is copied. For NumPy 2.0, the new native
+  `copy=False` flag is used.
+
+- Add broadcasting support to `cross`.
+
+## 1.0 (2024-01-24)
 
 This is the first release of `array_api_strict`. It is extracted from
 `numpy.array_api`, which was included as an experimental submodule in NumPy
