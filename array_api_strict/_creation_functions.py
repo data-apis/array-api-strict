@@ -11,7 +11,6 @@ if TYPE_CHECKING:
         NestedSequence,
         SupportsBufferProtocol,
     )
-    from collections.abc import Sequence
 from ._dtypes import _DType, _all_dtypes
 
 import numpy as np
@@ -22,6 +21,12 @@ def _check_valid_dtype(dtype):
     if dtype not in (None,) + _all_dtypes:
         raise ValueError("dtype must be one of the supported dtypes")
 
+def _supports_buffer_protocol(obj):
+    try:
+        memoryview(obj)
+    except TypeError:
+        return False
+    return True
 
 def asarray(
     obj: Union[
@@ -36,7 +41,7 @@ def asarray(
     *,
     dtype: Optional[Dtype] = None,
     device: Optional[Device] = None,
-    copy: Optional[Union[bool, np._CopyMode]] = None,
+    copy: Optional[bool] = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.asarray <numpy.asarray>`.
@@ -53,20 +58,37 @@ def asarray(
         _np_dtype = dtype._np_dtype
     if device not in [CPU_DEVICE, None]:
         raise ValueError(f"Unsupported device {device!r}")
-    if copy in (False, np._CopyMode.IF_NEEDED):
-        # Note: copy=False is not yet implemented in np.asarray
-        raise NotImplementedError("copy=False is not yet implemented")
+
+    if np.__version__[0] < '2':
+        if copy is False:
+            # Note: copy=False is not yet implemented in np.asarray for
+            # NumPy 1
+
+            # Work around it by creating the new array and seeing if NumPy
+            # copies it.
+            if isinstance(obj, Array):
+                new_array = np.array(obj._array, copy=copy, dtype=_np_dtype)
+                if new_array is not obj._array:
+                    raise ValueError("Unable to avoid copy while creating an array from given array.")
+                return Array._new(new_array)
+            elif _supports_buffer_protocol(obj):
+                # Buffer protocol will always support no-copy
+                return Array._new(np.array(obj, copy=copy, dtype=_np_dtype))
+            else:
+                # No-copy is unsupported for Python built-in types.
+                raise ValueError("Unable to avoid copy while creating an array from given object.")
+
+        if copy is None:
+            # NumPy 1 treats copy=False the same as the standard copy=None
+            copy = False
+
     if isinstance(obj, Array):
-        if dtype is not None and obj.dtype != dtype:
-            copy = True
-        if copy in (True, np._CopyMode.ALWAYS):
-            return Array._new(np.array(obj._array, copy=True, dtype=_np_dtype))
-        return obj
+        return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype))
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
         # Give a better error message in this case. NumPy would convert this
         # to an object array. TODO: This won't handle large integers in lists.
         raise OverflowError("Integer out of bounds for array dtypes")
-    res = np.asarray(obj, dtype=_np_dtype)
+    res = np.array(obj, dtype=_np_dtype, copy=copy)
     return Array._new(res)
 
 
