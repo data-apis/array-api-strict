@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import operator
 from enum import IntEnum
+import warnings
+
 from ._creation_functions import asarray
 from ._dtypes import (
     _DType,
@@ -480,8 +482,10 @@ class Array:
     def __array_namespace__(
         self: Array, /, *, api_version: Optional[str] = None
     ) -> types.ModuleType:
-        if api_version is not None and not api_version.startswith("2021."):
+        if api_version is not None and api_version not in ["2021.12", "2022.12"]:
             raise ValueError(f"Unrecognized array API version: {api_version!r}")
+        if api_version == "2021.12":
+            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
         import array_api_strict
         return array_api_strict
 
