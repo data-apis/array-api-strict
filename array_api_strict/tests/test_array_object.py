@@ -23,7 +23,7 @@ from .._dtypes import (
     uint64,
     bool as bool_,
 )
-
+import array_api_strict
 
 def test_validate_index():
     # The indexing tests in the official array API test suite test that the
@@ -398,3 +398,13 @@ def test_array_keys_use_private_array():
     key = ones((0, 0), dtype=bool_)
     with pytest.raises(IndexError):
         a[key]
+
+def test_array_namespace():
+    a = ones((3, 3))
+    assert a.__array_namespace__() == array_api_strict
+    assert a.__array_namespace__(api_version=None) is array_api_strict
+    assert a.__array_namespace__(api_version="2022.12") is array_api_strict
+    with pytest.warns(UserWarning):
+        assert a.__array_namespace__(api_version="2021.12") is array_api_strict
+    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
+    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2023.12"))
