@@ -14,8 +14,8 @@ project = 'array-api-strict'
 copyright = '2024, Consortium for Python Data API Standards'
 author = 'Consortium for Python Data API Standards'
 
-import array_api_strict
-release = array_api_strict.__version__
+# import array_api_strict
+# release = array_api_strict.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
