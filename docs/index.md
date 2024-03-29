@@ -145,11 +145,12 @@ issue, but this hasn't necessarily been tested thoroughly.
    the [xfails
    file](https://github.com/data-apis/array-api-strict/blob/main/array-api-tests-xfails.txt).
 
-    The most notable of these is that in NumPy 1.26, the `copy=False` flag is
-    not implemented for `asarray` and therefore `array_api_strict` raises
-    `NotImplementedError` in that case.
+2. array-api-strict is just a thin, pure Python wrapper around `numpy.ndarray`
+   and `numpy` functions. As such, the performance should be mostly comparable
+   to NumPy, but nonetheless, performance is not a primary concern for this
+   library, since it is only intended to be used for testing purposes.
 
-2. Since NumPy is a CPU-only library, the [device
+3. Since NumPy is a CPU-only library, the [device
    support](https://data-apis.org/array-api/latest/design_topics/device_support.html)
    in array-api-strict is superficial only. `x.device` is always a (private)
    `CPU_DEVICE` object, and `device` keywords to creation functions only
@@ -158,7 +159,7 @@ issue, but this hasn't necessarily been tested thoroughly.
    backend](https://github.com/data-apis/array-api-strict/issues/5) so that
    more significant device support can be tested.
 
-3. Although only array types are expected in array-api-strict functions,
+4. Although only array types are expected in array-api-strict functions,
    currently most functions do not do extensive type checking on their inputs,
    so a sufficiently duck-typed object may pass through silently (or at best,
    you may get `AttributeError` instead of `TypeError`). However, all type
@@ -166,7 +167,7 @@ issue, but this hasn't necessarily been tested thoroughly.
    this deviation may be tested with type checking. This [behavior may improve
    in the future](https://github.com/data-apis/array-api-strict/issues/6).
 
-4. There are some behaviors in the standard that are not required to be
+5. There are some behaviors in the standard that are not required to be
    implemented by libraries that cannot support [data dependent
    shapes](https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html).
    This includes [the `unique_*`
@@ -178,9 +179,9 @@ issue, but this hasn't necessarily been tested thoroughly.
    function. array-api-strict currently implements all of these. In the
    future, [there may be a way to disable them](https://github.com/data-apis/array-api-strict/issues/7).
 
-5. array-api-strict currently only supports the latest version of the array
-   API standard. [This may change in the future depending on
-   need](https://github.com/data-apis/array-api-strict/issues/8).
+6. array-api-strict currently only supports the 2022.12 version of the array
+   API standard. [Support for 2023.12 is
+   planned](https://github.com/data-apis/array-api-strict/issues/25).
 
 ## Usage
 
@@ -192,8 +193,8 @@ Previously this implementation was available as `numpy.array_api`, but it was
 moved to a separate package for NumPy 2.0.
 
 Note that the history of this repo prior to commit
-fbefd42e4d11e9be20e0a4785f2619fc1aef1e7c was generated automatically
-from the numpy git history, using the following
+[fbefd42e4d11e9be20e0a4785f2619fc1aef1e7c](https://github.com/data-apis/array-api-strict/commit/fbefd42e4d11e9be20e0a4785f2619fc1aef1e7c)
+was generated automatically from the numpy git history, using the following
 [git-filter-repo](https://github.com/newren/git-filter-repo) command:
 
 ```
