@@ -1,6 +1,7 @@
 furo
 linkify-it-py
 myst-parser
+numpy
 sphinx
-sphinx-copybutton
 sphinx-autobuild
+sphinx-copybutton
