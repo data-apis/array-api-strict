@@ -203,4 +203,6 @@ git_filter_repo.py --path numpy/array_api/ --path-rename numpy/array_api:array_a
 ```{toctree}
 :titlesonly:
 :hidden:
+
+changelog.md
 ```
