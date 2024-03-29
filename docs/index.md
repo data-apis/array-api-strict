@@ -183,16 +183,12 @@ issue, but this hasn't necessarily been tested thoroughly.
    API standard. [Support for 2023.12 is
    planned](https://github.com/data-apis/array-api-strict/issues/25).
 
-## Usage
-
-TODO: Add a sample CI script here.
-
 ## Relationship to `numpy.array_api`
 
 Previously this implementation was available as `numpy.array_api`, but it was
 moved to a separate package for NumPy 2.0.
 
-Note that the history of this repo prior to commit
+The history of this repo prior to commit
 [fbefd42e4d11e9be20e0a4785f2619fc1aef1e7c](https://github.com/data-apis/array-api-strict/commit/fbefd42e4d11e9be20e0a4785f2619fc1aef1e7c)
 was generated automatically from the numpy git history, using the following
 [git-filter-repo](https://github.com/newren/git-filter-repo) command:
