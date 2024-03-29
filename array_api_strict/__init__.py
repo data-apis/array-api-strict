@@ -10,7 +10,7 @@ It is *not* intended to be used by end-users. End-users of the array API
 should just use their favorite array library (NumPy, CuPy, PyTorch, etc.) as
 usual. It is also not intended to be used as a dependency by consuming
 libraries. Consuming library code should use the
-array-api-compat (https://github.com/data-apis/array-api-compat) package to
+array-api-compat (https://data-apis.org/array-api-compat/) package to
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
