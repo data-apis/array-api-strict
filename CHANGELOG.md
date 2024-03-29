@@ -1,6 +1,6 @@
 # array-api-strict Changelog
 
-## 1.1.1 (2024-04-28)
+## 1.1.1 (2024-04-29)
 
 - Fix the `api_version` argument to `__array_namespace__` to accept
   `'2021.12'` or `'2022.12'`.
