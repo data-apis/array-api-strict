@@ -284,6 +284,17 @@ from ._utility_functions import all, any
 
 __all__ += ["all", "any"]
 
+# Helper functions that are not part of the standard
+
+from ._flags import (
+    set_array_api_strict_flags,
+    get_array_api_strict_flags,
+    reset_array_api_strict_flags,
+    ArrayApiStrictFlags,
+)
+
+__all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_array_api_strict_flags', 'ArrayApiStrictFlags']
+
 from . import _version
 __version__ = _version.get_versions()['version']
 del _version
