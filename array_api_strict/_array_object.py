@@ -32,6 +32,7 @@ from ._dtypes import (
     _result_type,
     _dtype_categories,
 )
+from ._flags import get_array_api_strict_flags
 
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Any, SupportsIndex
 import types
@@ -427,13 +428,17 @@ class Array:
                                 "the Array API)"
                             )
             elif isinstance(i, Array):
-                if i.dtype in _boolean_dtypes and len(_key) != 1:
-                    assert isinstance(key, tuple)  # sanity check
-                    raise IndexError(
-                        f"Single-axes index {i} is a boolean array and "
-                        f"{len(key)=}, but masking is only specified in the "
-                        "Array API when the array is the sole index."
-                    )
+                if i.dtype in _boolean_dtypes:
+                    if len(_key) != 1:
+                        assert isinstance(key, tuple)  # sanity check
+                        raise IndexError(
+                            f"Single-axes index {i} is a boolean array and "
+                            f"{len(key)=}, but masking is only specified in the "
+                            "Array API when the array is the sole index."
+                        )
+                    if not get_array_api_strict_flags()['data_dependent_shapes']:
+                        raise RuntimeError("Boolean array indexing (masking) requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
+
                 elif i.dtype in _integer_dtypes and i.ndim != 0:
                     raise IndexError(
                         f"Single-axes index {i} is a non-zero-dimensional "

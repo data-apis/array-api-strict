@@ -265,3 +265,11 @@ def set_flags_from_environment():
         )
 
 set_flags_from_environment()
+
+def requires_data_dependent_shapes(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if not DATA_DEPENDENT_SHAPES:
+            raise RuntimeError(f"The function {func.__name__} requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
+        return func(*args, **kwargs)
+    return wrapper
