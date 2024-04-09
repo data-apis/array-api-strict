@@ -129,7 +129,9 @@ def set_array_api_strict_flags(
                     f"Extension {extension} requires standard version "
                     f"{extension_versions[extension]} or later"
                 )
-        ENABLED_EXTENSIONS = enabled_extensions
+        ENABLED_EXTENSIONS = tuple(enabled_extensions)
+    else:
+        ENABLED_EXTENSIONS = tuple([ext for ext in all_extensions if extension_versions[ext] <= STANDARD_VERSION])
 
 # We have to do this separately or it won't get added as the docstring
 set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
