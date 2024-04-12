@@ -244,7 +244,7 @@ from . import linalg
 
 __all__ += ["linalg"]
 
-from .linalg import matmul, tensordot, matrix_transpose, vecdot
+from ._linear_algebra_functions import matmul, tensordot, matrix_transpose, vecdot
 
 __all__ += ["matmul", "tensordot", "matrix_transpose", "vecdot"]
 

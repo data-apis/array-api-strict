@@ -273,3 +273,17 @@ def requires_data_dependent_shapes(func):
             raise RuntimeError(f"The function {func.__name__} requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
         return func(*args, **kwargs)
     return wrapper
+
+def requires_extension(extension):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if extension not in ENABLED_EXTENSIONS:
+                if extension == 'linalg' \
+                   and func.__name__ in ['matmul', 'tensordot',
+                                         'matrix_transpose', 'vecdot']:
+                    raise RuntimeError(f"The linalg extension has been disabled for array-api-strict. However, {func.__name__} is also present in the main array_api_strict namespace and may be used from there.")
+                raise RuntimeError(f"The function {func.__name__} requires the {extension} extension, but it has been disabled for array-api-strict")
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

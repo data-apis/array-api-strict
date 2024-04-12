@@ -15,9 +15,11 @@ from ._dtypes import (
 )
 from ._array_object import Array, CPU_DEVICE
 from ._data_type_functions import astype
+from ._flags import requires_extension
 
 import numpy as np
 
+@requires_extension('fft')
 def fft(
     x: Array,
     /,
@@ -40,6 +42,7 @@ def fft(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def ifft(
     x: Array,
     /,
@@ -62,6 +65,7 @@ def ifft(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def fftn(
     x: Array,
     /,
@@ -84,6 +88,7 @@ def fftn(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def ifftn(
     x: Array,
     /,
@@ -106,6 +111,7 @@ def ifftn(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def rfft(
     x: Array,
     /,
@@ -128,6 +134,7 @@ def rfft(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def irfft(
     x: Array,
     /,
@@ -150,6 +157,7 @@ def irfft(
         return astype(res, float32)
     return res
 
+@requires_extension('fft')
 def rfftn(
     x: Array,
     /,
@@ -172,6 +180,7 @@ def rfftn(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def irfftn(
     x: Array,
     /,
@@ -194,6 +203,7 @@ def irfftn(
         return astype(res, float32)
     return res
 
+@requires_extension('fft')
 def hfft(
     x: Array,
     /,
@@ -216,6 +226,7 @@ def hfft(
         return astype(res, float32)
     return res
 
+@requires_extension('fft')
 def ihfft(
     x: Array,
     /,
@@ -238,6 +249,7 @@ def ihfft(
         return astype(res, complex64)
     return res
 
+@requires_extension('fft')
 def fftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.fftfreq <numpy.fft.fftfreq>`.
@@ -248,6 +260,7 @@ def fftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Ar
         raise ValueError(f"Unsupported device {device!r}")
     return Array._new(np.fft.fftfreq(n, d=d))
 
+@requires_extension('fft')
 def rfftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.rfftfreq <numpy.fft.rfftfreq>`.
@@ -258,6 +271,7 @@ def rfftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> A
         raise ValueError(f"Unsupported device {device!r}")
     return Array._new(np.fft.rfftfreq(n, d=d))
 
+@requires_extension('fft')
 def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.fftshift <numpy.fft.fftshift>`.
@@ -268,6 +282,7 @@ def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
         raise TypeError("Only floating-point dtypes are allowed in fftshift")
     return Array._new(np.fft.fftshift(x._array, axes=axes))
 
+@requires_extension('fft')
 def ifftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.ifftshift <numpy.fft.ifftshift>`.
