@@ -487,6 +487,20 @@ class Array:
     def __array_namespace__(
         self: Array, /, *, api_version: Optional[str] = None
     ) -> types.ModuleType:
+        """
+        Return the array_api_strict namespace corresponding to api_version.
+
+        The default API version is '2022.12'. Note that '2021.12' is supported,
+        but currently identical to '2022.12'.
+
+        For array_api_strict, calling this function with api_version will set
+        the API version for the array_api_strict module globally. This can
+        also be achieved with the
+        {func}`array_api_strict.set_array_api_strict_flags` function. If you
+        want some way to only set the version locally, use the
+        {class}`array_api_strict.ArrayApiStrictFlags` context manager.
+
+        """
         if api_version is not None and api_version not in ["2021.12", "2022.12"]:
             raise ValueError(f"Unrecognized array API version: {api_version!r}")
         if api_version == "2021.12":
