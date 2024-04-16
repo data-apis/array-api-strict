@@ -50,6 +50,18 @@ def test_flags():
         api_version='2021.12',
         enabled_extensions=('linalg', 'fft')))
 
+    # Test resetting flags
+    set_array_api_strict_flags(
+        api_version='2021.12',
+        data_dependent_shapes=False,
+        enabled_extensions=())
+    reset_array_api_strict_flags()
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2022.12',
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
 
 def test_data_dependent_shapes():
     a = asarray([0, 0, 1, 2, 2])
