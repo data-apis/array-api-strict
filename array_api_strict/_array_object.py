@@ -501,7 +501,7 @@ class Array:
         {class}`array_api_strict.ArrayApiStrictFlags` context manager.
 
         """
-        set_array_api_strict_flags(standard_version=api_version)
+        set_array_api_strict_flags(api_version=api_version)
         if api_version == "2021.12":
             warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
         import array_api_strict

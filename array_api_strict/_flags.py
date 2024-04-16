@@ -19,7 +19,7 @@ supported_versions = (
     "2022.12",
 )
 
-STANDARD_VERSION = default_version = "2022.12"
+API_VERSION = default_version = "2022.12"
 
 DATA_DEPENDENT_SHAPES = True
 
@@ -42,7 +42,7 @@ ENABLED_EXTENSIONS = default_extensions = (
 
 def set_array_api_strict_flags(
     *,
-    standard_version=None,
+    api_version=None,
     data_dependent_shapes=None,
     enabled_extensions=None,
 ):
@@ -57,7 +57,7 @@ def set_array_api_strict_flags(
        This function is **not** part of the array API standard. It only exists
        in array-api-strict.
 
-    - `standard_version`: The version of the standard to use. Supported
+    - `api_version`: The version of the standard to use. Supported
       versions are: ``{supported_versions}``. The default version number is
       ``{default_version!r}``.
 
@@ -88,7 +88,7 @@ def set_array_api_strict_flags(
     The default values of the flags can also be changed by setting environment
     variables:
 
-    - ``ARRAY_API_STRICT_STANDARD_VERSION``: A string representing the version number.
+    - ``ARRAY_API_STRICT_API_VERSION``: A string representing the version number.
     - ``ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES``: "True" or "False".
     - ``ARRAY_API_STRICT_ENABLED_EXTENSIONS``: A comma separated list of
       extensions to enable.
@@ -98,7 +98,7 @@ def set_array_api_strict_flags(
 
     >>> from array_api_strict import set_array_api_strict_flags
     >>> # Set the standard version to 2021.12
-    >>> set_array_api_strict_flags(standard_version="2021.12")
+    >>> set_array_api_strict_flags(api_version="2021.12")
     >>> # Disable data-dependent shapes
     >>> set_array_api_strict_flags(data_dependent_shapes=False)
     >>> # Enable only the linalg extension (disable the fft extension)
@@ -112,12 +112,12 @@ def set_array_api_strict_flags(
     ArrayApiStrictFlags: A context manager to temporarily set the flags.
 
     """
-    global STANDARD_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
+    global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
 
-    if standard_version is not None:
-        if standard_version not in supported_versions:
-            raise ValueError(f"Unsupported standard version {standard_version!r}")
-        STANDARD_VERSION = standard_version
+    if api_version is not None:
+        if api_version not in supported_versions:
+            raise ValueError(f"Unsupported standard version {api_version!r}")
+        API_VERSION = api_version
 
     if data_dependent_shapes is not None:
         DATA_DEPENDENT_SHAPES = data_dependent_shapes
@@ -126,14 +126,14 @@ def set_array_api_strict_flags(
         for extension in enabled_extensions:
             if extension not in all_extensions:
                 raise ValueError(f"Unsupported extension {extension}")
-            if extension_versions[extension] > STANDARD_VERSION:
+            if extension_versions[extension] > API_VERSION:
                 raise ValueError(
                     f"Extension {extension} requires standard version "
                     f"{extension_versions[extension]} or later"
                 )
         ENABLED_EXTENSIONS = tuple(enabled_extensions)
     else:
-        ENABLED_EXTENSIONS = tuple([ext for ext in all_extensions if extension_versions[ext] <= STANDARD_VERSION])
+        ENABLED_EXTENSIONS = tuple([ext for ext in all_extensions if extension_versions[ext] <= API_VERSION])
 
 # We have to do this separately or it won't get added as the docstring
 set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
@@ -162,7 +162,7 @@ def get_array_api_strict_flags():
     >>> from array_api_strict import get_array_api_strict_flags
     >>> flags = get_array_api_strict_flags()
     >>> flags
-    {'standard_version': '2022.12', 'data_dependent_shapes': True, 'enabled_extensions': ('linalg', 'fft')}
+    {'api_version': '2022.12', 'data_dependent_shapes': True, 'enabled_extensions': ('linalg', 'fft')}
 
     See Also
     --------
@@ -173,7 +173,7 @@ def get_array_api_strict_flags():
 
     """
     return {
-        "standard_version": STANDARD_VERSION,
+        "api_version": API_VERSION,
         "data_dependent_shapes": DATA_DEPENDENT_SHAPES,
         "enabled_extensions": ENABLED_EXTENSIONS,
     }
@@ -204,8 +204,8 @@ def reset_array_api_strict_flags():
     ArrayApiStrictFlags: A context manager to temporarily set the flags.
 
     """
-    global STANDARD_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
-    STANDARD_VERSION = default_version
+    global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
+    API_VERSION = default_version
     DATA_DEPENDENT_SHAPES = True
     ENABLED_EXTENSIONS = default_extensions
 
@@ -230,10 +230,10 @@ class ArrayApiStrictFlags:
     reset_array_api_strict_flags
 
     """
-    def __init__(self, *, standard_version=None, data_dependent_shapes=None,
+    def __init__(self, *, api_version=None, data_dependent_shapes=None,
                  enabled_extensions=None):
         self.kwargs = {
-            "standard_version": standard_version,
+            "api_version": api_version,
             "data_dependent_shapes": data_dependent_shapes,
             "enabled_extensions": enabled_extensions,
         }
@@ -248,9 +248,9 @@ class ArrayApiStrictFlags:
 # Private functions
 
 def set_flags_from_environment():
-    if "ARRAY_API_STRICT_STANDARD_VERSION" in os.environ:
+    if "ARRAY_API_STRICT_API_VERSION" in os.environ:
         set_array_api_strict_flags(
-            standard_version=os.environ["ARRAY_API_STRICT_STANDARD_VERSION"]
+            api_version=os.environ["ARRAY_API_STRICT_API_VERSION"]
         )
 
     if "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES" in os.environ:

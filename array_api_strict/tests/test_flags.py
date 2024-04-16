@@ -18,7 +18,7 @@ def test_flags():
     # Test defaults
     flags = get_array_api_strict_flags()
     assert flags == {
-        'standard_version': '2022.12',
+        'api_version': '2022.12',
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
     }
@@ -27,33 +27,33 @@ def test_flags():
     set_array_api_strict_flags(data_dependent_shapes=False)
     flags = get_array_api_strict_flags()
     assert flags == {
-        'standard_version': '2022.12',
+        'api_version': '2022.12',
         'data_dependent_shapes': False,
         'enabled_extensions': ('linalg', 'fft'),
     }
     set_array_api_strict_flags(enabled_extensions=('fft',))
     flags = get_array_api_strict_flags()
     assert flags == {
-        'standard_version': '2022.12',
+        'api_version': '2022.12',
         'data_dependent_shapes': False,
         'enabled_extensions': ('fft',),
     }
     # Make sure setting the version to 2021.12 disables fft
-    set_array_api_strict_flags(standard_version='2021.12')
+    set_array_api_strict_flags(api_version='2021.12')
     flags = get_array_api_strict_flags()
     assert flags == {
-        'standard_version': '2021.12',
+        'api_version': '2021.12',
         'data_dependent_shapes': False,
         'enabled_extensions': ('linalg',),
     }
 
     # Test setting flags with invalid values
     pytest.raises(ValueError, lambda:
-                  set_array_api_strict_flags(standard_version='2020.12'))
+                  set_array_api_strict_flags(api_version='2020.12'))
     pytest.raises(ValueError, lambda: set_array_api_strict_flags(
                       enabled_extensions=('linalg', 'fft', 'invalid')))
     pytest.raises(ValueError, lambda: set_array_api_strict_flags(
-        standard_version='2021.12',
+        api_version='2021.12',
         enabled_extensions=('linalg', 'fft')))
 
 
