@@ -497,7 +497,7 @@ class Array:
         the API version for the array_api_strict module globally. This can
         also be achieved with the
         {func}`array_api_strict.set_array_api_strict_flags` function. If you
-        want some way to only set the version locally, use the
+        want to only set the version locally, use the
         {class}`array_api_strict.ArrayApiStrictFlags` context manager.
 
         """

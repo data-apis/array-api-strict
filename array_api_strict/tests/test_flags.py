@@ -63,6 +63,14 @@ def test_flags():
         'enabled_extensions': ('linalg', 'fft'),
     }
 
+def test_api_version():
+    # Test defaults
+    assert xp.__array_api_version__ == '2022.12'
+
+    # Test setting the version
+    set_array_api_strict_flags(api_version='2021.12')
+    assert xp.__array_api_version__ == '2021.12'
+
 def test_data_dependent_shapes():
     a = asarray([0, 0, 1, 2, 2])
     mask = asarray([True, False, True, False, True])

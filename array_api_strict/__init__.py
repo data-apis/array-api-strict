@@ -16,7 +16,11 @@ consuming libraries to test their array API usage.
 
 """
 
-__array_api_version__ = "2022.12"
+# Warning: __array_api_version__ could change globally with
+# set_array_api_strict_flags(). This should always be accessed as an
+# attribute, like xp.__array_api_version__, or using
+# array_api_strict.get_array_api_strict_flags()['api_version'].
+from ._flags import API_VERSION as __array_api_version__
 
 __all__ = ["__array_api_version__"]
 

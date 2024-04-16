@@ -14,6 +14,8 @@ library will only support one particular configuration of these flags.
 import functools
 import os
 
+import array_api_strict
+
 supported_versions = (
     "2021.12",
     "2022.12",
@@ -37,7 +39,6 @@ ENABLED_EXTENSIONS = default_extensions = (
     "linalg",
     "fft",
 )
-
 # Public functions
 
 def set_array_api_strict_flags(
@@ -118,6 +119,7 @@ def set_array_api_strict_flags(
         if api_version not in supported_versions:
             raise ValueError(f"Unsupported standard version {api_version!r}")
         API_VERSION = api_version
+        array_api_strict.__array_api_version__ = API_VERSION
 
     if data_dependent_shapes is not None:
         DATA_DEPENDENT_SHAPES = data_dependent_shapes
@@ -206,6 +208,7 @@ def reset_array_api_strict_flags():
     """
     global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
     API_VERSION = default_version
+    array_api_strict.__array_api_version__ = API_VERSION
     DATA_DEPENDENT_SHAPES = True
     ENABLED_EXTENSIONS = default_extensions
 
