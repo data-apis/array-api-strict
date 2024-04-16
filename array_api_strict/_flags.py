@@ -62,12 +62,11 @@ def set_array_api_strict_flags(
       ``{default_version!r}``.
 
     - `data_dependent_shapes`: Whether data-dependent shapes are enabled in
-      array-api-strict. This flag is enabled by default. Array libraries that
-      use computation graphs may not be able to support functions whose output
-      shapes depend on the input data.
+      array-api-strict.
 
-      This flag is enabled by default. Array libraries that use computation graphs may not be able to support
-      functions whose output shapes depend on the input data.
+      This flag is enabled by default. Array libraries that use computation
+      graphs may not be able to support functions whose output shapes depend
+      on the input data.
 
       The functions that make use of data-dependent shapes, and are therefore
       disabled by setting this flag to False are
