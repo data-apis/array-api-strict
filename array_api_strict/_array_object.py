@@ -32,7 +32,7 @@ from ._dtypes import (
     _result_type,
     _dtype_categories,
 )
-from ._flags import get_array_api_strict_flags
+from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Any, SupportsIndex
 import types
@@ -501,8 +501,7 @@ class Array:
         {class}`array_api_strict.ArrayApiStrictFlags` context manager.
 
         """
-        if api_version is not None and api_version not in ["2021.12", "2022.12"]:
-            raise ValueError(f"Unrecognized array API version: {api_version!r}")
+        set_array_api_strict_flags(standard_version=api_version)
         if api_version == "2021.12":
             warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
         import array_api_strict

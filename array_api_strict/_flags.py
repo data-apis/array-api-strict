@@ -116,7 +116,7 @@ def set_array_api_strict_flags(
 
     if standard_version is not None:
         if standard_version not in supported_versions:
-            raise ValueError(f"Unsupported standard version {standard_version}")
+            raise ValueError(f"Unsupported standard version {standard_version!r}")
         STANDARD_VERSION = standard_version
 
     if data_dependent_shapes is not None:
