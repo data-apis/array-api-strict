@@ -8,12 +8,6 @@ import array_api_strict as xp
 
 import pytest
 
-@pytest.fixture(autouse=True)
-def reset_flags():
-    reset_array_api_strict_flags()
-    yield
-    reset_array_api_strict_flags()
-
 def test_flags():
     # Test defaults
     flags = get_array_api_strict_flags()
