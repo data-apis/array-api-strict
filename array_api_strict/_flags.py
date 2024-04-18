@@ -1,14 +1,15 @@
 """
-This file defines flags for that allow array-api-strict to be used in
-different "modes". These modes include
+These functions configure global flags that allow array-api-strict to be
+used in different "modes". These modes include
 
 - Changing to different supported versions of the standard.
 - Enabling or disabling different optional behaviors (such as data-dependent
   shapes).
 - Enabling or disabling different optional extensions.
 
-Nothing in this file is part of the standard itself. A typical array API
+None of these functions are part of the standard itself. A typical array API
 library will only support one particular configuration of these flags.
+
 """
 
 import functools
@@ -112,8 +113,8 @@ def set_array_api_strict_flags(
     See Also
     --------
 
-    get_array_api_strict_flags
-    reset_array_api_strict_flags
+    get_array_api_strict_flags: Get the current values of flags.
+    reset_array_api_strict_flags: Reset the flags to their default values.
     ArrayApiStrictFlags: A context manager to temporarily set the flags.
 
     """
@@ -175,8 +176,8 @@ def get_array_api_strict_flags():
     See Also
     --------
 
-    set_array_api_strict_flags
-    reset_array_api_strict_flags
+    set_array_api_strict_flags: Set one or more flags to a given value.
+    reset_array_api_strict_flags: Reset the flags to their default values.
     ArrayApiStrictFlags: A context manager to temporarily set the flags.
 
     """
@@ -207,8 +208,8 @@ def reset_array_api_strict_flags():
     See Also
     --------
 
-    set_array_api_strict_flags
-    get_array_api_strict_flags
+    get_array_api_strict_flags: Get the current values of flags.
+    set_array_api_strict_flags: Set one or more flags to a given value.
     ArrayApiStrictFlags: A context manager to temporarily set the flags.
 
     """
@@ -234,9 +235,9 @@ class ArrayApiStrictFlags:
     See Also
     --------
 
-    set_array_api_strict_flags
-    get_array_api_strict_flags
-    reset_array_api_strict_flags
+    get_array_api_strict_flags: Get the current values of flags.
+    set_array_api_strict_flags: Set one or more flags to a given value.
+    reset_array_api_strict_flags: Reset the flags to their default values.
 
     """
     def __init__(self, *, api_version=None, data_dependent_shapes=None,
