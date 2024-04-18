@@ -32,8 +32,12 @@ def test_flags():
         'data_dependent_shapes': False,
         'enabled_extensions': ('fft',),
     }
-    # Make sure setting the version to 2021.12 disables fft
-    set_array_api_strict_flags(api_version='2021.12')
+    # Make sure setting the version to 2021.12 disables fft and issues a
+    # warning.
+    with pytest.warns(UserWarning) as record:
+        set_array_api_strict_flags(api_version='2021.12')
+    assert len(record) == 1
+    assert '2021.12' in str(record[0].message)
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2021.12',
@@ -51,10 +55,11 @@ def test_flags():
         enabled_extensions=('linalg', 'fft')))
 
     # Test resetting flags
-    set_array_api_strict_flags(
-        api_version='2021.12',
-        data_dependent_shapes=False,
-        enabled_extensions=())
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(
+            api_version='2021.12',
+            data_dependent_shapes=False,
+            enabled_extensions=())
     reset_array_api_strict_flags()
     flags = get_array_api_strict_flags()
     assert flags == {

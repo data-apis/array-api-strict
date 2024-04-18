@@ -13,6 +13,7 @@ library will only support one particular configuration of these flags.
 
 import functools
 import os
+import warnings
 
 import array_api_strict
 
@@ -61,6 +62,9 @@ def set_array_api_strict_flags(
     - `api_version`: The version of the standard to use. Supported
       versions are: ``{supported_versions}``. The default version number is
       ``{default_version!r}``.
+
+      Note that 2021.12 is supported, but currently gives the same thing as
+      2022.12 (except that the fft extension will be disabled).
 
     - `data_dependent_shapes`: Whether data-dependent shapes are enabled in
       array-api-strict.
@@ -118,6 +122,8 @@ def set_array_api_strict_flags(
     if api_version is not None:
         if api_version not in supported_versions:
             raise ValueError(f"Unsupported standard version {api_version!r}")
+        if api_version == "2021.12":
+            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 

@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import operator
 from enum import IntEnum
-import warnings
 
 from ._creation_functions import asarray
 from ._dtypes import (
@@ -502,8 +501,6 @@ class Array:
 
         """
         set_array_api_strict_flags(api_version=api_version)
-        if api_version == "2021.12":
-            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
         import array_api_strict
         return array_api_strict
 
