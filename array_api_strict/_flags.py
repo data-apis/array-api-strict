@@ -115,7 +115,7 @@ def set_array_api_strict_flags(
 
     get_array_api_strict_flags: Get the current values of flags.
     reset_array_api_strict_flags: Reset the flags to their default values.
-    ArrayApiStrictFlags: A context manager to temporarily set the flags.
+    ArrayAPIStrictFlags: A context manager to temporarily set the flags.
 
     """
     global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
@@ -178,7 +178,7 @@ def get_array_api_strict_flags():
 
     set_array_api_strict_flags: Set one or more flags to a given value.
     reset_array_api_strict_flags: Reset the flags to their default values.
-    ArrayApiStrictFlags: A context manager to temporarily set the flags.
+    ArrayAPIStrictFlags: A context manager to temporarily set the flags.
 
     """
     return {
@@ -210,7 +210,7 @@ def reset_array_api_strict_flags():
 
     get_array_api_strict_flags: Get the current values of flags.
     set_array_api_strict_flags: Set one or more flags to a given value.
-    ArrayApiStrictFlags: A context manager to temporarily set the flags.
+    ArrayAPIStrictFlags: A context manager to temporarily set the flags.
 
     """
     global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
@@ -220,7 +220,7 @@ def reset_array_api_strict_flags():
     ENABLED_EXTENSIONS = default_extensions
 
 
-class ArrayApiStrictFlags:
+class ArrayAPIStrictFlags:
     """
     A context manager to temporarily set the array-api-strict flags.
 
