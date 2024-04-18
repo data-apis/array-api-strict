@@ -37,3 +37,12 @@ used by array-api-strict initially. They will not change the defaults used by
 .. envvar:: ARRAY_API_STRICT_ENABLED_EXTENSIONS
 
    A comma separated list of extensions to enable.
+
+Array API Functions
+--------------------
+
+All functions and methods in
+the array API standard are implemented in array-api-strict. See the `Array API
+Standard
+<https://data-apis.org/array-api/latest/API_specification/index.html>`__ for
+full documentation for each function.
