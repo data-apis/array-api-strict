@@ -20,7 +20,7 @@
 This is the first release of `array_api_strict`. It is extracted from
 `numpy.array_api`, which was included as an experimental submodule in NumPy
 versions prior to 2.0. Note that the commit history in this repository is
-extracted from the git history of numpy/array_api/ (see the [README](README.md)).
+extracted from the git history of numpy/array_api/ (see [](numpy.array_api)).
 
 Additionally, the following changes are new to `array_api_strict` from
 `numpy.array_api` in NumPy 1.26 (the last NumPy feature release to include

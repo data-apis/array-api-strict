@@ -91,22 +91,20 @@ def set_array_api_strict_flags(
       array-api-strict. The default is ``{default_extensions}``. Note that
       some extensions require a minimum version of the standard.
 
-    The default values of the flags can also be changed by setting environment
-    variables:
-
-    - ``ARRAY_API_STRICT_API_VERSION``: A string representing the version number.
-    - ``ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES``: "True" or "False".
-    - ``ARRAY_API_STRICT_ENABLED_EXTENSIONS``: A comma separated list of
-      extensions to enable.
+    The flags can also be changed by setting :ref:`environment variables
+    <environment-variables>`.
 
     Examples
     --------
 
     >>> from array_api_strict import set_array_api_strict_flags
+
     >>> # Set the standard version to 2021.12
     >>> set_array_api_strict_flags(api_version="2021.12")
+
     >>> # Disable data-dependent shapes
     >>> set_array_api_strict_flags(data_dependent_shapes=False)
+
     >>> # Enable only the linalg extension (disable the fft extension)
     >>> set_array_api_strict_flags(enabled_extensions=["linalg"])
 
@@ -192,12 +190,16 @@ def reset_array_api_strict_flags():
     """
     Reset the array-api-strict flags to their default values.
 
-    This will also reset any flags that were set by environment variables.
+    This will also reset any flags that were set by :ref:`environment
+    variables <environment-variables>` back to their default values.
 
     .. note::
 
        This function is **not** part of the array API standard. It only exists
        in array-api-strict.
+
+    See :func:`set_array_api_strict_flags` for a list of flags and their
+    default values.
 
     Examples
     --------
@@ -229,7 +231,7 @@ class ArrayAPIStrictFlags:
        This class is **not** part of the array API standard. It only exists
        in array-api-strict.
 
-    See :func:`~.array_api_strict.set_array_api_strict_flags` for a
+    See :func:`set_array_api_strict_flags` for a
     description of the available flags.
 
     See Also

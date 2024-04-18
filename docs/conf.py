@@ -22,8 +22,8 @@ author = 'Consortium for Python Data API Standards'
 
 extensions = [
     'myst_parser',
-    # 'sphinx.ext.autodoc',
-    # 'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     # 'sphinx.ext.intersphinx',
     'sphinx_copybutton',
 ]
