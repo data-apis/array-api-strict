@@ -4,7 +4,6 @@ from ._dtypes import (
     _floating_dtypes,
     _numeric_dtypes,
     float32,
-    float64,
     complex64,
     complex128,
 )
@@ -160,7 +159,7 @@ def inv(x: Array, /) -> Array:
 # -np.inf, 'fro', 'nuc']]], but Literal does not support floating-point
 # literals.
 @requires_extension('linalg')
-def matrix_norm(x: Array, /, *, keepdims: bool = False, ord: Optional[Union[int, float, Literal['fro', 'nuc']]] = 'fro') -> Array:
+def matrix_norm(x: Array, /, *, keepdims: bool = False, ord: Optional[Union[int, float, Literal['fro', 'nuc']]] = 'fro') -> Array:  # noqa: F821
     """
     Array API compatible wrapper for :py:func:`np.linalg.norm <numpy.linalg.norm>`.
 
@@ -252,7 +251,7 @@ def pinv(x: Array, /, *, rtol: Optional[Union[float, Array]] = None) -> Array:
     return Array._new(np.linalg.pinv(x._array, rcond=rtol))
 
 @requires_extension('linalg')
-def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRResult:
+def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRResult:  # noqa: F821
     """
     Array API compatible wrapper for :py:func:`np.linalg.qr <numpy.linalg.qr>`.
 
