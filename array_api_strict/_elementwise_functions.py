@@ -319,6 +319,16 @@ def conj(x: Array, /) -> Array:
         raise TypeError("Only complex floating-point dtypes are allowed in conj")
     return Array._new(np.conj(x))
 
+@requires_api_version('2023.12')
+def copysign(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.copysign <numpy.copysign>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in copysign")
+    return Array._new(np.copysign(x1._array, x2._array))
 
 def cos(x: Array, /) -> Array:
     """
