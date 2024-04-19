@@ -1,0 +1,7 @@
+[lint]
+ignore = [
+  # Ignore module import not at top of file
+  "E402",
+  # Annoying style checks
+  "E7",
+]

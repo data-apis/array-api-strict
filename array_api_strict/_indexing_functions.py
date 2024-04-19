@@ -3,6 +3,11 @@ from __future__ import annotations
 from ._array_object import Array
 from ._dtypes import _integer_dtypes
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Optional
+
 import numpy as np
 
 def take(x: Array, indices: Array, /, *, axis: Optional[int] = None) -> Array:

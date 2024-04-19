@@ -83,6 +83,7 @@ __all__ += [
     "broadcast_to",
     "can_cast",
     "finfo",
+    "isdtype",
     "iinfo",
     "result_type",
 ]
@@ -114,6 +115,8 @@ __all__ += [
     "uint64",
     "float32",
     "float64",
+    "complex64",
+    "complex128",
     "bool",
 ]
 
@@ -198,6 +201,7 @@ __all__ += [
     "bitwise_xor",
     "ceil",
     "clip",
+    "conj",
     "cos",
     "cosh",
     "divide",
@@ -208,6 +212,7 @@ __all__ += [
     "floor_divide",
     "greater",
     "greater_equal",
+    "imag",
     "isfinite",
     "isinf",
     "isnan",
@@ -227,6 +232,7 @@ __all__ += [
     "not_equal",
     "positive",
     "pow",
+    "real",
     "remainder",
     "round",
     "sign",

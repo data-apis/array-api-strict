@@ -4,7 +4,7 @@ from numpy.testing import assert_raises, suppress_warnings
 import numpy as np
 import pytest
 
-from .. import ones, asarray, reshape, result_type, all, equal
+from .. import ones, asarray, result_type, all, equal
 from .._array_object import Array, CPU_DEVICE
 from .._dtypes import (
     _all_dtypes,

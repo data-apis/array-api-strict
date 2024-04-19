@@ -33,11 +33,12 @@ from ._dtypes import (
 )
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 
-from typing import TYPE_CHECKING, Optional, Tuple, Union, Any, SupportsIndex
+from typing import TYPE_CHECKING, SupportsIndex
 import types
 
 if TYPE_CHECKING:
-    from ._typing import Any, PyCapsule, Device, Dtype
+    from typing import Optional, Tuple, Union, Any
+    from ._typing import PyCapsule, Device, Dtype
     import numpy.typing as npt
 
 import numpy as np
@@ -589,8 +590,8 @@ class Array:
         key: Union[
             int,
             slice,
-            ellipsis,
-            Tuple[Union[int, slice, ellipsis, None], ...],
+            ellipsis,  # noqa: F821
+            Tuple[Union[int, slice, ellipsis, None], ...],  # noqa: F821
             Array,
         ],
         /,
@@ -780,7 +781,7 @@ class Array:
     def __setitem__(
         self,
         key: Union[
-            int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], Array
+            int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], Array  # noqa: F821
         ],
         value: Union[int, float, bool, Array],
         /,
