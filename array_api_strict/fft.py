@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union, Optional, Literal
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Union, Optional, Literal
     from ._typing import Device
     from collections.abc import Sequence
 

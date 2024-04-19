@@ -4,7 +4,9 @@ from ._array_object import Array
 from ._dtypes import _result_type, _real_numeric_dtypes
 from ._flags import requires_data_dependent_shapes
 
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import Optional, Tuple
 
 import numpy as np
 

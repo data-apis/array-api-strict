@@ -8,9 +8,10 @@ from ._dtypes import (
 from ._array_object import Array
 from ._dtypes import float32, complex64
 
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Optional, Tuple, Union
     from ._typing import Dtype
 
 import numpy as np

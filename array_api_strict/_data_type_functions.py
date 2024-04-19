@@ -15,9 +15,10 @@ from ._dtypes import (
 )
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import List, Tuple, Union
     from ._typing import Dtype
 
 import numpy as np
