@@ -183,6 +183,7 @@ issue, but this hasn't necessarily been tested thoroughly.
    API standard. [Support for 2023.12 is
    planned](https://github.com/data-apis/array-api-strict/issues/25).
 
+(numpy.array_api)=
 ## Relationship to `numpy.array_api`
 
 Previously this implementation was available as `numpy.array_api`, but it was
@@ -201,5 +202,6 @@ git_filter_repo.py --path numpy/array_api/ --path-rename numpy/array_api:array_a
 :titlesonly:
 :hidden:
 
+api.rst
 changelog.md
 ```
