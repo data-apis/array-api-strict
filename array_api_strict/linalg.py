@@ -4,7 +4,6 @@ from ._dtypes import (
     _floating_dtypes,
     _numeric_dtypes,
     float32,
-    float64,
     complex64,
     complex128,
 )

@@ -1,7 +1,6 @@
 from numpy.testing import assert_raises
 import numpy as np
 
-from .. import all
 from .._creation_functions import asarray
 from .._dtypes import float64, int8
 from .._manipulation_functions import (

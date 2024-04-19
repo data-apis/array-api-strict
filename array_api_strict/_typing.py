@@ -21,10 +21,6 @@ import sys
 
 from typing import (
     Any,
-    Literal,
-    Sequence,
-    Type,
-    Union,
     TypeVar,
     Protocol,
 )
