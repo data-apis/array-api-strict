@@ -54,6 +54,19 @@ def test_flags():
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg',),
     }
+    reset_array_api_strict_flags()
+
+    # 2023.12 should issue a warning
+    with pytest.warns(UserWarning) as record:
+        set_array_api_strict_flags(api_version='2023.12')
+    assert len(record) == 1
+    assert '2023.12' in str(record[0].message)
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2023.12',
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
 
     # Test setting flags with invalid values
     pytest.raises(ValueError, lambda:

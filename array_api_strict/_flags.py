@@ -21,6 +21,7 @@ import array_api_strict
 supported_versions = (
     "2021.12",
     "2022.12",
+    "2023.12",
 )
 
 API_VERSION = default_version = "2022.12"
@@ -66,6 +67,9 @@ def set_array_api_strict_flags(
 
       Note that 2021.12 is supported, but currently gives the same thing as
       2022.12 (except that the fft extension will be disabled).
+
+      2023.12 support is preliminary. Some features in 2023.12 may still be
+      missing, and it hasn't been fully tested.
 
     - `data_dependent_shapes`: Whether data-dependent shapes are enabled in
       array-api-strict.
@@ -123,6 +127,8 @@ def set_array_api_strict_flags(
             raise ValueError(f"Unsupported standard version {api_version!r}")
         if api_version == "2021.12":
             warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
+        if api_version == "2023.12":
+            warnings.warn("The 2023.12 version of the array API specification is still preliminary. Some functions are not yet implemented, and it has not been fully tested.")
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 
