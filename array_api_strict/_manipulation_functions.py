@@ -57,7 +57,7 @@ def reshape(x: Array,
             /,
             shape: Tuple[int, ...],
             *,
-            copy: Optional[Bool] = None) -> Array:
+            copy: Optional[bool] = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.reshape <numpy.reshape>`.
 

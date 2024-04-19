@@ -589,8 +589,8 @@ class Array:
         key: Union[
             int,
             slice,
-            ellipsis,
-            Tuple[Union[int, slice, ellipsis, None], ...],
+            ellipsis,  # noqa: F821
+            Tuple[Union[int, slice, ellipsis, None], ...],  # noqa: F821
             Array,
         ],
         /,
@@ -780,7 +780,7 @@ class Array:
     def __setitem__(
         self,
         key: Union[
-            int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], Array
+            int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], Array  # noqa: F821
         ],
         value: Union[int, float, bool, Array],
         /,
