@@ -12,6 +12,11 @@ from ._dtypes import (
     _result_type,
 )
 from ._array_object import Array
+from ._flags import requires_api_version
+from ._creation_functions import asarray
+from ._utility_functions import any as xp_any
+
+from typing import Optional, Union
 
 import numpy as np
 
@@ -240,6 +245,68 @@ def ceil(x: Array, /) -> Array:
         return x
     return Array._new(np.ceil(x._array))
 
+# WARNING: This function is not yet tested by the array-api-tests test suite.
+
+# Note: min and max argument names are different and not optional in numpy.
+@requires_api_version('2023.12')
+def clip(
+    x: Array,
+    /,
+    min: Optional[Union[int, float, Array]] = None,
+    max: Optional[Union[int, float, Array]] = None,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.clip <numpy.clip>`.
+
+    See its docstring for more information.
+    """
+    if (x.dtype not in _real_numeric_dtypes
+        or isinstance(min, Array) and min.dtype not in _real_numeric_dtypes
+        or isinstance(max, Array) and max.dtype not in _real_numeric_dtypes):
+        raise TypeError("Only real numeric dtypes are allowed in clip")
+    if not isinstance(min, (int, float, Array, type(None))):
+        raise TypeError("min must be an None, int, float, or an array")
+    if not isinstance(max, (int, float, Array, type(None))):
+        raise TypeError("max must be an None, int, float, or an array")
+
+    # Mixed dtype kinds is implementation defined
+    if (x.dtype in _integer_dtypes
+        and (isinstance(min, float) or
+             isinstance(min, Array) and min.dtype in _real_floating_dtypes)):
+        raise TypeError("min must be integral when x is integral")
+    if (x.dtype in _integer_dtypes
+        and (isinstance(max, float) or
+             isinstance(max, Array) and max.dtype in _real_floating_dtypes)):
+        raise TypeError("max must be integral when x is integral")
+    if (x.dtype in _real_floating_dtypes
+        and (isinstance(min, int) or
+             isinstance(min, Array) and min.dtype in _integer_dtypes)):
+        raise TypeError("min must be floating-point when x is floating-point")
+    if (x.dtype in _real_floating_dtypes
+        and (isinstance(max, int) or
+             isinstance(max, Array) and max.dtype in _integer_dtypes)):
+        raise TypeError("max must be floating-point when x is floating-point")
+
+    if min is max is None:
+        # Note: NumPy disallows min = max = None
+        return x
+
+    # Normalize to make the below logic simpler
+    if min is not None:
+        min = asarray(min)._array
+    if max is not None:
+        max = asarray(max)._array
+
+    # min > max is implementation defined
+    if min is not None and max is not None and np.any(min > max):
+        raise ValueError("min must be less than or equal to max")
+
+    result = np.clip(x._array, min, max)
+    # Note: NumPy applies type promotion, but the standard specifies the
+    # return dtype should be the same as x
+    if result.dtype != x.dtype._np_dtype:
+        result = result.astype(x.dtype._np_dtype)
+    return Array._new(result)
 
 def conj(x: Array, /) -> Array:
     """
