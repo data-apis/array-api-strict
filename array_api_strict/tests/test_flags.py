@@ -42,6 +42,16 @@ def test_flags():
     assert flags == {
         'api_version': '2021.12',
         'data_dependent_shapes': False,
+        'enabled_extensions': (),
+    }
+    reset_array_api_strict_flags()
+
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2021.12')
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2021.12',
+        'data_dependent_shapes': True,
         'enabled_extensions': ('linalg',),
     }
 

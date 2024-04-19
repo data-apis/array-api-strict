@@ -140,7 +140,7 @@ def set_array_api_strict_flags(
                 )
         ENABLED_EXTENSIONS = tuple(enabled_extensions)
     else:
-        ENABLED_EXTENSIONS = tuple([ext for ext in all_extensions if extension_versions[ext] <= API_VERSION])
+        ENABLED_EXTENSIONS = tuple([ext for ext in ENABLED_EXTENSIONS if extension_versions[ext] <= API_VERSION])
 
 # We have to do this separately or it won't get added as the docstring
 set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
