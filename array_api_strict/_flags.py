@@ -277,6 +277,21 @@ def set_flags_from_environment():
 
 set_flags_from_environment()
 
+# Decorators
+
+def requires_api_version(version):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if version > API_VERSION:
+                raise RuntimeError(
+                    f"The function {func.__name__} requires API version {version} or later, "
+                    f"but the current API version for array-api-strict is {API_VERSION}"
+                )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 def requires_data_dependent_shapes(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
