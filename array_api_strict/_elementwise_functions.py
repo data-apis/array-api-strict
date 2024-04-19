@@ -305,6 +305,8 @@ def clip(
     # Note: NumPy applies type promotion, but the standard specifies the
     # return dtype should be the same as x
     if result.dtype != x.dtype._np_dtype:
+        # TODO: I'm not completely sure this always gives the correct thing
+        # for integer dtypes. See https://github.com/numpy/numpy/issues/24976
         result = result.astype(x.dtype._np_dtype)
     return Array._new(result)
 
