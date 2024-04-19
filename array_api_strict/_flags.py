@@ -126,9 +126,9 @@ def set_array_api_strict_flags(
         if api_version not in supported_versions:
             raise ValueError(f"Unsupported standard version {api_version!r}")
         if api_version == "2021.12":
-            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
+            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12", stacklevel=2)
         if api_version == "2023.12":
-            warnings.warn("The 2023.12 version of the array API specification is still preliminary. Some functions are not yet implemented, and it has not been fully tested.")
+            warnings.warn("The 2023.12 version of the array API specification is still preliminary. Some functions are not yet implemented, and it has not been fully tested.", stacklevel=2)
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 
