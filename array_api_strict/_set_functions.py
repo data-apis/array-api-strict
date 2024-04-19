@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from ._array_object import Array
 
+from ._flags import requires_data_dependent_shapes
+
 from typing import NamedTuple
 
 import numpy as np
@@ -35,6 +37,7 @@ class UniqueInverseResult(NamedTuple):
     inverse_indices: Array
 
 
+@requires_data_dependent_shapes
 def unique_all(x: Array, /) -> UniqueAllResult:
     """
     Array API compatible wrapper for :py:func:`np.unique <numpy.unique>`.
@@ -59,6 +62,7 @@ def unique_all(x: Array, /) -> UniqueAllResult:
     )
 
 
+@requires_data_dependent_shapes
 def unique_counts(x: Array, /) -> UniqueCountsResult:
     res = np.unique(
         x._array,
@@ -71,6 +75,7 @@ def unique_counts(x: Array, /) -> UniqueCountsResult:
     return UniqueCountsResult(*[Array._new(i) for i in res])
 
 
+@requires_data_dependent_shapes
 def unique_inverse(x: Array, /) -> UniqueInverseResult:
     """
     Array API compatible wrapper for :py:func:`np.unique <numpy.unique>`.
@@ -90,6 +95,7 @@ def unique_inverse(x: Array, /) -> UniqueInverseResult:
     return UniqueInverseResult(Array._new(values), Array._new(inverse_indices))
 
 
+@requires_data_dependent_shapes
 def unique_values(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.unique <numpy.unique>`.

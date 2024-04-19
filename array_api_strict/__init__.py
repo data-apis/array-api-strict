@@ -16,7 +16,11 @@ consuming libraries to test their array API usage.
 
 """
 
-__array_api_version__ = "2022.12"
+# Warning: __array_api_version__ could change globally with
+# set_array_api_strict_flags(). This should always be accessed as an
+# attribute, like xp.__array_api_version__, or using
+# array_api_strict.get_array_api_strict_flags()['api_version'].
+from ._flags import API_VERSION as __array_api_version__
 
 __all__ = ["__array_api_version__"]
 
@@ -244,7 +248,7 @@ from . import linalg
 
 __all__ += ["linalg"]
 
-from .linalg import matmul, tensordot, matrix_transpose, vecdot
+from ._linear_algebra_functions import matmul, tensordot, matrix_transpose, vecdot
 
 __all__ += ["matmul", "tensordot", "matrix_transpose", "vecdot"]
 
@@ -283,6 +287,17 @@ __all__ += ["max", "mean", "min", "prod", "std", "sum", "var"]
 from ._utility_functions import all, any
 
 __all__ += ["all", "any"]
+
+# Helper functions that are not part of the standard
+
+from ._flags import (
+    set_array_api_strict_flags,
+    get_array_api_strict_flags,
+    reset_array_api_strict_flags,
+    ArrayAPIStrictFlags,
+)
+
+__all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_array_api_strict_flags', 'ArrayAPIStrictFlags']
 
 from . import _version
 __version__ = _version.get_versions()['version']

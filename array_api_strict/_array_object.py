@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import operator
 from enum import IntEnum
-import warnings
 
 from ._creation_functions import asarray
 from ._dtypes import (
@@ -32,6 +31,7 @@ from ._dtypes import (
     _result_type,
     _dtype_categories,
 )
+from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Any, SupportsIndex
 import types
@@ -427,13 +427,17 @@ class Array:
                                 "the Array API)"
                             )
             elif isinstance(i, Array):
-                if i.dtype in _boolean_dtypes and len(_key) != 1:
-                    assert isinstance(key, tuple)  # sanity check
-                    raise IndexError(
-                        f"Single-axes index {i} is a boolean array and "
-                        f"{len(key)=}, but masking is only specified in the "
-                        "Array API when the array is the sole index."
-                    )
+                if i.dtype in _boolean_dtypes:
+                    if len(_key) != 1:
+                        assert isinstance(key, tuple)  # sanity check
+                        raise IndexError(
+                            f"Single-axes index {i} is a boolean array and "
+                            f"{len(key)=}, but masking is only specified in the "
+                            "Array API when the array is the sole index."
+                        )
+                    if not get_array_api_strict_flags()['data_dependent_shapes']:
+                        raise RuntimeError("Boolean array indexing (masking) requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
+
                 elif i.dtype in _integer_dtypes and i.ndim != 0:
                     raise IndexError(
                         f"Single-axes index {i} is a non-zero-dimensional "
@@ -482,10 +486,21 @@ class Array:
     def __array_namespace__(
         self: Array, /, *, api_version: Optional[str] = None
     ) -> types.ModuleType:
-        if api_version is not None and api_version not in ["2021.12", "2022.12"]:
-            raise ValueError(f"Unrecognized array API version: {api_version!r}")
-        if api_version == "2021.12":
-            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
+        """
+        Return the array_api_strict namespace corresponding to api_version.
+
+        The default API version is '2022.12'. Note that '2021.12' is supported,
+        but currently identical to '2022.12'.
+
+        For array_api_strict, calling this function with api_version will set
+        the API version for the array_api_strict module globally. This can
+        also be achieved with the
+        {func}`array_api_strict.set_array_api_strict_flags` function. If you
+        want to only set the version locally, use the
+        {class}`array_api_strict.ArrayApiStrictFlags` context manager.
+
+        """
+        set_array_api_strict_flags(api_version=api_version)
         import array_api_strict
         return array_api_strict
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ._array_object import Array
 from ._dtypes import _result_type, _real_numeric_dtypes
+from ._flags import requires_data_dependent_shapes
 
 from typing import Optional, Tuple
 
@@ -30,6 +31,7 @@ def argmin(x: Array, /, *, axis: Optional[int] = None, keepdims: bool = False) -
     return Array._new(np.asarray(np.argmin(x._array, axis=axis, keepdims=keepdims)))
 
 
+@requires_data_dependent_shapes
 def nonzero(x: Array, /) -> Tuple[Array, ...]:
     """
     Array API compatible wrapper for :py:func:`np.nonzero <numpy.nonzero>`.
