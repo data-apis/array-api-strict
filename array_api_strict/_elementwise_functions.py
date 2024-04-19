@@ -14,7 +14,6 @@ from ._dtypes import (
 from ._array_object import Array
 from ._flags import requires_api_version
 from ._creation_functions import asarray
-from ._utility_functions import any as xp_any
 
 from typing import Optional, Union
 
