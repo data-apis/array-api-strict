@@ -7,6 +7,9 @@ from ._dtypes import (
 )
 from ._array_object import Array
 from ._dtypes import float32, complex64
+from ._flags import requires_api_version
+from ._creation_functions import zeros
+from ._manipulation_functions import concat
 
 from typing import TYPE_CHECKING
 
@@ -16,6 +19,28 @@ if TYPE_CHECKING:
 
 import numpy as np
 
+@requires_api_version('2023.12')
+def cumulative_sum(
+    x: Array,
+    /,
+    *,
+    axis: Optional[int] = None,
+    dtype: Optional[Dtype] = None,
+    include_initial: bool = False,
+) -> Array:
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
+    if dtype is None:
+        dtype = x.dtype
+
+    if axis is None:
+        if x.ndim > 1:
+            raise ValueError("axis must be specified in cumulative_sum for more than one dimension")
+        axis = 0
+    # np.cumsum does not support include_initial
+    if include_initial:
+        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dtype), x], axis=axis)
+    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype._np_dtype))
 
 def max(
     x: Array,
