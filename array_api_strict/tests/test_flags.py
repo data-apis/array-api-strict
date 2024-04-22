@@ -73,9 +73,10 @@ def test_flags():
                   set_array_api_strict_flags(api_version='2020.12'))
     pytest.raises(ValueError, lambda: set_array_api_strict_flags(
                       enabled_extensions=('linalg', 'fft', 'invalid')))
-    pytest.raises(ValueError, lambda: set_array_api_strict_flags(
-        api_version='2021.12',
-        enabled_extensions=('linalg', 'fft')))
+    with pytest.warns(UserWarning):
+        pytest.raises(ValueError, lambda: set_array_api_strict_flags(
+            api_version='2021.12',
+            enabled_extensions=('linalg', 'fft')))
 
     # Test resetting flags
     with pytest.warns(UserWarning):
@@ -96,7 +97,8 @@ def test_api_version():
     assert xp.__array_api_version__ == '2022.12'
 
     # Test setting the version
-    set_array_api_strict_flags(api_version='2021.12')
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2021.12')
     assert xp.__array_api_version__ == '2021.12'
 
 def test_data_dependent_shapes():

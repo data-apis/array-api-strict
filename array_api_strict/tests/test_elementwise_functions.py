@@ -12,6 +12,8 @@ from .._dtypes import (
 )
 from .._flags import set_array_api_strict_flags
 
+import pytest
+
 def nargs(func):
     return len(getfullargspec(func).args)
 
@@ -101,7 +103,8 @@ def test_function_types():
             yield asarray(1.0, dtype=d)
 
     # Use the latest version of the standard so all functions are included
-    set_array_api_strict_flags(api_version="2023.12")
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version="2023.12")
 
     for x in _array_vals():
         for func_name, types in elementwise_function_input_types.items():
