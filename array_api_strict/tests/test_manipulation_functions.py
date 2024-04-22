@@ -25,7 +25,7 @@ def test_reshape_copy():
     a = asarray(np.ones((2, 3)))
     b = reshape(a, (3, 2), copy=True)
     assert not np.shares_memory(a._array, b._array)
-    
+
     a = asarray(np.ones((2, 3)))
     b = reshape(a, (3, 2), copy=False)
     assert np.shares_memory(a._array, b._array)
