@@ -33,6 +33,7 @@ def cumulative_sum(
     if dtype is None:
         dtype = x.dtype
 
+    # TODO: The standard is not clear about what should happen when x.ndim == 0.
     if axis is None:
         if x.ndim > 1:
             raise ValueError("axis must be specified in cumulative_sum for more than one dimension")
