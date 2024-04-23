@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from ._array_object import Array
+from ._creation_functions import asarray
 from ._data_type_functions import result_type
-from ._flags import requires_api_version
+from ._flags import requires_api_version, get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
 
@@ -58,7 +59,6 @@ def moveaxis(
     """
     return Array._new(np.moveaxis(x._array, source, destination))
 
-
 # Note: The function name is different here (see also matrix_transpose).
 # Unlike transpose(), the axes argument is required.
 def permute_dims(x: Array, /, axes: Tuple[int, ...]) -> Array:
@@ -69,6 +69,29 @@ def permute_dims(x: Array, /, axes: Tuple[int, ...]) -> Array:
     """
     return Array._new(np.transpose(x._array, axes))
 
+@requires_api_version('2023.12')
+def repeat(
+    x: Array,
+    repeats: Union[int, Array],
+    /,
+    *,
+    axis: Optional[int] = None,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.repeat <numpy.repeat>`.
+
+    See its docstring for more information.
+    """
+    if isinstance(repeats, Array):
+        data_dependent_shapes = get_array_api_strict_flags()['data_dependent_shapes']
+        if not data_dependent_shapes:
+            raise RuntimeError("repeat() with repeats as an array requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
+    elif isinstance(repeats, int):
+        repeats = asarray(repeats)
+    else:
+        raise TypeError("repeats must be an int or array")
+
+    return Array._new(np.repeat(x._array, repeats, axis=axis))
 
 # Note: the optional argument is called 'shape', not 'newshape'
 def reshape(x: Array,

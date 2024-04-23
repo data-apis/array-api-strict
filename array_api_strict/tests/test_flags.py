@@ -2,7 +2,7 @@ from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
                       reset_array_api_strict_flags)
 
 from .. import (asarray, unique_all, unique_counts, unique_inverse,
-                unique_values, nonzero)
+                unique_values, nonzero, repeat)
 
 import array_api_strict as xp
 
@@ -102,8 +102,12 @@ def test_api_version():
     assert xp.__array_api_version__ == '2021.12'
 
 def test_data_dependent_shapes():
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2023.12') # to enable repeat()
+
     a = asarray([0, 0, 1, 2, 2])
     mask = asarray([True, False, True, False, True])
+    repeats = asarray([1, 1, 2, 2, 2])
 
     # Should not error
     unique_all(a)
@@ -112,7 +116,8 @@ def test_data_dependent_shapes():
     unique_values(a)
     nonzero(a)
     a[mask]
-    # TODO: add repeat when it is implemented
+    repeat(a, repeats)
+    repeat(a, 2)
 
     set_array_api_strict_flags(data_dependent_shapes=False)
 
@@ -122,6 +127,8 @@ def test_data_dependent_shapes():
     pytest.raises(RuntimeError, lambda: unique_values(a))
     pytest.raises(RuntimeError, lambda: nonzero(a))
     pytest.raises(RuntimeError, lambda: a[mask])
+    pytest.raises(RuntimeError, lambda: repeat(a, repeats))
+    repeat(a, 2) # Should never error
 
 linalg_examples = {
     'cholesky': lambda: xp.linalg.cholesky(xp.eye(3)),

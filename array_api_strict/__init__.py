@@ -277,13 +277,14 @@ from ._manipulation_functions import (
     flip,
     moveaxis,
     permute_dims,
+    repeat,
     reshape,
     roll,
     squeeze,
     stack,
 )
 
-__all__ += ["concat", "expand_dims", "flip", "moveaxis", "permute_dims", "reshape", "roll", "squeeze", "stack"]
+__all__ += ["concat", "expand_dims", "flip", "moveaxis", "permute_dims", "repeat", "reshape", "roll", "squeeze", "stack"]
 
 from ._searching_functions import argmax, argmin, nonzero, where
 

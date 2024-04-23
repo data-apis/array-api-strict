@@ -81,10 +81,10 @@ def set_array_api_strict_flags(
       The functions that make use of data-dependent shapes, and are therefore
       disabled by setting this flag to False are
 
-      - `unique_all`, `unique_counts`, `unique_inverse`, and `unique_values`.
-      - `nonzero`
+      - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
+      - `nonzero()`
       - Boolean array indexing
-      - `repeat` when the `repeats` argument is an array (requires 2023.12
+      - `repeat()` when the `repeats` argument is an array (requires 2023.12
         version of the standard)
 
       See
