@@ -64,6 +64,8 @@ elementwise_function_input_types = {
     "logical_not": "boolean",
     "logical_or": "boolean",
     "logical_xor": "boolean",
+    "maximum": "real numeric",
+    "minimum": "real numeric",
     "multiply": "numeric",
     "negative": "numeric",
     "not_equal": "all",

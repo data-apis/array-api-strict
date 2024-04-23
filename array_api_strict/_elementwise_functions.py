@@ -651,6 +651,35 @@ def logical_xor(x1: Array, x2: Array, /) -> Array:
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.logical_xor(x1._array, x2._array))
 
+@requires_api_version('2023.12')
+def maximum(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.maximum <numpy.maximum>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in maximum")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    # TODO: maximum(-0., 0.) is unspecified. Should we issue a warning/error
+    # in that case?
+    return Array._new(np.maximum(x1._array, x2._array))
+
+@requires_api_version('2023.12')
+def minimum(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.minimum <numpy.minimum>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in minimum")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.minimum(x1._array, x2._array))
 
 def multiply(x1: Array, x2: Array, /) -> Array:
     """
