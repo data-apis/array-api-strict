@@ -455,6 +455,7 @@ def greater_equal(x1: Array, x2: Array, /) -> Array:
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.greater_equal(x1._array, x2._array))
 
+@requires_api_version('2023.12')
 def hypot(x1: Array, x2: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.hypot <numpy.hypot>`.
