@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ._array_object import Array
 from ._data_type_functions import result_type
+from ._flags import requires_api_version
 
 from typing import TYPE_CHECKING
 
@@ -42,6 +43,20 @@ def flip(x: Array, /, *, axis: Optional[Union[int, Tuple[int, ...]]] = None) -> 
     See its docstring for more information.
     """
     return Array._new(np.flip(x._array, axis=axis))
+
+@requires_api_version('2023.12')
+def moveaxis(
+    x: Array,
+    source: Union[int, Tuple[int, ...]],
+    destination: Union[int, Tuple[int, ...]],
+    /,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.moveaxis <numpy.moveaxis>`.
+
+    See its docstring for more information.
+    """
+    return Array._new(np.moveaxis(x._array, source, destination))
 
 
 # Note: The function name is different here (see also matrix_transpose).
