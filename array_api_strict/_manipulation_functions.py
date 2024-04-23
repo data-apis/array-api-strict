@@ -3,6 +3,7 @@ from __future__ import annotations
 from ._array_object import Array
 from ._creation_functions import asarray
 from ._data_type_functions import result_type
+from ._dtypes import _integer_dtypes
 from ._flags import requires_api_version, get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
@@ -86,6 +87,8 @@ def repeat(
         data_dependent_shapes = get_array_api_strict_flags()['data_dependent_shapes']
         if not data_dependent_shapes:
             raise RuntimeError("repeat() with repeats as an array requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
+        if repeats.dtype not in _integer_dtypes:
+            raise TypeError("The repeats array must have an integer dtype")
     elif isinstance(repeats, int):
         repeats = asarray(repeats)
     else:
