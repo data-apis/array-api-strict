@@ -75,6 +75,7 @@ elementwise_function_input_types = {
     "remainder": "real numeric",
     "round": "numeric",
     "sign": "numeric",
+    "signbit": "real floating-point",
     "sin": "floating-point",
     "sinh": "floating-point",
     "sqrt": "floating-point",

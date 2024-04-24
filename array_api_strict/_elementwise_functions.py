@@ -791,6 +791,18 @@ def sign(x: Array, /) -> Array:
     return Array._new(np.sign(x._array))
 
 
+@requires_api_version('2023.12')
+def signbit(x: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.signbit <numpy.signbit>`.
+
+    See its docstring for more information.
+    """
+    if x.dtype not in _real_floating_dtypes:
+        raise TypeError("Only real floating-point dtypes are allowed in signbit")
+    return Array._new(np.signbit(x._array))
+
+
 def sin(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.sin <numpy.sin>`.
