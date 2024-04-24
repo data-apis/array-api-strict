@@ -154,3 +154,16 @@ def stack(arrays: Union[Tuple[Array, ...], List[Array]], /, *, axis: int = 0) ->
     result_type(*arrays)
     arrays = tuple(a._array for a in arrays)
     return Array._new(np.stack(arrays, axis=axis))
+
+
+@requires_api_version('2023.12')
+def tile(x: Array, repetitions: Tuple[int, ...], /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.tile <numpy.tile>`.
+
+    See its docstring for more information.
+    """
+    # Note: NumPy allows repetitions to be an int or array
+    if not isinstance(repetitions, tuple):
+        raise TypeError("repetitions must be a tuple")
+    return Array._new(np.tile(x._array, repetitions))
