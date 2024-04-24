@@ -64,6 +64,8 @@ def searchsorted(
     sorter = sorter._array if sorter is not None else None
     # TODO: The sort order of nans and signed zeros is implementation
     # dependent. Should we error/warn if they are present?
+
+    # x1 must be 1-D, but NumPy already requires this.
     return Array._new(np.searchsorted(x1._array, x2._array, side=side, sorter=sorter))
 
 def where(condition: Array, x1: Array, x2: Array, /) -> Array:
