@@ -167,3 +167,15 @@ def tile(x: Array, repetitions: Tuple[int, ...], /) -> Array:
     if not isinstance(repetitions, tuple):
         raise TypeError("repetitions must be a tuple")
     return Array._new(np.tile(x._array, repetitions))
+
+# Note: this function is new
+@requires_api_version('2023.12')
+def unstack(x: Array, /, *, axis: int = 0) -> Tuple[Array, ...]:
+    if not (-x.ndim <= axis < x.ndim):
+        raise ValueError("axis out of range")
+
+    if axis < 0:
+        axis += x.ndim
+
+    slices = (slice(None),) * axis
+    return tuple(x[slices + (i, ...)] for i in range(x.shape[axis]))
