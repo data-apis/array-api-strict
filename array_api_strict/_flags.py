@@ -178,6 +178,14 @@ def get_array_api_strict_flags():
        This function is **not** part of the array API standard. It only exists
        in array-api-strict.
 
+    .. note::
+
+       The `inspection API
+       <https://data-apis.org/array-api/latest/API_specification/inspection.html>`__
+       provides a portable way to access most of this information. However, it
+       is only present in standard versions starting with 2023.12. The array
+       API version can be accessed portably using `xp.__array_api_version__`.
+
     Returns
     -------
     dict

@@ -260,6 +260,12 @@ from ._indexing_functions import take
 
 __all__ += ["take"]
 
+from ._info import __array_namespace_info__
+
+__all__ += [
+    "__array_namespace_info__",
+]
+
 # linalg is an extension in the array API spec, which is a sub-namespace. Only
 # a subset of functions in it are imported into the top-level namespace.
 from . import linalg
