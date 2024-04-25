@@ -13,6 +13,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2022.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
     }
@@ -22,6 +23,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2022.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': False,
         'enabled_extensions': ('linalg', 'fft'),
     }
@@ -29,6 +31,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2022.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': False,
         'enabled_extensions': ('fft',),
     }
@@ -41,6 +44,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2021.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': False,
         'enabled_extensions': ('linalg',),
     }
@@ -58,12 +62,14 @@ def test_flags():
     with pytest.warns(UserWarning):
         set_array_api_strict_flags(
             api_version='2021.12',
+            boolean_indexing=False,
             data_dependent_shapes=False,
             enabled_extensions=())
     reset_array_api_strict_flags()
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2022.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
     }
@@ -96,6 +102,17 @@ def test_data_dependent_shapes():
     pytest.raises(RuntimeError, lambda: unique_inverse(a))
     pytest.raises(RuntimeError, lambda: unique_values(a))
     pytest.raises(RuntimeError, lambda: nonzero(a))
+    a[mask] # No error (boolean indexing is a separate flag)
+
+def test_boolean_indexing():
+    a = asarray([0, 0, 1, 2, 2])
+    mask = asarray([True, False, True, False, True])
+
+    # Should not error
+    a[mask]
+
+    set_array_api_strict_flags(boolean_indexing=False)
+
     pytest.raises(RuntimeError, lambda: a[mask])
 
 linalg_examples = {

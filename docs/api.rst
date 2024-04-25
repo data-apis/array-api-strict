@@ -30,6 +30,10 @@ used by array-api-strict initially. They will not change the defaults used by
 
    A string representing the version number.
 
+.. envvar:: ARRAY_API_STRICT_BOOLEAN_INDEXING
+
+   "True" or "False" to enable or disable boolean indexing.
+
 .. envvar:: ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES
 
    "True" or "False" to enable or disable data dependent shapes.
