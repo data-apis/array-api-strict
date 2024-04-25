@@ -26,6 +26,8 @@ supported_versions = (
 
 API_VERSION = default_version = "2022.12"
 
+BOOLEAN_INDEXING = True
+
 DATA_DEPENDENT_SHAPES = True
 
 all_extensions = (
@@ -47,6 +49,7 @@ ENABLED_EXTENSIONS = default_extensions = (
 def set_array_api_strict_flags(
     *,
     api_version=None,
+    boolean_indexing=None,
     data_dependent_shapes=None,
     enabled_extensions=None,
 ):
@@ -71,6 +74,12 @@ def set_array_api_strict_flags(
       2023.12 support is preliminary. Some features in 2023.12 may still be
       missing, and it hasn't been fully tested.
 
+
+    - `boolean_indexing`: Whether indexing by a boolean array is supported.
+      Note that although boolean array indexing does result in data-dependent
+      shapes, this flag is independent of the `data_dependent_shapes` flag
+      (see below).
+
     - `data_dependent_shapes`: Whether data-dependent shapes are enabled in
       array-api-strict.
 
@@ -83,9 +92,11 @@ def set_array_api_strict_flags(
 
       - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
       - `nonzero()`
-      - Boolean array indexing
       - `repeat()` when the `repeats` argument is an array (requires 2023.12
         version of the standard)
+
+      Note that while boolean indexing is also data-dependent, it is
+      controlled by a separate `boolean_indexing` flag (see above).
 
       See
       https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html
@@ -106,8 +117,8 @@ def set_array_api_strict_flags(
     >>> # Set the standard version to 2021.12
     >>> set_array_api_strict_flags(api_version="2021.12")
 
-    >>> # Disable data-dependent shapes
-    >>> set_array_api_strict_flags(data_dependent_shapes=False)
+    >>> # Disable data-dependent shapes and boolean indexing
+    >>> set_array_api_strict_flags(data_dependent_shapes=False, boolean_indexing=False)
 
     >>> # Enable only the linalg extension (disable the fft extension)
     >>> set_array_api_strict_flags(enabled_extensions=["linalg"])
@@ -120,7 +131,7 @@ def set_array_api_strict_flags(
     ArrayAPIStrictFlags: A context manager to temporarily set the flags.
 
     """
-    global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
+    global API_VERSION, BOOLEAN_INDEXING, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
 
     if api_version is not None:
         if api_version not in supported_versions:
@@ -131,6 +142,9 @@ def set_array_api_strict_flags(
             warnings.warn("The 2023.12 version of the array API specification is still preliminary. Some functions are not yet implemented, and it has not been fully tested.", stacklevel=2)
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
+
+    if boolean_indexing is not None:
+        BOOLEAN_INDEXING = boolean_indexing
 
     if data_dependent_shapes is not None:
         DATA_DEPENDENT_SHAPES = data_dependent_shapes
@@ -175,7 +189,11 @@ def get_array_api_strict_flags():
     >>> from array_api_strict import get_array_api_strict_flags
     >>> flags = get_array_api_strict_flags()
     >>> flags
-    {'api_version': '2022.12', 'data_dependent_shapes': True, 'enabled_extensions': ('linalg', 'fft')}
+    {'api_version': '2022.12',
+     'boolean_indexing': True,
+     'data_dependent_shapes': True,
+     'enabled_extensions': ('linalg', 'fft')
+    }
 
     See Also
     --------
@@ -187,6 +205,7 @@ def get_array_api_strict_flags():
     """
     return {
         "api_version": API_VERSION,
+        "boolean_indexing": BOOLEAN_INDEXING,
         "data_dependent_shapes": DATA_DEPENDENT_SHAPES,
         "enabled_extensions": ENABLED_EXTENSIONS,
     }
@@ -221,9 +240,10 @@ def reset_array_api_strict_flags():
     ArrayAPIStrictFlags: A context manager to temporarily set the flags.
 
     """
-    global API_VERSION, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
+    global API_VERSION, BOOLEAN_INDEXING, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
     API_VERSION = default_version
     array_api_strict.__array_api_version__ = API_VERSION
+    BOOLEAN_INDEXING = True
     DATA_DEPENDENT_SHAPES = True
     ENABLED_EXTENSIONS = default_extensions
 
@@ -248,10 +268,11 @@ class ArrayAPIStrictFlags:
     reset_array_api_strict_flags: Reset the flags to their default values.
 
     """
-    def __init__(self, *, api_version=None, data_dependent_shapes=None,
-                 enabled_extensions=None):
+    def __init__(self, *, api_version=None, boolean_indexing=None,
+                 data_dependent_shapes=None, enabled_extensions=None):
         self.kwargs = {
             "api_version": api_version,
+            "boolean_indexing": boolean_indexing,
             "data_dependent_shapes": data_dependent_shapes,
             "enabled_extensions": enabled_extensions,
         }
@@ -269,6 +290,11 @@ def set_flags_from_environment():
     if "ARRAY_API_STRICT_API_VERSION" in os.environ:
         set_array_api_strict_flags(
             api_version=os.environ["ARRAY_API_STRICT_API_VERSION"]
+        )
+
+    if "ARRAY_API_STRICT_BOOLEAN_INDEXING" in os.environ:
+        set_array_api_strict_flags(
+            boolean_indexing=os.environ["ARRAY_API_STRICT_BOOLEAN_INDEXING"].lower() == "true"
         )
 
     if "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES" in os.environ:
