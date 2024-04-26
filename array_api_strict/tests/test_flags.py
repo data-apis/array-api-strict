@@ -55,6 +55,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2021.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg',),
     }
@@ -68,6 +69,7 @@ def test_flags():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2023.12',
+        'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
     }
@@ -132,6 +134,8 @@ def test_data_dependent_shapes():
     pytest.raises(RuntimeError, lambda: unique_inverse(a))
     pytest.raises(RuntimeError, lambda: unique_values(a))
     pytest.raises(RuntimeError, lambda: nonzero(a))
+    pytest.raises(RuntimeError, lambda: repeat(a, repeats))
+    repeat(a, 2) # Should never error
     a[mask] # No error (boolean indexing is a separate flag)
 
 def test_boolean_indexing():
@@ -144,8 +148,6 @@ def test_boolean_indexing():
     set_array_api_strict_flags(boolean_indexing=False)
 
     pytest.raises(RuntimeError, lambda: a[mask])
-    pytest.raises(RuntimeError, lambda: repeat(a, repeats))
-    repeat(a, 2) # Should never error
 
 linalg_examples = {
     'cholesky': lambda: xp.linalg.cholesky(xp.eye(3)),
