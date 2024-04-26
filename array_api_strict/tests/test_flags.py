@@ -1,5 +1,7 @@
 from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
                       reset_array_api_strict_flags)
+from .._info import (capabilities, default_device, default_dtypes, devices,
+                     dtypes)
 
 from .. import (asarray, unique_all, unique_counts, unique_inverse,
                 unique_values, nonzero, repeat)
@@ -237,3 +239,39 @@ def test_fft(func_name):
 
     set_array_api_strict_flags(enabled_extensions=('fft',))
     func()
+
+api_version_2023_12_examples = {
+    '__array_namespace_info__': lambda: xp.__array_namespace_info__(),
+    # Test these functions directly to ensure they are properly decorated
+    'capabilities': capabilities,
+    'default_device': default_device,
+    'default_dtypes': default_dtypes,
+    'devices': devices,
+    'dtypes': dtypes,
+    'clip': lambda: xp.clip(xp.asarray([1, 2, 3]), 1, 2),
+    'copysign': lambda: xp.copysign(xp.asarray([1., 2., 3.]), xp.asarray([-1., -1., -1.])),
+    'cumulative_sum': lambda: xp.cumulative_sum(xp.asarray([1, 2, 3])),
+    'hypot': lambda: xp.hypot(xp.asarray([3., 4.]), xp.asarray([4., 3.])),
+    'maximum': lambda: xp.maximum(xp.asarray([1, 2, 3]), xp.asarray([2, 3, 4])),
+    'minimum': lambda: xp.minimum(xp.asarray([1, 2, 3]), xp.asarray([2, 3, 4])),
+    'moveaxis': lambda: xp.moveaxis(xp.ones((3, 3)), 0, 1),
+    'repeat': lambda: xp.repeat(xp.asarray([1, 2, 3]), 3),
+    'searchsorted': lambda: xp.searchsorted(xp.asarray([1, 2, 3]), xp.asarray([0, 1, 2, 3, 4])),
+    'signbit': lambda: xp.signbit(xp.asarray([-1., 0., 1.])),
+    'tile': lambda: xp.tile(xp.ones((3, 3)), (2, 3)),
+    'unstack': lambda: xp.unstack(xp.ones((3, 3)), axis=0),
+}
+
+@pytest.mark.parametrize('func_name', api_version_2023_12_examples.keys())
+def test_api_version_2023_12(func_name):
+    func = api_version_2023_12_examples[func_name]
+
+    # By default, these functions should error
+    pytest.raises(RuntimeError, func)
+
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2023.12')
+        func()
+
+    set_array_api_strict_flags(api_version='2022.12')
+    pytest.raises(RuntimeError, func)
