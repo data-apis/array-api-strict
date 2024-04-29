@@ -11,7 +11,7 @@ from ._data_type_functions import finfo
 from ._manipulation_functions import reshape
 from ._elementwise_functions import conj
 from ._array_object import Array
-from ._flags import requires_extension
+from ._flags import requires_extension, get_array_api_strict_flags
 
 try:
     from numpy._core.numeric import normalize_axis_tuple
@@ -377,10 +377,11 @@ def trace(x: Array, /, *, offset: int = 0, dtype: Optional[Dtype] = None) -> Arr
     # Note: trace() works the same as sum() and prod() (see
     # _statistical_functions.py)
     if dtype is None:
-        if x.dtype == float32:
-            dtype = np.float64
-        elif x.dtype == complex64:
-            dtype = np.complex128
+        if get_array_api_strict_flags()['api_version'] < '2023.12':
+            if x.dtype == float32:
+                dtype = np.float64
+            elif x.dtype == complex64:
+                dtype = np.complex128
     else:
         dtype = dtype._np_dtype
     # Note: trace always operates on the last two axes, whereas np.trace
