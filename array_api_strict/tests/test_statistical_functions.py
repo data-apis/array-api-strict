@@ -1,5 +1,7 @@
 import pytest
 
+from .._flags import set_array_api_strict_flags
+
 import array_api_strict as xp
 
 @pytest.mark.parametrize('func_name', ['sum', 'prod', 'trace'])
@@ -20,7 +22,7 @@ def test_sum_prod_trace_2023_12(func_name):
     assert func(a_int).dtype == xp.int64
 
     with pytest.warns(UserWarning):
-        xp.set_array_api_strict_flags(api_version='2023.12')
+        set_array_api_strict_flags(api_version='2023.12')
 
     assert func(a_real).dtype == xp.float32
     assert func(a_complex).dtype == xp.complex64
