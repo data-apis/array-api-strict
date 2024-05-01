@@ -439,7 +439,7 @@ class Array:
                             "Array API when the array is the sole index."
                         )
                     if not get_array_api_strict_flags()['boolean_indexing']:
-                        raise RuntimeError("Boolean array indexing (masking) requires data-dependent shapes, but the boolean_indexing flag has been disabled for array-api-strict")
+                        raise RuntimeError("The boolean_indexing flag has been disabled for array-api-strict")
 
                 elif i.dtype in _integer_dtypes and i.ndim != 0:
                     raise IndexError(
