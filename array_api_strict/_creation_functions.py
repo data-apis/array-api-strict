@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         SupportsBufferProtocol,
     )
 from ._dtypes import _DType, _all_dtypes
+from ._flags import get_array_api_strict_flags
 
 import numpy as np
 
@@ -174,18 +175,37 @@ def eye(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=dtype))
 
 
-def from_dlpack(x: object, /) -> Array:
+_default = object()
+
+def from_dlpack(
+    x: object,
+    /,
+    *,
+    device: Optional[Device] = _default,
+    copy: Optional[bool] = _default,
+) -> Array:
     from ._array_object import Array
+
+    if get_array_api_strict_flags()['api_version'] < '2023.12':
+        if device is not _default:
+            raise ValueError("The device argument to from_dlpack requires at least version 2023.12 of the array API")
+        if copy is not _default:
+            raise ValueError("The copy argument to from_dlpack requires at least version 2023.12 of the array API")
+
+    if device is not _default:
+        _check_device(device)
+    if copy not in [_default, None]:
+        raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
 
     return Array._new(np.from_dlpack(x))
 

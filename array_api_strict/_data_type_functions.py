@@ -36,7 +36,7 @@ def astype(
         if get_array_api_strict_flags()['api_version'] >= '2023.12':
             _check_device(device)
         else:
-            raise TypeError("The device argument to astype requires the 2023.12 version of the array API")
+            raise TypeError("The device argument to astype requires at least version 2023.12 of the array API")
 
     if not copy and dtype == x.dtype:
         return x
