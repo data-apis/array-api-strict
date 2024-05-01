@@ -293,6 +293,13 @@ class ArrayAPIStrictFlags:
 
 # Private functions
 
+ENVIRONMENT_VARIABLES = [
+    "ARRAY_API_STRICT_API_VERSION",
+    "ARRAY_API_STRICT_BOOLEAN_INDEXING",
+    "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES",
+    "ARRAY_API_STRICT_ENABLED_EXTENSIONS",
+]
+
 def set_flags_from_environment():
     if "ARRAY_API_STRICT_API_VERSION" in os.environ:
         set_array_api_strict_flags(
