@@ -23,6 +23,8 @@ from .._dtypes import (
     uint64,
     bool as bool_,
 )
+from .._flags import set_array_api_strict_flags
+
 import array_api_strict
 
 def test_validate_index():
@@ -420,3 +422,33 @@ def test_array_namespace():
 
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
+
+
+@pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
+def dlpack_2023_12(api_version):
+    if api_version != '2022.12':
+        with pytest.warns(UserWarning):
+            set_array_api_strict_flags(api_version=api_version)
+    else:
+        set_array_api_strict_flags(api_version=api_version)
+
+    a = asarray([1, 2, 3], dtype=int8)
+    # Never an error
+    a.__dlpack__()
+
+
+    exception = NotImplementedError if api_version >= '2023.12' else ValueError
+    pytest.raises(exception, lambda:
+                  a.__dlpack__(dl_device=CPU_DEVICE))
+    pytest.raises(exception, lambda:
+                  a.__dlpack__(dl_device=None))
+    pytest.raises(exception, lambda:
+                  a.__dlpack__(max_version=(1, 0)))
+    pytest.raises(exception, lambda:
+                  a.__dlpack__(max_version=None))
+    pytest.raises(exception, lambda:
+                    a.__dlpack__(copy=False))
+    pytest.raises(exception, lambda:
+                    a.__dlpack__(copy=True))
+    pytest.raises(exception, lambda:
+                    a.__dlpack__(copy=None))

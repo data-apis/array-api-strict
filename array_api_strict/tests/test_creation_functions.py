@@ -3,6 +3,8 @@ import warnings
 from numpy.testing import assert_raises
 import numpy as np
 
+import pytest
+
 from .. import all
 from .._creation_functions import (
     asarray,
@@ -10,6 +12,7 @@ from .._creation_functions import (
     empty,
     empty_like,
     eye,
+    from_dlpack,
     full,
     full_like,
     linspace,
@@ -21,7 +24,7 @@ from .._creation_functions import (
 )
 from .._dtypes import float32, float64
 from .._array_object import Array, CPU_DEVICE
-
+from .._flags import set_array_api_strict_flags
 
 def test_asarray_errors():
     # Test various protections against incorrect usage
@@ -188,3 +191,24 @@ def test_meshgrid_dtype_errors():
     meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float32))
 
     assert_raises(ValueError, lambda: meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float64)))
+
+
+@pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
+def from_dlpack_2023_12(api_version):
+    if api_version != '2022.12':
+        with pytest.warns(UserWarning):
+            set_array_api_strict_flags(api_version=api_version)
+    else:
+        set_array_api_strict_flags(api_version=api_version)
+
+    a = asarray([1., 2., 3.], dtype=float64)
+    # Never an error
+    capsule = a.__dlpack__()
+    from_dlpack(capsule)
+
+    exception = NotImplementedError if api_version >= '2023.12' else ValueError
+    pytest.raises(exception, lambda: from_dlpack(capsule, device=CPU_DEVICE))
+    pytest.raises(exception, lambda: from_dlpack(capsule, device=None))
+    pytest.raises(exception, lambda: from_dlpack(capsule, copy=False))
+    pytest.raises(exception, lambda: from_dlpack(capsule, copy=True))
+    pytest.raises(exception, lambda: from_dlpack(capsule, copy=None))
