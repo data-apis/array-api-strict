@@ -51,6 +51,8 @@ class _cpu_device:
 
 CPU_DEVICE = _cpu_device()
 
+_default = object()
+
 class Array:
     """
     n-d array object for the array API namespace.
@@ -525,10 +527,34 @@ class Array:
         res = self._array.__complex__()
         return res
 
-    def __dlpack__(self: Array, /, *, stream: None = None) -> PyCapsule:
+    def __dlpack__(
+        self: Array,
+        /,
+        *,
+        stream: Optional[Union[int, Any]] = None,
+        max_version: Optional[tuple[int, int]] = _default,
+        dl_device: Optional[tuple[IntEnum, int]] = _default,
+        copy: Optional[bool] = _default,
+    ) -> PyCapsule:
         """
         Performs the operation __dlpack__.
         """
+        if get_array_api_strict_flags()['api_version'] < '2023.12':
+            if max_version is not _default:
+                raise ValueError("The max_version argument to __dlpack__ requires at least version 2023.12 of the array API")
+            if dl_device is not _default:
+                raise ValueError("The device argument to __dlpack__ requires at least version 2023.12 of the array API")
+            if copy is not _default:
+                raise ValueError("The copy argument to __dlpack__ requires at least version 2023.12 of the array API")
+
+        # Going to wait for upstream numpy support
+        if max_version not in [_default, None]:
+            raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
+        if dl_device not in [_default, None]:
+            raise NotImplementedError("The device argument to __dlpack__ is not yet implemented")
+        if copy not in [_default, None]:
+            raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
+
         return self._array.__dlpack__(stream=stream)
 
     def __dlpack_device__(self: Array, /) -> Tuple[IntEnum, int]:
