@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from ._array_object import Array, CPU_DEVICE
+from ._array_object import Array
+from ._creation_functions import _check_device
 from ._dtypes import (
     _DType,
     _all_dtypes,
@@ -33,8 +34,7 @@ def astype(
 ) -> Array:
     if device is not _default:
         if get_array_api_strict_flags()['api_version'] >= '2023.12':
-            if device not in [CPU_DEVICE, None]:
-                raise ValueError(f"Unsupported device {device!r}")
+            _check_device(device)
         else:
             raise TypeError("The device argument to astype requires the 2023.12 version of the array API")
 
