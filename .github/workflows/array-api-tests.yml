@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   PYTEST_ARGS: "-v -rxXfE --ci --hypothesis-disable-deadline --max-examples 200"
+  API_VERSIONS: "2022.12 2023.12"
 
 jobs:
   array-api-tests:
@@ -12,7 +13,6 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
         numpy-version: ['1.26', 'dev']
-        api_version: ['2022.12', '2023.12']
         exclude:
           - python-version: '3.8'
             numpy-version: 'dev'
@@ -50,12 +50,13 @@ jobs:
         # tests fail in numpy 1.26 on bad scalar type promotion behavior)
         NPY_PROMOTION_STATE: weak
       run: |
-        export ARRAY_API_STRICT_API_VERSION=${{ matrix.api_version }}
+        # Parameterizing this in the CI matrix is wasteful. Just do a loop here.
+        for ARRAY_API_STRICT_API_VERSION in ${API_VERSIONS}; do
+            # Only signature tests work for now for 2023.12
+            if [[ "$ARRAY_API_STRICT_API_VERSION" == "2023.12" ]]; then
+              PYTEST_ARGS="${PYTEST_ARGS} -k signature
+            fi
 
-        # Only signature tests work for now for 2023.12
-        if [[ "${{ matrix.api_version }}" == "2023.12" ]]; then
-          PYTEST_ARGS="${PYTEST_ARGS} -k signature
-        fi
-
-        cd ${GITHUB_WORKSPACE}/array-api-tests
-        pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
+            cd ${GITHUB_WORKSPACE}/array-api-tests
+            pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
+        done
