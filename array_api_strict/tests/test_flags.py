@@ -184,9 +184,10 @@ linalg_main_namespace_examples = {
     'matrix_transpose': lambda: xp.matrix_transpose(xp.eye(3)),
     'tensordot': lambda: xp.tensordot(xp.eye(3), xp.eye(3)),
     'vecdot': lambda: xp.vecdot(xp.asarray([1, 2, 3]), xp.asarray([4, 5, 6])),
+    'mT': lambda: xp.eye(3).mT,
 }
 
-assert set(linalg_main_namespace_examples) == set(xp.__all__) & set(xp.linalg.__all__)
+assert set(linalg_main_namespace_examples) == (set(xp.__all__) & set(xp.linalg.__all__)) | {"mT"}
 
 @pytest.mark.parametrize('func_name', linalg_examples.keys())
 def test_linalg(func_name):

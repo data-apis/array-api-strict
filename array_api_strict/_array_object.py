@@ -1159,7 +1159,7 @@ class Array:
     # Note: mT is new in array API spec (see matrix_transpose)
     @property
     def mT(self) -> Array:
-        from .linalg import matrix_transpose
+        from ._linear_algebra_functions import matrix_transpose
         return matrix_transpose(self)
 
     @property
