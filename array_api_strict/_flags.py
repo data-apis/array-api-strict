@@ -317,9 +317,10 @@ def set_flags_from_environment():
         )
 
     if "ARRAY_API_STRICT_ENABLED_EXTENSIONS" in os.environ:
-        set_array_api_strict_flags(
-            enabled_extensions=os.environ["ARRAY_API_STRICT_ENABLED_EXTENSIONS"].split(",")
-        )
+        enabled_extensions = os.environ["ARRAY_API_STRICT_ENABLED_EXTENSIONS"].split(",")
+        if enabled_extensions == [""]:
+            enabled_extensions = []
+        set_array_api_strict_flags(enabled_extensions=enabled_extensions)
 
 set_flags_from_environment()
 
