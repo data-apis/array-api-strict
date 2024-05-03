@@ -16,13 +16,15 @@ consuming libraries to test their array API usage.
 
 """
 
+__all__ = []
+
 # Warning: __array_api_version__ could change globally with
 # set_array_api_strict_flags(). This should always be accessed as an
 # attribute, like xp.__array_api_version__, or using
 # array_api_strict.get_array_api_strict_flags()['api_version'].
 from ._flags import API_VERSION as __array_api_version__
 
-__all__ = ["__array_api_version__"]
+__all__ += ["__array_api_version__"]
 
 from ._constants import e, inf, nan, pi, newaxis
 
@@ -266,18 +268,9 @@ __all__ += [
     "__array_namespace_info__",
 ]
 
-# linalg is an extension in the array API spec, which is a sub-namespace. Only
-# a subset of functions in it are imported into the top-level namespace.
-from . import linalg
-
-__all__ += ["linalg"]
-
 from ._linear_algebra_functions import matmul, tensordot, matrix_transpose, vecdot
 
 __all__ += ["matmul", "tensordot", "matrix_transpose", "vecdot"]
-
-from . import fft
-__all__ += ["fft"]
 
 from ._manipulation_functions import (
     concat,
@@ -330,3 +323,22 @@ __all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_a
 from . import _version
 __version__ = _version.get_versions()['version']
 del _version
+
+
+# Extensions can be enabled or disabled dynamically. In order to make
+# "array_api_strict.linalg" give an AttributeError when it is disabled, we
+# use __getattr__. Note that linalg and fft are dynamically added and removed
+# from __all__ in set_array_api_strict_flags.
+
+def __getattr__(name):
+    if name in ['linalg', 'fft']:
+        if name in get_array_api_strict_flags()['enabled_extensions']:
+            if name == 'linalg':
+                from . import _linalg
+                return _linalg
+            elif name == 'fft':
+                from . import _fft
+                return _fft
+        else:
+            raise AttributeError(f"The {name!r} extension has been disabled for array_api_strict")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

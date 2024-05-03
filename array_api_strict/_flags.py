@@ -161,6 +161,10 @@ def set_array_api_strict_flags(
     else:
         ENABLED_EXTENSIONS = tuple([ext for ext in ENABLED_EXTENSIONS if extension_versions[ext] <= API_VERSION])
 
+    array_api_strict.__all__[:] = sorted(set(ENABLED_EXTENSIONS) |
+                                         set(array_api_strict.__all__) -
+                                         set(default_extensions))
+
 # We have to do this separately or it won't get added as the docstring
 set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
     supported_versions=supported_versions,
@@ -321,6 +325,9 @@ def set_flags_from_environment():
         if enabled_extensions == [""]:
             enabled_extensions = []
         set_array_api_strict_flags(enabled_extensions=enabled_extensions)
+    else:
+        # Needed at first import to add linalg and fft to __all__
+        set_array_api_strict_flags(enabled_extensions=default_extensions)
 
 set_flags_from_environment()
 
