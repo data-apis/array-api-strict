@@ -305,29 +305,25 @@ ENVIRONMENT_VARIABLES = [
 ]
 
 def set_flags_from_environment():
+    kwargs = {}
     if "ARRAY_API_STRICT_API_VERSION" in os.environ:
-        set_array_api_strict_flags(
-            api_version=os.environ["ARRAY_API_STRICT_API_VERSION"]
-        )
+        kwargs["api_version"] = os.environ["ARRAY_API_STRICT_API_VERSION"]
 
     if "ARRAY_API_STRICT_BOOLEAN_INDEXING" in os.environ:
-        set_array_api_strict_flags(
-            boolean_indexing=os.environ["ARRAY_API_STRICT_BOOLEAN_INDEXING"].lower() == "true"
-        )
+        kwargs["boolean_indexing"] = os.environ["ARRAY_API_STRICT_BOOLEAN_INDEXING"].lower() == "true"
 
     if "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES" in os.environ:
-        set_array_api_strict_flags(
-            data_dependent_shapes=os.environ["ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES"].lower() == "true"
-        )
+        kwargs["data_dependent_shapes"] = os.environ["ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES"].lower() == "true"
 
     if "ARRAY_API_STRICT_ENABLED_EXTENSIONS" in os.environ:
         enabled_extensions = os.environ["ARRAY_API_STRICT_ENABLED_EXTENSIONS"].split(",")
         if enabled_extensions == [""]:
             enabled_extensions = []
-        set_array_api_strict_flags(enabled_extensions=enabled_extensions)
-    else:
-        # Needed at first import to add linalg and fft to __all__
-        set_array_api_strict_flags(enabled_extensions=default_extensions)
+        kwargs["enabled_extensions"] = enabled_extensions
+
+    # Called unconditionally because it is needed at first import to add
+    # linalg and fft to __all__
+    set_array_api_strict_flags(**kwargs)
 
 set_flags_from_environment()
 
