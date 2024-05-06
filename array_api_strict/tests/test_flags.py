@@ -370,3 +370,124 @@ assert 'fft' not in globals()
     exec('from array_api_strict import *', ns)
     assert 'linalg' not in ns
     assert 'fft' not in ns
+
+
+def test_environment_variables():
+    # Test that the environment variables work as expected
+    subprocess_tests = [
+        # ARRAY_API_STRICT_API_VERSION
+        ('''\
+import array_api_strict as xp
+assert xp.__array_api_version__ == '2022.12'
+
+assert xp.get_array_api_strict_flags()['api_version'] == '2022.12'
+
+''', {}),
+        *[
+        (f'''\
+import array_api_strict as xp
+assert xp.__array_api_version__ == '{version}'
+
+assert xp.get_array_api_strict_flags()['api_version'] == '{version}'
+
+if {version} == '2021.12':
+    assert hasattr(xp, 'linalg')
+    assert not hasattr(xp, 'fft')
+
+''', {"ARRAY_API_STRICT_API_VERSION": version}) for version in ('2021.12', '2022.12', '2023.12')],
+
+       # ARRAY_API_STRICT_BOOLEAN_INDEXING
+        ('''\
+import array_api_strict as xp
+
+a = xp.ones(3)
+mask = xp.asarray([True, False, True])
+
+assert xp.all(a[mask] == xp.asarray([1., 1.]))
+assert xp.get_array_api_strict_flags()['boolean_indexing'] == True
+''', {}),
+        *[(f'''\
+import array_api_strict as xp
+
+a = xp.ones(3)
+mask = xp.asarray([True, False, True])
+
+if {boolean_indexing}:
+    assert xp.all(a[mask] == xp.asarray([1., 1.]))
+else:
+    try:
+        a[mask]
+    except RuntimeError:
+        pass
+    else:
+        assert False
+
+assert xp.get_array_api_strict_flags()['boolean_indexing'] == {boolean_indexing}
+''', {"ARRAY_API_STRICT_BOOLEAN_INDEXING": boolean_indexing})
+            for boolean_indexing in ('True', 'False')],
+
+        # ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES
+        ('''\
+import array_api_strict as xp
+
+a = xp.ones(3)
+xp.unique_all(a)
+
+assert xp.get_array_api_strict_flags()['data_dependent_shapes'] == True
+''', {}),
+        *[(f'''\
+import array_api_strict as xp
+
+a = xp.ones(3)
+if {data_dependent_shapes}:
+    xp.unique_all(a)
+else:
+    try:
+        xp.unique_all(a)
+    except RuntimeError:
+        pass
+    else:
+        assert False
+
+assert xp.get_array_api_strict_flags()['data_dependent_shapes'] == {data_dependent_shapes}
+''', {"ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES": data_dependent_shapes})
+            for data_dependent_shapes in ('True', 'False')],
+
+        # ARRAY_API_STRICT_ENABLED_EXTENSIONS
+        ('''\
+import array_api_strict as xp
+assert hasattr(xp, 'linalg')
+assert hasattr(xp, 'fft')
+
+assert xp.get_array_api_strict_flags()['enabled_extensions'] == ('linalg', 'fft')
+''', {}),
+        *[(f'''\
+import array_api_strict as xp
+
+assert hasattr(xp, 'linalg') == ('linalg' in {extensions.split(',')})
+assert hasattr(xp, 'fft') == ('fft' in {extensions.split(',')})
+
+assert sorted(xp.get_array_api_strict_flags()['enabled_extensions']) == {sorted(set(extensions.split(','))-{''})}
+''', {"ARRAY_API_STRICT_ENABLED_EXTENSIONS": extensions})
+            for extensions in ('', 'linalg', 'fft', 'linalg,fft')],
+    ]
+
+    for test, env in subprocess_tests:
+        try:
+            subprocess.run([sys.executable, '-c', test], check=True,
+                           capture_output=True, encoding='utf-8', env=env)
+        except subprocess.CalledProcessError as e:
+            print(e.stdout, end='')
+            # Ensure the exception is shown in the output log
+            raise AssertionError(f"""\
+STDOUT:
+{e.stderr}
+
+STDERR:
+{e.stderr}
+
+TEST:
+{test}
+
+ENV:
+{env}""")
