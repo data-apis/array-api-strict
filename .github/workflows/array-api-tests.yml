@@ -52,11 +52,6 @@ jobs:
       run: |
         # Parameterizing this in the CI matrix is wasteful. Just do a loop here.
         for ARRAY_API_STRICT_API_VERSION in ${API_VERSIONS}; do
-            # Only signature tests work for now for 2023.12
-            if [[ "$ARRAY_API_STRICT_API_VERSION" == "2023.12" ]]; then
-              PYTEST_ARGS="${PYTEST_ARGS} -k signature
-            fi
-
             cd ${GITHUB_WORKSPACE}/array-api-tests
             pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
         done
