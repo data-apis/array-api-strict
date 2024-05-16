@@ -20,7 +20,7 @@ import numpy as np
 def _check_valid_dtype(dtype):
     # Note: Only spelling dtypes as the dtype objects is supported.
     if dtype not in (None,) + _all_dtypes:
-        raise ValueError("dtype must be one of the supported dtypes")
+        raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
 
 def _supports_buffer_protocol(obj):
     try:
