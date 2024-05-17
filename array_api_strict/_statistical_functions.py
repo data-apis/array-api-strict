@@ -30,8 +30,9 @@ def cumulative_sum(
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
-    if dtype is None:
-        dtype = x.dtype
+    dt = x.dtype if dtype is None else dtype
+    if dtype is not None:
+        dtype = dtype._np_dtype
 
     # TODO: The standard is not clear about what should happen when x.ndim == 0.
     if axis is None:
@@ -40,8 +41,10 @@ def cumulative_sum(
         axis = 0
     # np.cumsum does not support include_initial
     if include_initial:
-        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dtype), x], axis=axis)
-    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype._np_dtype))
+        if axis < 0:
+            axis += x.ndim
+        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
+    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype))
 
 def max(
     x: Array,
