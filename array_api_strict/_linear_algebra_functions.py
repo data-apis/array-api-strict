@@ -61,7 +61,7 @@ def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
         elif axis < min(-1, -x1.ndim, -x2.ndim):
             raise ValueError("axis is out of bounds for x1 and x2")
 
-    # In versions if the standard prior to 2023.12, vecdot applied axis after
+    # In versions of the standard prior to 2023.12, vecdot applied axis after
     # broadcasting. This is different from applying it before broadcasting
     # when axis is nonnegative. The below code keeps this behavior for
     # 2022.12, primarily for backwards compatibility. Note that the behavior
