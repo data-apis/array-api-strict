@@ -1,14 +1,5 @@
 from __future__ import annotations
 
-__all__ = [
-    "__array_namespace_info__",
-    "capabilities",
-    "default_device",
-    "default_dtypes",
-    "devices",
-    "dtypes",
-]
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
