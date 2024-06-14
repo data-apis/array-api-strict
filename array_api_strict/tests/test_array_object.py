@@ -416,3 +416,7 @@ def test_array_namespace():
 
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2023.12"))
+
+def test_no_iter():
+    pytest.raises(TypeError, lambda: iter(ones(3)))
+    pytest.raises(TypeError, lambda: iter(ones((3, 3))))
