@@ -15,9 +15,12 @@ libraries. Consuming library code should use the
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
-array-api-strict currently supports the 2022.12 version of the standard.
-2023.12 support is planned and is tracked by [this
-issue](https://github.com/data-apis/array-api-strict/issues/25).
+array-api-strict currently supports the
+[2022.12](https://data-apis.org/array-api/latest/changelog.html#v2022-12)
+version of the standard. Experimental
+[2023.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
+support is implemented, [but must be enabled with a
+flag](set_array_api_strict_flags).
 
 ## Install
 
@@ -179,9 +182,11 @@ issue, but this hasn't necessarily been tested thoroughly.
    function. array-api-strict currently implements all of these. In the
    future, [there may be a way to disable them](https://github.com/data-apis/array-api-strict/issues/7).
 
-6. array-api-strict currently only supports the 2022.12 version of the array
-   API standard. [Support for 2023.12 is
-   planned](https://github.com/data-apis/array-api-strict/issues/25).
+6. array-api-strict currently uses the 2022.12 version of the array API
+   standard. Support for 2023.12 is implemented but is still experimental and
+   not fully tested. It can be enabled with
+   [`array_api_strict.set_array_api_strict_flags(api_version='2023.12')`](set_array_api_strict_flags).
+
 
 (numpy.array_api)=
 ## Relationship to `numpy.array_api`

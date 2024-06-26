@@ -11,7 +11,7 @@ from ._data_type_functions import finfo
 from ._manipulation_functions import reshape
 from ._elementwise_functions import conj
 from ._array_object import Array
-from ._flags import requires_extension
+from ._flags import requires_extension, get_array_api_strict_flags
 
 try:
     from numpy._core.numeric import normalize_axis_tuple
@@ -80,6 +80,17 @@ def cross(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
     # Note: this is different from np.cross(), which allows dimension 2
     if x1.shape[axis] != 3:
         raise ValueError('cross() dimension must equal 3')
+
+    if get_array_api_strict_flags()['api_version'] >= '2023.12':
+        if axis >= 0:
+            raise ValueError("axis must be negative in cross")
+        elif axis < min(-1, -x1.ndim, -x2.ndim):
+            raise ValueError("axis is out of bounds for x1 and x2")
+
+        # Prior to 2023.12, there was ambiguity in the standard about whether
+        # positive axis applied before or after broadcasting. NumPy applies
+        # the axis before broadcasting. Since that behavior is what has always
+        # been implemented here, we keep it for backwards compatibility.
     return Array._new(np.cross(x1._array, x2._array, axis=axis))
 
 @requires_extension('linalg')
@@ -377,10 +388,11 @@ def trace(x: Array, /, *, offset: int = 0, dtype: Optional[Dtype] = None) -> Arr
     # Note: trace() works the same as sum() and prod() (see
     # _statistical_functions.py)
     if dtype is None:
-        if x.dtype == float32:
-            dtype = np.float64
-        elif x.dtype == complex64:
-            dtype = np.complex128
+        if get_array_api_strict_flags()['api_version'] < '2023.12':
+            if x.dtype == float32:
+                dtype = np.float64
+            elif x.dtype == complex64:
+                dtype = np.complex128
     else:
         dtype = dtype._np_dtype
     # Note: trace always operates on the last two axes, whereas np.trace

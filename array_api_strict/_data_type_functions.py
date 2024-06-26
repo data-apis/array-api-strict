@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ._array_object import Array
+from ._creation_functions import _check_device
 from ._dtypes import (
     _DType,
     _all_dtypes,
@@ -13,19 +14,30 @@ from ._dtypes import (
     _numeric_dtypes,
     _result_type,
 )
+from ._flags import get_array_api_strict_flags
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import List, Tuple, Union
-    from ._typing import Dtype
+    from typing import List, Tuple, Union, Optional
+    from ._typing import Dtype, Device
 
 import numpy as np
 
+# Use to emulate the asarray(device) argument not existing in 2022.12
+_default = object()
 
 # Note: astype is a function, not an array method as in NumPy.
-def astype(x: Array, dtype: Dtype, /, *, copy: bool = True) -> Array:
+def astype(
+    x: Array, dtype: Dtype, /, *, copy: bool = True, device: Optional[Device] = _default
+) -> Array:
+    if device is not _default:
+        if get_array_api_strict_flags()['api_version'] >= '2023.12':
+            _check_device(device)
+        else:
+            raise TypeError("The device argument to astype requires at least version 2023.12 of the array API")
+
     if not copy and dtype == x.dtype:
         return x
     return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy))

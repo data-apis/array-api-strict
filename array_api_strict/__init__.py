@@ -16,13 +16,15 @@ consuming libraries to test their array API usage.
 
 """
 
+__all__ = []
+
 # Warning: __array_api_version__ could change globally with
 # set_array_api_strict_flags(). This should always be accessed as an
 # attribute, like xp.__array_api_version__, or using
 # array_api_strict.get_array_api_strict_flags()['api_version'].
 from ._flags import API_VERSION as __array_api_version__
 
-__all__ = ["__array_api_version__"]
+__all__ += ["__array_api_version__"]
 
 from ._constants import e, inf, nan, pi, newaxis
 
@@ -137,7 +139,9 @@ from ._elementwise_functions import (
     bitwise_right_shift,
     bitwise_xor,
     ceil,
+    clip,
     conj,
+    copysign,
     cos,
     cosh,
     divide,
@@ -148,6 +152,7 @@ from ._elementwise_functions import (
     floor_divide,
     greater,
     greater_equal,
+    hypot,
     imag,
     isfinite,
     isinf,
@@ -163,6 +168,8 @@ from ._elementwise_functions import (
     logical_not,
     logical_or,
     logical_xor,
+    maximum,
+    minimum,
     multiply,
     negative,
     not_equal,
@@ -172,6 +179,7 @@ from ._elementwise_functions import (
     remainder,
     round,
     sign,
+    signbit,
     sin,
     sinh,
     square,
@@ -199,7 +207,9 @@ __all__ += [
     "bitwise_right_shift",
     "bitwise_xor",
     "ceil",
+    "clip",
     "conj",
+    "copysign",
     "cos",
     "cosh",
     "divide",
@@ -210,6 +220,7 @@ __all__ += [
     "floor_divide",
     "greater",
     "greater_equal",
+    "hypot",
     "imag",
     "isfinite",
     "isinf",
@@ -225,6 +236,8 @@ __all__ += [
     "logical_not",
     "logical_or",
     "logical_xor",
+    "maximum",
+    "minimum",
     "multiply",
     "negative",
     "not_equal",
@@ -234,6 +247,7 @@ __all__ += [
     "remainder",
     "round",
     "sign",
+    "signbit",
     "sin",
     "sinh",
     "square",
@@ -248,35 +262,36 @@ from ._indexing_functions import take
 
 __all__ += ["take"]
 
-# linalg is an extension in the array API spec, which is a sub-namespace. Only
-# a subset of functions in it are imported into the top-level namespace.
-from . import linalg
+from ._info import __array_namespace_info__
 
-__all__ += ["linalg"]
+__all__ += [
+    "__array_namespace_info__",
+]
 
 from ._linear_algebra_functions import matmul, tensordot, matrix_transpose, vecdot
 
 __all__ += ["matmul", "tensordot", "matrix_transpose", "vecdot"]
 
-from . import fft
-__all__ += ["fft"]
-
 from ._manipulation_functions import (
     concat,
     expand_dims,
     flip,
+    moveaxis,
     permute_dims,
+    repeat,
     reshape,
     roll,
     squeeze,
     stack,
+    tile,
+    unstack,
 )
 
-__all__ += ["concat", "expand_dims", "flip", "permute_dims", "reshape", "roll", "squeeze", "stack"]
+__all__ += ["concat", "expand_dims", "flip", "moveaxis", "permute_dims", "repeat", "reshape", "roll", "squeeze", "stack", "tile", "unstack"]
 
-from ._searching_functions import argmax, argmin, nonzero, where
+from ._searching_functions import argmax, argmin, nonzero, searchsorted, where
 
-__all__ += ["argmax", "argmin", "nonzero", "where"]
+__all__ += ["argmax", "argmin", "nonzero", "searchsorted", "where"]
 
 from ._set_functions import unique_all, unique_counts, unique_inverse, unique_values
 
@@ -286,9 +301,9 @@ from ._sorting_functions import argsort, sort
 
 __all__ += ["argsort", "sort"]
 
-from ._statistical_functions import max, mean, min, prod, std, sum, var
+from ._statistical_functions import cumulative_sum, max, mean, min, prod, std, sum, var
 
-__all__ += ["max", "mean", "min", "prod", "std", "sum", "var"]
+__all__ += ["cumulative_sum", "max", "mean", "min", "prod", "std", "sum", "var"]
 
 from ._utility_functions import all, any
 
@@ -308,3 +323,22 @@ __all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_a
 from . import _version
 __version__ = _version.get_versions()['version']
 del _version
+
+
+# Extensions can be enabled or disabled dynamically. In order to make
+# "array_api_strict.linalg" give an AttributeError when it is disabled, we
+# use __getattr__. Note that linalg and fft are dynamically added and removed
+# from __all__ in set_array_api_strict_flags.
+
+def __getattr__(name):
+    if name in ['linalg', 'fft']:
+        if name in get_array_api_strict_flags()['enabled_extensions']:
+            if name == 'linalg':
+                from . import _linalg
+                return _linalg
+            elif name == 'fft':
+                from . import _fft
+                return _fft
+        else:
+            raise AttributeError(f"The {name!r} extension has been disabled for array_api_strict")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

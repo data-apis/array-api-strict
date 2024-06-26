@@ -12,6 +12,10 @@ from ._dtypes import (
     _result_type,
 )
 from ._array_object import Array
+from ._flags import requires_api_version
+from ._creation_functions import asarray
+
+from typing import Optional, Union
 
 import numpy as np
 
@@ -240,6 +244,70 @@ def ceil(x: Array, /) -> Array:
         return x
     return Array._new(np.ceil(x._array))
 
+# WARNING: This function is not yet tested by the array-api-tests test suite.
+
+# Note: min and max argument names are different and not optional in numpy.
+@requires_api_version('2023.12')
+def clip(
+    x: Array,
+    /,
+    min: Optional[Union[int, float, Array]] = None,
+    max: Optional[Union[int, float, Array]] = None,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.clip <numpy.clip>`.
+
+    See its docstring for more information.
+    """
+    if (x.dtype not in _real_numeric_dtypes
+        or isinstance(min, Array) and min.dtype not in _real_numeric_dtypes
+        or isinstance(max, Array) and max.dtype not in _real_numeric_dtypes):
+        raise TypeError("Only real numeric dtypes are allowed in clip")
+    if not isinstance(min, (int, float, Array, type(None))):
+        raise TypeError("min must be an None, int, float, or an array")
+    if not isinstance(max, (int, float, Array, type(None))):
+        raise TypeError("max must be an None, int, float, or an array")
+
+    # Mixed dtype kinds is implementation defined
+    if (x.dtype in _integer_dtypes
+        and (isinstance(min, float) or
+             isinstance(min, Array) and min.dtype in _real_floating_dtypes)):
+        raise TypeError("min must be integral when x is integral")
+    if (x.dtype in _integer_dtypes
+        and (isinstance(max, float) or
+             isinstance(max, Array) and max.dtype in _real_floating_dtypes)):
+        raise TypeError("max must be integral when x is integral")
+    if (x.dtype in _real_floating_dtypes
+        and (isinstance(min, int) or
+             isinstance(min, Array) and min.dtype in _integer_dtypes)):
+        raise TypeError("min must be floating-point when x is floating-point")
+    if (x.dtype in _real_floating_dtypes
+        and (isinstance(max, int) or
+             isinstance(max, Array) and max.dtype in _integer_dtypes)):
+        raise TypeError("max must be floating-point when x is floating-point")
+
+    if min is max is None:
+        # Note: NumPy disallows min = max = None
+        return x
+
+    # Normalize to make the below logic simpler
+    if min is not None:
+        min = asarray(min)._array
+    if max is not None:
+        max = asarray(max)._array
+
+    # min > max is implementation defined
+    if min is not None and max is not None and np.any(min > max):
+        raise ValueError("min must be less than or equal to max")
+
+    result = np.clip(x._array, min, max)
+    # Note: NumPy applies type promotion, but the standard specifies the
+    # return dtype should be the same as x
+    if result.dtype != x.dtype._np_dtype:
+        # TODO: I'm not completely sure this always gives the correct thing
+        # for integer dtypes. See https://github.com/numpy/numpy/issues/24976
+        result = result.astype(x.dtype._np_dtype)
+    return Array._new(result)
 
 def conj(x: Array, /) -> Array:
     """
@@ -251,6 +319,19 @@ def conj(x: Array, /) -> Array:
         raise TypeError("Only complex floating-point dtypes are allowed in conj")
     return Array._new(np.conj(x))
 
+@requires_api_version('2023.12')
+def copysign(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.copysign <numpy.copysign>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in copysign")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.copysign(x1._array, x2._array))
 
 def cos(x: Array, /) -> Array:
     """
@@ -377,6 +458,19 @@ def greater_equal(x1: Array, x2: Array, /) -> Array:
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.greater_equal(x1._array, x2._array))
 
+@requires_api_version('2023.12')
+def hypot(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.hypot <numpy.hypot>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
+        raise TypeError("Only real floating-point dtypes are allowed in hypot")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.hypot(x1._array, x2._array))
 
 def imag(x: Array, /) -> Array:
     """
@@ -560,6 +654,35 @@ def logical_xor(x1: Array, x2: Array, /) -> Array:
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.logical_xor(x1._array, x2._array))
 
+@requires_api_version('2023.12')
+def maximum(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.maximum <numpy.maximum>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in maximum")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    # TODO: maximum(-0., 0.) is unspecified. Should we issue a warning/error
+    # in that case?
+    return Array._new(np.maximum(x1._array, x2._array))
+
+@requires_api_version('2023.12')
+def minimum(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.minimum <numpy.minimum>`.
+
+    See its docstring for more information.
+    """
+    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+        raise TypeError("Only real numeric dtypes are allowed in minimum")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.minimum(x1._array, x2._array))
 
 def multiply(x1: Array, x2: Array, /) -> Array:
     """
@@ -669,6 +792,18 @@ def sign(x: Array, /) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in sign")
     return Array._new(np.sign(x._array))
+
+
+@requires_api_version('2023.12')
+def signbit(x: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.signbit <numpy.signbit>`.
+
+    See its docstring for more information.
+    """
+    if x.dtype not in _real_floating_dtypes:
+        raise TypeError("Only real floating-point dtypes are allowed in signbit")
+    return Array._new(np.signbit(x._array))
 
 
 def sin(x: Array, /) -> Array:

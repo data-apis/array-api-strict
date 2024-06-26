@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         SupportsBufferProtocol,
     )
 from ._dtypes import _DType, _all_dtypes
+from ._flags import get_array_api_strict_flags
 
 import numpy as np
 
@@ -19,7 +20,7 @@ import numpy as np
 def _check_valid_dtype(dtype):
     # Note: Only spelling dtypes as the dtype objects is supported.
     if dtype not in (None,) + _all_dtypes:
-        raise ValueError("dtype must be one of the supported dtypes")
+        raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
 
 def _supports_buffer_protocol(obj):
     try:
@@ -27,6 +28,14 @@ def _supports_buffer_protocol(obj):
     except TypeError:
         return False
     return True
+
+def _check_device(device):
+    # _array_object imports in this file are inside the functions to avoid
+    # circular imports
+    from ._array_object import CPU_DEVICE
+
+    if device not in [CPU_DEVICE, None]:
+        raise ValueError(f"Unsupported device {device!r}")
 
 def asarray(
     obj: Union[
@@ -48,16 +57,13 @@ def asarray(
 
     See its docstring for more information.
     """
-    # _array_object imports in this file are inside the functions to avoid
-    # circular imports
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
     _np_dtype = None
     if dtype is not None:
         _np_dtype = dtype._np_dtype
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
 
     if np.__version__[0] < '2':
         if copy is False:
@@ -106,11 +112,11 @@ def arange(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.arange(start, stop=stop, step=step, dtype=dtype))
@@ -127,11 +133,11 @@ def empty(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.empty(shape, dtype=dtype))
@@ -145,11 +151,11 @@ def empty_like(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.empty_like(x._array, dtype=dtype))
@@ -169,18 +175,38 @@ def eye(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=dtype))
 
 
-def from_dlpack(x: object, /) -> Array:
+_default = object()
+
+def from_dlpack(
+    x: object,
+    /,
+    *,
+    device: Optional[Device] = _default,
+    copy: Optional[bool] = _default,
+) -> Array:
     from ._array_object import Array
+
+    if get_array_api_strict_flags()['api_version'] < '2023.12':
+        if device is not _default:
+            raise ValueError("The device argument to from_dlpack requires at least version 2023.12 of the array API")
+        if copy is not _default:
+            raise ValueError("The copy argument to from_dlpack requires at least version 2023.12 of the array API")
+
+    # Going to wait for upstream numpy support
+    if device is not _default:
+        _check_device(device)
+    if copy not in [_default, None]:
+        raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
 
     return Array._new(np.from_dlpack(x))
 
@@ -197,11 +223,11 @@ def full(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if isinstance(fill_value, Array) and fill_value.ndim == 0:
         fill_value = fill_value._array
     if dtype is not None:
@@ -227,11 +253,11 @@ def full_like(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     res = np.full_like(x._array, fill_value, dtype=dtype)
@@ -257,11 +283,11 @@ def linspace(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.linspace(start, stop, num, dtype=dtype, endpoint=endpoint))
@@ -298,11 +324,11 @@ def ones(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.ones(shape, dtype=dtype))
@@ -316,11 +342,11 @@ def ones_like(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.ones_like(x._array, dtype=dtype))
@@ -365,11 +391,11 @@ def zeros(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.zeros(shape, dtype=dtype))
@@ -383,11 +409,11 @@ def zeros_like(
 
     See its docstring for more information.
     """
-    from ._array_object import Array, CPU_DEVICE
+    from ._array_object import Array
 
     _check_valid_dtype(dtype)
-    if device not in [CPU_DEVICE, None]:
-        raise ValueError(f"Unsupported device {device!r}")
+    _check_device(device)
+
     if dtype is not None:
         dtype = dtype._np_dtype
     return Array._new(np.zeros_like(x._array, dtype=dtype))

@@ -7,6 +7,9 @@ from ._dtypes import (
 )
 from ._array_object import Array
 from ._dtypes import float32, complex64
+from ._flags import requires_api_version, get_array_api_strict_flags
+from ._creation_functions import zeros
+from ._manipulation_functions import concat
 
 from typing import TYPE_CHECKING
 
@@ -16,6 +19,32 @@ if TYPE_CHECKING:
 
 import numpy as np
 
+@requires_api_version('2023.12')
+def cumulative_sum(
+    x: Array,
+    /,
+    *,
+    axis: Optional[int] = None,
+    dtype: Optional[Dtype] = None,
+    include_initial: bool = False,
+) -> Array:
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
+    dt = x.dtype if dtype is None else dtype
+    if dtype is not None:
+        dtype = dtype._np_dtype
+
+    # TODO: The standard is not clear about what should happen when x.ndim == 0.
+    if axis is None:
+        if x.ndim > 1:
+            raise ValueError("axis must be specified in cumulative_sum for more than one dimension")
+        axis = 0
+    # np.cumsum does not support include_initial
+    if include_initial:
+        if axis < 0:
+            axis += x.ndim
+        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
+    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype))
 
 def max(
     x: Array,
@@ -63,14 +92,16 @@ def prod(
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in prod")
-    # Note: sum() and prod() always upcast for dtype=None. `np.prod` does that
-    # for integers, but not for float32 or complex64, so we need to
-    # special-case it here
+
     if dtype is None:
-        if x.dtype == float32:
-            dtype = np.float64
-        elif x.dtype == complex64:
-            dtype = np.complex128
+        # Note: In versions prior to 2023.12, sum() and prod() upcast for all
+        # dtypes when dtype=None. For 2023.12, the behavior is the same as in
+        # NumPy (only upcast for integral dtypes).
+        if get_array_api_strict_flags()['api_version'] < '2023.12':
+            if x.dtype == float32:
+                dtype = np.float64
+            elif x.dtype == complex64:
+                dtype = np.complex128
     else:
         dtype = dtype._np_dtype
     return Array._new(np.prod(x._array, dtype=dtype, axis=axis, keepdims=keepdims))
@@ -100,14 +131,16 @@ def sum(
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in sum")
-    # Note: sum() and prod() always upcast for dtype=None. `np.sum` does that
-    # for integers, but not for float32 or complex64, so we need to
-    # special-case it here
+
     if dtype is None:
-        if x.dtype == float32:
-            dtype = np.float64
-        elif x.dtype == complex64:
-            dtype = np.complex128
+        # Note: In versions prior to 2023.12, sum() and prod() upcast for all
+        # dtypes when dtype=None. For 2023.12, the behavior is the same as in
+        # NumPy (only upcast for integral dtypes).
+        if get_array_api_strict_flags()['api_version'] < '2023.12':
+            if x.dtype == float32:
+                dtype = np.float64
+            elif x.dtype == complex64:
+                dtype = np.complex128
     else:
         dtype = dtype._np_dtype
     return Array._new(np.sum(x._array, axis=axis, dtype=dtype, keepdims=keepdims))

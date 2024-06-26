@@ -11,6 +11,8 @@ Array API Strict Flags
 .. currentmodule:: array_api_strict
 
 .. autofunction:: get_array_api_strict_flags
+
+.. _set_array_api_strict_flags:
 .. autofunction:: set_array_api_strict_flags
 .. autofunction:: reset_array_api_strict_flags
 .. autoclass:: ArrayAPIStrictFlags

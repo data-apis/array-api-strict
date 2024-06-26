@@ -8,8 +8,8 @@ linalg extension is disabled in the flags.
 from __future__ import annotations
 
 from ._dtypes import _numeric_dtypes
-
 from ._array_object import Array
+from ._flags import get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -54,6 +54,19 @@ def matrix_transpose(x: Array, /) -> Array:
 def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
     if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
         raise TypeError('Only numeric dtypes are allowed in vecdot')
+
+    if get_array_api_strict_flags()['api_version'] >= '2023.12':
+        if axis >= 0:
+            raise ValueError("axis must be negative in vecdot")
+        elif axis < min(-1, -x1.ndim, -x2.ndim):
+            raise ValueError("axis is out of bounds for x1 and x2")
+
+    # In versions of the standard prior to 2023.12, vecdot applied axis after
+    # broadcasting. This is different from applying it before broadcasting
+    # when axis is nonnegative. The below code keeps this behavior for
+    # 2022.12, primarily for backwards compatibility. Note that the behavior
+    # is unambiguous when axis is negative, so the below code should work
+    # correctly in that case regardless of which version is used.
     ndim = max(x1.ndim, x2.ndim)
     x1_shape = (1,)*(ndim - x1.ndim) + tuple(x1.shape)
     x2_shape = (1,)*(ndim - x2.ndim) + tuple(x2.shape)

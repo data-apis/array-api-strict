@@ -21,6 +21,8 @@ import sys
 
 from typing import (
     Any,
+    ModuleType,
+    TypedDict,
     TypeVar,
     Protocol,
 )
@@ -39,6 +41,8 @@ Device = _cpu_device
 
 Dtype = _DType
 
+Info = ModuleType
+
 if sys.version_info >= (3, 12):
     from collections.abc import Buffer as SupportsBufferProtocol
 else:
@@ -48,3 +52,37 @@ PyCapsule = Any
 
 class SupportsDLPack(Protocol):
     def __dlpack__(self, /, *, stream: None = ...) -> PyCapsule: ...
+
+Capabilities = TypedDict(
+    "Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool}
+)
+
+DefaultDataTypes = TypedDict(
+    "DefaultDataTypes",
+    {
+        "real floating": Dtype,
+        "complex floating": Dtype,
+        "integral": Dtype,
+        "indexing": Dtype,
+    },
+)
+
+DataTypes = TypedDict(
+    "DataTypes",
+    {
+        "bool": Dtype,
+        "float32": Dtype,
+        "float64": Dtype,
+        "complex64": Dtype,
+        "complex128": Dtype,
+        "int8": Dtype,
+        "int16": Dtype,
+        "int32": Dtype,
+        "int64": Dtype,
+        "uint8": Dtype,
+        "uint16": Dtype,
+        "uint32": Dtype,
+        "uint64": Dtype,
+    },
+    total=False,
+)

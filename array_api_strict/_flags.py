@@ -21,6 +21,7 @@ import array_api_strict
 supported_versions = (
     "2021.12",
     "2022.12",
+    "2023.12",
 )
 
 API_VERSION = default_version = "2022.12"
@@ -70,6 +71,8 @@ def set_array_api_strict_flags(
       Note that 2021.12 is supported, but currently gives the same thing as
       2022.12 (except that the fft extension will be disabled).
 
+      2023.12 support is experimental. Some features in 2023.12 may still be
+      missing, and it hasn't been fully tested.
 
     - `boolean_indexing`: Whether indexing by a boolean array is supported.
       Note that although boolean array indexing does result in data-dependent
@@ -86,9 +89,9 @@ def set_array_api_strict_flags(
       The functions that make use of data-dependent shapes, and are therefore
       disabled by setting this flag to False are
 
-      - `unique_all`, `unique_counts`, `unique_inverse`, and `unique_values`.
-      - `nonzero`
-      - `repeat` when the `repeats` argument is an array (requires 2023.12
+      - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
+      - `nonzero()`
+      - `repeat()` when the `repeats` argument is an array (requires 2023.12
         version of the standard)
 
       Note that while boolean indexing is also data-dependent, it is
@@ -133,7 +136,9 @@ def set_array_api_strict_flags(
         if api_version not in supported_versions:
             raise ValueError(f"Unsupported standard version {api_version!r}")
         if api_version == "2021.12":
-            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12")
+            warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12", stacklevel=2)
+        if api_version == "2023.12":
+            warnings.warn("The 2023.12 version of the array API specification is still preliminary. Some functions are not yet implemented, and it has not been fully tested.", stacklevel=2)
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 
@@ -154,7 +159,11 @@ def set_array_api_strict_flags(
                 )
         ENABLED_EXTENSIONS = tuple(enabled_extensions)
     else:
-        ENABLED_EXTENSIONS = tuple([ext for ext in all_extensions if extension_versions[ext] <= API_VERSION])
+        ENABLED_EXTENSIONS = tuple([ext for ext in ENABLED_EXTENSIONS if extension_versions[ext] <= API_VERSION])
+
+    array_api_strict.__all__[:] = sorted(set(ENABLED_EXTENSIONS) |
+                                         set(array_api_strict.__all__) -
+                                         set(default_extensions))
 
 # We have to do this separately or it won't get added as the docstring
 set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
@@ -171,6 +180,14 @@ def get_array_api_strict_flags():
 
        This function is **not** part of the array API standard. It only exists
        in array-api-strict.
+
+    .. note::
+
+       The `inspection API
+       <https://data-apis.org/array-api/latest/API_specification/inspection.html>`__
+       provides a portable way to access most of this information. However, it
+       is only present in standard versions starting with 2023.12. The array
+       API version can be accessed portably using `xp.__array_api_version__`.
 
     Returns
     -------
@@ -280,28 +297,50 @@ class ArrayAPIStrictFlags:
 
 # Private functions
 
+ENVIRONMENT_VARIABLES = [
+    "ARRAY_API_STRICT_API_VERSION",
+    "ARRAY_API_STRICT_BOOLEAN_INDEXING",
+    "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES",
+    "ARRAY_API_STRICT_ENABLED_EXTENSIONS",
+]
+
 def set_flags_from_environment():
+    kwargs = {}
     if "ARRAY_API_STRICT_API_VERSION" in os.environ:
-        set_array_api_strict_flags(
-            api_version=os.environ["ARRAY_API_STRICT_API_VERSION"]
-        )
+        kwargs["api_version"] = os.environ["ARRAY_API_STRICT_API_VERSION"]
 
     if "ARRAY_API_STRICT_BOOLEAN_INDEXING" in os.environ:
-        set_array_api_strict_flags(
-            boolean_indexing=os.environ["ARRAY_API_STRICT_BOOLEAN_INDEXING"].lower() == "true"
-        )
+        kwargs["boolean_indexing"] = os.environ["ARRAY_API_STRICT_BOOLEAN_INDEXING"].lower() == "true"
 
     if "ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES" in os.environ:
-        set_array_api_strict_flags(
-            data_dependent_shapes=os.environ["ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES"].lower() == "true"
-        )
+        kwargs["data_dependent_shapes"] = os.environ["ARRAY_API_STRICT_DATA_DEPENDENT_SHAPES"].lower() == "true"
 
     if "ARRAY_API_STRICT_ENABLED_EXTENSIONS" in os.environ:
-        set_array_api_strict_flags(
-            enabled_extensions=os.environ["ARRAY_API_STRICT_ENABLED_EXTENSIONS"].split(",")
-        )
+        enabled_extensions = os.environ["ARRAY_API_STRICT_ENABLED_EXTENSIONS"].split(",")
+        if enabled_extensions == [""]:
+            enabled_extensions = []
+        kwargs["enabled_extensions"] = enabled_extensions
+
+    # Called unconditionally because it is needed at first import to add
+    # linalg and fft to __all__
+    set_array_api_strict_flags(**kwargs)
 
 set_flags_from_environment()
+
+# Decorators
+
+def requires_api_version(version):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if version > API_VERSION:
+                raise RuntimeError(
+                    f"The function {func.__name__} requires API version {version} or later, "
+                    f"but the current API version for array-api-strict is {API_VERSION}"
+                )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 def requires_data_dependent_shapes(func):
     @functools.wraps(func)
