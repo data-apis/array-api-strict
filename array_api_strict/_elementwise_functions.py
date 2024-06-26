@@ -328,6 +328,9 @@ def copysign(x1: Array, x2: Array, /) -> Array:
     """
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in copysign")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.copysign(x1._array, x2._array))
 
 def cos(x: Array, /) -> Array:
