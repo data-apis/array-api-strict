@@ -423,6 +423,9 @@ def test_array_namespace():
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
 
+def test_no_iter():
+    pytest.raises(TypeError, lambda: iter(ones(3)))
+    pytest.raises(TypeError, lambda: iter(ones((3, 3))))
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
 def dlpack_2023_12(api_version):

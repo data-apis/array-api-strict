@@ -673,6 +673,15 @@ class Array:
         res = self._array.__invert__()
         return self.__class__._new(res)
 
+    def __iter__(self: Array, /):
+        """
+        Performs the operation __iter__.
+        """
+        # Manually disable iteration, since __getitem__ raises IndexError on
+        # things like ones((3, 3))[0], which causes list(ones((3, 3))) to give
+        # [].
+        raise TypeError("array iteration is not allowed in array-api-strict")
+
     def __le__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __le__.
