@@ -59,54 +59,59 @@ def set_array_api_strict_flags(
     Flags are global variables that enable or disable array-api-strict
     behaviors.
 
+    The flags can also be changed by setting :ref:`environment variables <environment-variables>`.
+
     .. note::
 
        This function is **not** part of the array API standard. It only exists
        in array-api-strict.
 
-    - `api_version`: The version of the standard to use. Supported
-      versions are: ``{supported_versions}``. The default version number is
-      ``{default_version!r}``.
+    Parameters
+    ----------
+    api_version : str, optional
+        The version of the standard to use. Supported versions are:
+        ``{supported_versions}``. The default version number is
+        ``{default_version!r}``.
 
-      Note that 2021.12 is supported, but currently gives the same thing as
-      2022.12 (except that the fft extension will be disabled).
+        Note that 2021.12 is supported, but currently gives the same thing as
+        2022.12 (except that the fft extension will be disabled).
 
-      2023.12 support is experimental. Some features in 2023.12 may still be
-      missing, and it hasn't been fully tested.
+        2023.12 support is experimental. Some features in 2023.12 may still be
+        missing, and it hasn't been fully tested. A future version of
+        array-api-strict will change the default version to 2023.12.
 
-    - `boolean_indexing`: Whether indexing by a boolean array is supported.
-      Note that although boolean array indexing does result in data-dependent
-      shapes, this flag is independent of the `data_dependent_shapes` flag
-      (see below).
+    boolean_indexing : bool, optional
+        Whether indexing by a boolean array is supported.
+        Note that although boolean array indexing does result in
+        data-dependent shapes, this flag is independent of the
+        `data_dependent_shapes` flag (see below).
 
-    - `data_dependent_shapes`: Whether data-dependent shapes are enabled in
-      array-api-strict.
+    data_dependent_shapes : bool, optional
+        Whether data-dependent shapes are enabled in array-api-strict.
+        This flag is enabled by default. Array libraries that use computation
+        graphs may not be able to support functions whose output shapes depend
+        on the input data.
 
-      This flag is enabled by default. Array libraries that use computation
-      graphs may not be able to support functions whose output shapes depend
-      on the input data.
+        The functions that make use of data-dependent shapes, and are therefore
+        disabled by setting this flag to False are
 
-      The functions that make use of data-dependent shapes, and are therefore
-      disabled by setting this flag to False are
+        - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
+        - `nonzero()`
+        - `repeat()` when the `repeats` argument is an array (requires the
+          2023.12 version of the standard)
 
-      - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
-      - `nonzero()`
-      - `repeat()` when the `repeats` argument is an array (requires 2023.12
-        version of the standard)
+        Note that while boolean indexing is also data-dependent, it is
+        controlled by a separate `boolean_indexing` flag (see above).
 
-      Note that while boolean indexing is also data-dependent, it is
-      controlled by a separate `boolean_indexing` flag (see above).
+        See
+        https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html
+        for more details.
 
-      See
-      https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html
-      for more details.
+    enabled_extensions : list of str, optional
+        A list of extensions that are enabled in array-api-strict. The default
+        is ``{default_extensions}``. Note that some extensions require a
+        minimum version of the standard.
 
-    - `enabled_extensions`: A list of extensions that are enabled in
-      array-api-strict. The default is ``{default_extensions}``. Note that
-      some extensions require a minimum version of the standard.
-
-    The flags can also be changed by setting :ref:`environment variables
-    <environment-variables>`.
 
     Examples
     --------

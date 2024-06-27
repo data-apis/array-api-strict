@@ -20,7 +20,7 @@ array-api-strict currently supports the
 version of the standard. Experimental
 [2023.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
 support is implemented, [but must be enabled with a
-flag](set_array_api_strict_flags).
+flag](array-api-strict-flags).
 
 ## Install
 
@@ -37,7 +37,7 @@ and [Conda-forge](https://anaconda.org/conda-forge/array-api-strict)
 conda install --channel conda-forge array-api-strict
 ```
 
-array-api-strict supports NumPy 1.26 and (the upcoming) NumPy 2.0.
+array-api-strict supports NumPy 1.26 and NumPy 2.0.
 
 ## Rationale
 
@@ -109,7 +109,7 @@ strict/minimal:
   like `sin` will accept integer array inputs, but the [standard only requires
   them to accept floating-point
   inputs](https://data-apis.org/array-api/latest/API_specification/generated/array_api.sin.html#array_api.sin),
-  so in array-api-strict, `sin(integer_array)` will raise an exception.
+  so in array-api-strict, `sin(asarray(0))` will raise an exception.
 
 - The
   [indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html)
@@ -130,6 +130,12 @@ strict/minimal:
   supported. Arrays should be created with one of the [array creation
   functions](https://data-apis.org/array-api/latest/API_specification/creation_functions.html)
   such as `asarray`.
+
+- Optional behavior such as [optional
+  extensions](https://data-apis.org/array-api/latest/extensions/index.html),
+  functions that use data-dependent shapes, and boolean indexing are enabled
+  by default but can disabled with the [array-api-strict
+  flags](array-api-strict-flags).
 
 ## Caveats
 
@@ -170,23 +176,13 @@ issue, but this hasn't necessarily been tested thoroughly.
    this deviation may be tested with type checking. This [behavior may improve
    in the future](https://github.com/data-apis/array-api-strict/issues/6).
 
-5. There are some behaviors in the standard that are not required to be
-   implemented by libraries that cannot support [data dependent
-   shapes](https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html).
-   This includes [the `unique_*`
-   functions](https://data-apis.org/array-api/latest/API_specification/set_functions.html),
-   [boolean array
-   indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html#boolean-array-indexing),
-   and the
-   [`nonzero`](https://data-apis.org/array-api/latest/API_specification/generated/array_api.nonzero.html)
-   function. array-api-strict currently implements all of these. In the
-   future, [there may be a way to disable them](https://github.com/data-apis/array-api-strict/issues/7).
-
-6. array-api-strict currently uses the 2022.12 version of the array API
-   standard. Support for 2023.12 is implemented but is still experimental and
-   not fully tested. It can be enabled with
-   [`array_api_strict.set_array_api_strict_flags(api_version='2023.12')`](set_array_api_strict_flags).
-
+5. array-api-strict currently uses the 2022.12 version of the array API
+   standard by default. Support for 2023.12 is implemented but is still
+   experimental and not fully tested. It can be enabled with
+   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
+   <array_api_strict.set_array_api_strict_flags>` or by setting the
+   environment variable {envvar}`ARRAY_API_STRICT_API_VERSION=2023.12
+   <ARRAY_API_STRICT_API_VERSION>`.
 
 (numpy.array_api)=
 ## Relationship to `numpy.array_api`
