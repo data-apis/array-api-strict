@@ -271,7 +271,7 @@ array-api-compat (<a class="reference external" href="https://data-apis.org/arra
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.</p>
 <section id="module-array_api_strict._flags">
-<span id="array-api-strict-flags"></span><h2>Array API Strict Flags<a class="headerlink" href="#module-array_api_strict._flags" title="Link to this heading">¶</a></h2>
+<span id="id1"></span><span id="array-api-strict-flags"></span><h2>Array API Strict Flags<a class="headerlink" href="#module-array_api_strict._flags" title="Link to this heading">¶</a></h2>
 <p>These functions configure global flags that allow array-api-strict to be
 used in different “modes”. These modes include</p>
 <ul class="simple">
@@ -290,6 +290,13 @@ library will only support one particular configuration of these flags.</p>
 <p class="admonition-title">Note</p>
 <p>This function is <strong>not</strong> part of the array API standard. It only exists
 in array-api-strict.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/inspection.html">inspection API</a>
+provides a portable way to access most of this information. However, it
+is only present in standard versions starting with 2023.12. The array
+API version can be accessed portably using <code class="code docutils literal notranslate"><span class="pre">xp.__array_api_version__</span></code>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -326,34 +333,39 @@ in array-api-strict.</p>
 <dd><p>Set the array-api-strict flags to the specified values.</p>
 <p>Flags are global variables that enable or disable array-api-strict
 behaviors.</p>
+<p>The flags can also be changed by setting <a class="reference internal" href="#environment-variables"><span class="std std-ref">environment variables</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This function is <strong>not</strong> part of the array API standard. It only exists
 in array-api-strict.</p>
 </div>
-<ul>
-<li><p><code class="code docutils literal notranslate"><span class="pre">api_version</span></code>: The version of the standard to use. Supported
-versions are: <code class="docutils literal notranslate"><span class="pre">('2021.12',</span> <span class="pre">'2022.12')</span></code>. The default version number is
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>api_version</strong> (<em>str, optional</em>) – The version of the standard to use. Supported versions are:
+<code class="docutils literal notranslate"><span class="pre">('2021.12',</span> <span class="pre">'2022.12',</span> <span class="pre">'2023.12')</span></code>. The default version number is
 <code class="docutils literal notranslate"><span class="pre">'2022.12'</span></code>.</p>
 <p>Note that 2021.12 is supported, but currently gives the same thing as
 2022.12 (except that the fft extension will be disabled).</p>
+<p>2023.12 support is experimental. Some features in 2023.12 may still be
+missing, and it hasn’t been fully tested. A future version of
+array-api-strict will change the default version to 2023.12.</p>
 </li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">boolean_indexing</span></code>: Whether indexing by a boolean array is supported.
-Note that although boolean array indexing does result in data-dependent
-shapes, this flag is independent of the <code class="code docutils literal notranslate"><span class="pre">data_dependent_shapes</span></code> flag
-(see below).</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">data_dependent_shapes</span></code>: Whether data-dependent shapes are enabled in
-array-api-strict.</p>
-<p>This flag is enabled by default. Array libraries that use computation
+<li><p><strong>boolean_indexing</strong> (<em>bool, optional</em>) – Whether indexing by a boolean array is supported.
+Note that although boolean array indexing does result in
+data-dependent shapes, this flag is independent of the
+<code class="code docutils literal notranslate"><span class="pre">data_dependent_shapes</span></code> flag (see below).</p></li>
+<li><p><strong>data_dependent_shapes</strong> (<em>bool, optional</em>) – Whether data-dependent shapes are enabled in array-api-strict.
+This flag is enabled by default. Array libraries that use computation
 graphs may not be able to support functions whose output shapes depend
 on the input data.</p>
 <p>The functions that make use of data-dependent shapes, and are therefore
 disabled by setting this flag to False are</p>
 <ul class="simple">
-<li><p><code class="code docutils literal notranslate"><span class="pre">unique_all</span></code>, <code class="code docutils literal notranslate"><span class="pre">unique_counts</span></code>, <code class="code docutils literal notranslate"><span class="pre">unique_inverse</span></code>, and <code class="code docutils literal notranslate"><span class="pre">unique_values</span></code>.</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">nonzero</span></code></p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">repeat</span></code> when the <code class="code docutils literal notranslate"><span class="pre">repeats</span></code> argument is an array (requires 2023.12
-version of the standard)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">unique_all()</span></code>, <code class="code docutils literal notranslate"><span class="pre">unique_counts()</span></code>, <code class="code docutils literal notranslate"><span class="pre">unique_inverse()</span></code>, and <code class="code docutils literal notranslate"><span class="pre">unique_values()</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">nonzero()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">repeat()</span></code> when the <code class="code docutils literal notranslate"><span class="pre">repeats</span></code> argument is an array (requires the
+2023.12 version of the standard)</p></li>
 </ul>
 <p>Note that while boolean indexing is also data-dependent, it is
 controlled by a separate <code class="code docutils literal notranslate"><span class="pre">boolean_indexing</span></code> flag (see above).</p>
@@ -361,11 +373,12 @@ controlled by a separate <code class="code docutils literal notranslate"><span c
 <a class="reference external" href="https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html">https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html</a>
 for more details.</p>
 </li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">enabled_extensions</span></code>: A list of extensions that are enabled in
-array-api-strict. The default is <code class="docutils literal notranslate"><span class="pre">('linalg',</span> <span class="pre">'fft')</span></code>. Note that
-some extensions require a minimum version of the standard.</p></li>
+<li><p><strong>enabled_extensions</strong> (<em>list of str, optional</em>) – A list of extensions that are enabled in array-api-strict. The default
+is <code class="docutils literal notranslate"><span class="pre">('linalg',</span> <span class="pre">'fft')</span></code>. Note that some extensions require a
+minimum version of the standard.</p></li>
 </ul>
-<p>The flags can also be changed by setting <a class="reference internal" href="#environment-variables"><span class="std std-ref">environment variables</span></a>.</p>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">array_api_strict</span> <span class="kn">import</span> <span class="n">set_array_api_strict_flags</span>
 </pre></div>
@@ -451,7 +464,7 @@ description of the available flags.</p>
 </dd></dl>
 
 <section id="environment-variables">
-<span id="id1"></span><h3>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h3>
+<span id="id2"></span><h3>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h3>
 <p>Flags can also be set with environment variables.
 <a class="reference internal" href="#array_api_strict.set_array_api_strict_flags" title="array_api_strict.set_array_api_strict_flags"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_array_api_strict_flags()</span></code></a> will override the values set by environment
 variables. Note that the environment variables will only change the defaults

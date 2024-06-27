@@ -270,9 +270,12 @@ libraries. Consuming library code should use the
 <a class="reference external" href="https://data-apis.org/array-api-compat/">array-api-compat</a> package to
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.</p>
-<p>array-api-strict currently supports the 2022.12 version of the standard.
-2023.12 support is planned and is tracked by <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/25">this
-issue</a>.</p>
+<p>array-api-strict currently supports the
+<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2022-12">2022.12</a>
+version of the standard. Experimental
+<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2023-12">2023.12</a>
+support is implemented, <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">but must be enabled with a
+flag</span></a>.</p>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">array-api-strict</span></code> is available on both
@@ -284,7 +287,7 @@ issue</a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">--</span><span class="n">channel</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">array</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">strict</span>
 </pre></div>
 </div>
-<p>array-api-strict supports NumPy 1.26 and (the upcoming) NumPy 2.0.</p>
+<p>array-api-strict supports NumPy 1.26 and NumPy 2.0.</p>
 </section>
 <section id="rationale">
 <h2>Rationale<a class="headerlink" href="#rationale" title="Link to this heading">¶</a></h2>
@@ -345,7 +348,7 @@ aspects of the library. For example, in NumPy, most transcendental functions
 like <code class="docutils literal notranslate"><span class="pre">sin</span></code> will accept integer array inputs, but the <a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/generated/array_api.sin.html#array_api.sin">standard only requires
 them to accept floating-point
 inputs</a>,
-so in array-api-strict, <code class="docutils literal notranslate"><span class="pre">sin(integer_array)</span></code> will raise an exception.</p></li>
+so in array-api-strict, <code class="docutils literal notranslate"><span class="pre">sin(asarray(0))</span></code> will raise an exception.</p></li>
 <li><p>The
 <a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/indexing.html">indexing</a>
 semantics required by the standard are limited compared to those implemented
@@ -362,6 +365,11 @@ Subclassing or otherwise trying to directly initialize this object is not
 supported. Arrays should be created with one of the <a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/creation_functions.html">array creation
 functions</a>
 such as <code class="docutils literal notranslate"><span class="pre">asarray</span></code>.</p></li>
+<li><p>Optional behavior such as <a class="reference external" href="https://data-apis.org/array-api/latest/extensions/index.html">optional
+extensions</a>,
+functions that use data-dependent shapes, and boolean indexing are enabled
+by default but can disabled with the <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">array-api-strict
+flags</span></a>.</p></li>
 </ul>
 </section>
 <section id="caveats">
@@ -399,20 +407,11 @@ you may get <code class="docutils literal notranslate"><span class="pre">Attribu
 signatures have type annotations (based on those from the standard), so
 this deviation may be tested with type checking. This <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/6">behavior may improve
 in the future</a>.</p></li>
-<li><p>There are some behaviors in the standard that are not required to be
-implemented by libraries that cannot support <a class="reference external" href="https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html">data dependent
-shapes</a>.
-This includes <a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/set_functions.html">the <code class="docutils literal notranslate"><span class="pre">unique_*</span></code>
-functions</a>,
-<a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/indexing.html#boolean-array-indexing">boolean array
-indexing</a>,
-and the
-<a class="reference external" href="https://data-apis.org/array-api/latest/API_specification/generated/array_api.nonzero.html"><code class="docutils literal notranslate"><span class="pre">nonzero</span></code></a>
-function. array-api-strict currently implements all of these. In the
-future, <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/7">there may be a way to disable them</a>.</p></li>
-<li><p>array-api-strict currently only supports the 2022.12 version of the array
-API standard. <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/25">Support for 2023.12 is
-planned</a>.</p></li>
+<li><p>array-api-strict currently uses the 2022.12 version of the array API
+standard by default. Support for 2023.12 is implemented but is still
+experimental and not fully tested. It can be enabled with
+<a class="reference internal" href="api.html#array_api_strict.set_array_api_strict_flags" title="array_api_strict.set_array_api_strict_flags"><code class="xref py py-func docutils literal notranslate"><span class="pre">array_api_strict.set_array_api_strict_flags(api_version='2023.12')</span></code></a> or by setting the
+environment variable <span class="target" id="index-0"></span><a class="reference internal" href="api.html#envvar-ARRAY_API_STRICT_API_VERSION"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">ARRAY_API_STRICT_API_VERSION=2023.12</span></code></a>.</p></li>
 </ol>
 </section>
 <section id="relationship-to-numpy-array-api">
