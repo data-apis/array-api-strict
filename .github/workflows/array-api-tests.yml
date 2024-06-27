@@ -42,7 +42,7 @@ jobs:
         fi
         python -m pip install ${GITHUB_WORKSPACE}/array-api-strict
         python -m pip install -r ${GITHUB_WORKSPACE}/array-api-tests/requirements.txt
-        python -m pip install hypothesis==6.97.1
+        python -m pip install hypothesis
     - name: Run the array API testsuite
       env:
         ARRAY_API_TESTS_MODULE: array_api_strict
