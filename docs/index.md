@@ -37,7 +37,7 @@ and [Conda-forge](https://anaconda.org/conda-forge/array-api-strict)
 conda install --channel conda-forge array-api-strict
 ```
 
-array-api-strict supports NumPy 1.26 and (the upcoming) NumPy 2.0.
+array-api-strict supports NumPy 1.26 and NumPy 2.0.
 
 ## Rationale
 
