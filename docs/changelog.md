@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.0 (2024-06-27)
+
+### Major Changes
+
+- array-api-strict has a new set of [flags](array-api-strict-flags) that can
+  be used to dynamically enable or disable features in array-api-strict. These
+  flags allow you to change the supported array API version, enable or disable
+  [extensions](https://data-apis.org/array-api/latest/extensions/index.html),
+  enable or disable features that rely on data-dependent shapes, and enable or
+  disable boolean indexing. Future versions may add additional flags to allow
+  changing other optional or varying behavior in the standard.
+
+- Added experimental support for the
+  [2023.12](https://data-apis.org/array-api/2023.12/changelog.html#v2023-12)
+  version of the array API standard. The default version is still 2022.12, but
+  the version can be changed to 2023.12 using the aforementioned flags, either
+  by calling
+  {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
+  <array_api_strict.set_array_api_strict_flags>` or setting the environment
+  variable {envvar}`ARRAY_API_STRICT_API_VERSION=2023.12
+  <ARRAY_API_STRICT_API_VERSION>`.
+
+### Minor Changes
+
+- Calling `iter()` on an array now correctly raises `TypeError`.
+
+- Add some missing names to `__all__`.
+
 ## 1.1.1 (2024-04-29)
 
 - Fix the `api_version` argument to `__array_namespace__` to accept
