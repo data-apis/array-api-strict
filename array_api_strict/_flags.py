@@ -81,8 +81,8 @@ def set_array_api_strict_flags(
         array-api-strict will change the default version to 2023.12.
 
     boolean_indexing : bool, optional
-        Whether indexing by a boolean array is supported.
-        Note that although boolean array indexing does result in
+        Whether indexing by a boolean array is supported. This flag is enabled
+        by default. Note that although boolean array indexing does result in
         data-dependent shapes, this flag is independent of the
         `data_dependent_shapes` flag (see below).
 
@@ -275,6 +275,19 @@ class ArrayAPIStrictFlags:
 
     See :func:`set_array_api_strict_flags` for a
     description of the available flags.
+
+    Examples
+    --------
+
+    >>> from array_api_strict import ArrayAPIStrictFlags, get_array_api_strict_flags
+    >>> with ArrayAPIStrictFlags(api_version="2022.12", boolean_indexing=False):
+    ...     flags = get_array_api_strict_flags()
+    >>> flags
+    {'api_version': '2022.12',
+     'boolean_indexing': False,
+     'data_dependent_shapes': True,
+     'enabled_extensions': ('linalg', 'fft')
+    }
 
     See Also
     --------
