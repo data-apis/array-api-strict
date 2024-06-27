@@ -3,6 +3,8 @@ API Reference
 
 .. automodule:: array_api_strict
 
+.. _array-api-strict-flags:
+
 Array API Strict Flags
 ----------------------
 
@@ -12,7 +14,6 @@ Array API Strict Flags
 
 .. autofunction:: get_array_api_strict_flags
 
-.. _set_array_api_strict_flags:
 .. autofunction:: set_array_api_strict_flags
 .. autofunction:: reset_array_api_strict_flags
 .. autoclass:: ArrayAPIStrictFlags

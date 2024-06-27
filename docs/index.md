@@ -20,7 +20,7 @@ array-api-strict currently supports the
 version of the standard. Experimental
 [2023.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
 support is implemented, [but must be enabled with a
-flag](set_array_api_strict_flags).
+flag](array-api-strict-flags).
 
 ## Install
 
@@ -185,7 +185,7 @@ issue, but this hasn't necessarily been tested thoroughly.
 6. array-api-strict currently uses the 2022.12 version of the array API
    standard. Support for 2023.12 is implemented but is still experimental and
    not fully tested. It can be enabled with
-   [`array_api_strict.set_array_api_strict_flags(api_version='2023.12')`](set_array_api_strict_flags).
+   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12') <array_api_strict.set_array_api_strict_flags>`.
 
 
 (numpy.array_api)=
