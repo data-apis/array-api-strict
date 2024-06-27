@@ -75,7 +75,8 @@ def set_array_api_strict_flags(
         2022.12 (except that the fft extension will be disabled).
 
         2023.12 support is experimental. Some features in 2023.12 may still be
-        missing, and it hasn't been fully tested.
+        missing, and it hasn't been fully tested. A future version of
+        array-api-strict will change the default version to 2023.12.
 
     boolean_indexing : bool, optional
         Whether indexing by a boolean array is supported.
