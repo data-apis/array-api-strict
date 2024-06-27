@@ -109,7 +109,7 @@ strict/minimal:
   like `sin` will accept integer array inputs, but the [standard only requires
   them to accept floating-point
   inputs](https://data-apis.org/array-api/latest/API_specification/generated/array_api.sin.html#array_api.sin),
-  so in array-api-strict, `sin(integer_array)` will raise an exception.
+  so in array-api-strict, `sin(asarray(0))` will raise an exception.
 
 - The
   [indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html)
