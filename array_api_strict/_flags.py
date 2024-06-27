@@ -59,6 +59,8 @@ def set_array_api_strict_flags(
     Flags are global variables that enable or disable array-api-strict
     behaviors.
 
+    The flags can also be changed by setting :ref:`environment variables <environment-variables>`.
+
     .. note::
 
        This function is **not** part of the array API standard. It only exists
@@ -95,8 +97,8 @@ def set_array_api_strict_flags(
 
         - `unique_all()`, `unique_counts()`, `unique_inverse()`, and `unique_values()`.
         - `nonzero()`
-        - `repeat()` when the `repeats` argument is an array (requires 2023.12
-          version of the standard)
+        - `repeat()` when the `repeats` argument is an array (requires the
+          2023.12 version of the standard)
 
         Note that while boolean indexing is also data-dependent, it is
         controlled by a separate `boolean_indexing` flag (see above).
@@ -110,8 +112,6 @@ def set_array_api_strict_flags(
         is ``{default_extensions}``. Note that some extensions require a
         minimum version of the standard.
 
-    The flags can also be changed by setting :ref:`environment variables
-    <environment-variables>`.
 
     Examples
     --------
