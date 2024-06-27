@@ -10,7 +10,7 @@
   [extensions](https://data-apis.org/array-api/latest/extensions/index.html),
   enable or disable features that rely on data-dependent shapes, and enable or
   disable boolean indexing. Future versions may add additional flags to allow
-  changing other optional or varying behavior in the standard.
+  changing other optional or varying behaviors in the standard.
 
 - Added experimental support for the
   [2023.12](https://data-apis.org/array-api/2023.12/changelog.html#v2023-12)
@@ -20,7 +20,8 @@
   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
   <array_api_strict.set_array_api_strict_flags>` or setting the environment
   variable {envvar}`ARRAY_API_STRICT_API_VERSION=2023.12
-  <ARRAY_API_STRICT_API_VERSION>`.
+  <ARRAY_API_STRICT_API_VERSION>`. A future version of array-api-strict will
+  change the default version to 2023.12.
 
 ### Minor Changes
 
