@@ -131,6 +131,12 @@ strict/minimal:
   functions](https://data-apis.org/array-api/latest/API_specification/creation_functions.html)
   such as `asarray`.
 
+- Optional behavior such as [optional
+  extensions](https://data-apis.org/array-api/latest/extensions/index.html),
+  functions that use data-dependent shapes, and boolean indexing are enabled
+  by default but can disabled with the [array-api-strict
+  flags](array-api-strict-flags).
+
 ## Caveats
 
 array-api-strict is a thin pure Python wrapper around NumPy. NumPy 2.0 fully
@@ -170,11 +176,7 @@ issue, but this hasn't necessarily been tested thoroughly.
    this deviation may be tested with type checking. This [behavior may improve
    in the future](https://github.com/data-apis/array-api-strict/issues/6).
 
-5. By default, all extensions in the standard are enabled, as well as optional
-   behaviors such as data-dependent shapes and boolean indexing. These can be
-   disabled with the [array-api-strict flags](array-api-strict-flags).
-
-6. array-api-strict currently uses the 2022.12 version of the array API
+5. array-api-strict currently uses the 2022.12 version of the array API
    standard by default. Support for 2023.12 is implemented but is still
    experimental and not fully tested. It can be enabled with
    {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
