@@ -170,23 +170,17 @@ issue, but this hasn't necessarily been tested thoroughly.
    this deviation may be tested with type checking. This [behavior may improve
    in the future](https://github.com/data-apis/array-api-strict/issues/6).
 
-5. There are some behaviors in the standard that are not required to be
-   implemented by libraries that cannot support [data dependent
-   shapes](https://data-apis.org/array-api/latest/design_topics/data_dependent_output_shapes.html).
-   This includes [the `unique_*`
-   functions](https://data-apis.org/array-api/latest/API_specification/set_functions.html),
-   [boolean array
-   indexing](https://data-apis.org/array-api/latest/API_specification/indexing.html#boolean-array-indexing),
-   and the
-   [`nonzero`](https://data-apis.org/array-api/latest/API_specification/generated/array_api.nonzero.html)
-   function. array-api-strict currently implements all of these. In the
-   future, [there may be a way to disable them](https://github.com/data-apis/array-api-strict/issues/7).
+5. By default, all extensions in the standard are enabled, as well as optional
+   behaviors such as data-dependent shapes and boolean indexing. These can be
+   disabled with the [array-api-strict flags](array-api-strict-flags).
 
 6. array-api-strict currently uses the 2022.12 version of the array API
-   standard. Support for 2023.12 is implemented but is still experimental and
-   not fully tested. It can be enabled with
-   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12') <array_api_strict.set_array_api_strict_flags>`.
-
+   standard by default. Support for 2023.12 is implemented but is still
+   experimental and not fully tested. It can be enabled with
+   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
+   <array_api_strict.set_array_api_strict_flags>` or by setting the
+   environment variable {envvar}`ARRAY_API_STRICT_API_VERSION=2023.12
+   <ARRAY_API_STRICT_API_VERSION>`.
 
 (numpy.array_api)=
 ## Relationship to `numpy.array_api`
