@@ -351,8 +351,8 @@ in array-api-strict.</p>
 missing, and it hasn’t been fully tested. A future version of
 array-api-strict will change the default version to 2023.12.</p>
 </li>
-<li><p><strong>boolean_indexing</strong> (<em>bool, optional</em>) – Whether indexing by a boolean array is supported.
-Note that although boolean array indexing does result in
+<li><p><strong>boolean_indexing</strong> (<em>bool, optional</em>) – Whether indexing by a boolean array is supported. This flag is enabled
+by default. Note that although boolean array indexing does result in
 data-dependent shapes, this flag is independent of the
 <code class="code docutils literal notranslate"><span class="pre">data_dependent_shapes</span></code> flag (see below).</p></li>
 <li><p><strong>data_dependent_shapes</strong> (<em>bool, optional</em>) – Whether data-dependent shapes are enabled in array-api-strict.
@@ -450,6 +450,18 @@ in array-api-strict.</p>
 </div>
 <p>See <a class="reference internal" href="#array_api_strict.set_array_api_strict_flags" title="array_api_strict.set_array_api_strict_flags"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_array_api_strict_flags()</span></code></a> for a
 description of the available flags.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">array_api_strict</span> <span class="kn">import</span> <span class="n">ArrayAPIStrictFlags</span><span class="p">,</span> <span class="n">get_array_api_strict_flags</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">ArrayAPIStrictFlags</span><span class="p">(</span><span class="n">api_version</span><span class="o">=</span><span class="s2">&quot;2022.12&quot;</span><span class="p">,</span> <span class="n">boolean_indexing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">flags</span> <span class="o">=</span> <span class="n">get_array_api_strict_flags</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flags</span>
+<span class="go">{&#39;api_version&#39;: &#39;2022.12&#39;,</span>
+<span class="go"> &#39;boolean_indexing&#39;: False,</span>
+<span class="go"> &#39;data_dependent_shapes&#39;: True,</span>
+<span class="go"> &#39;enabled_extensions&#39;: (&#39;linalg&#39;, &#39;fft&#39;)</span>
+<span class="go">}</span>
+</pre></div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
