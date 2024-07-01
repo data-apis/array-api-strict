@@ -1,5 +1,14 @@
 # Changelog
 
+### 2.0.1 (2024-07-01)
+
+## Minor Changes
+
+- Re-allow iteration on 1-D arrays. A change from 2.0 fixed iter() raising on
+  n-D arrays but also made 1-D arrays raise. The standard does not explicitly
+  disallow iteration on 1-D arrays, and the default Python `__iter__`
+  implementation allows it to work, so for now, it is kept intact as working.
+
 ## 2.0 (2024-06-27)
 
 ### Major Changes
