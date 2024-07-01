@@ -677,10 +677,16 @@ class Array:
         """
         Performs the operation __iter__.
         """
-        # Manually disable iteration, since __getitem__ raises IndexError on
-        # things like ones((3, 3))[0], which causes list(ones((3, 3))) to give
-        # [].
-        raise TypeError("array iteration is not allowed in array-api-strict")
+        # Manually disable iteration on higher dimensional arrays, since
+        # __getitem__ raises IndexError on things like ones((3, 3))[0], which
+        # causes list(ones((3, 3))) to give [].
+        if self.ndim > 1:
+            raise TypeError("array iteration is not allowed in array-api-strict")
+        # Allow iteration for 1-D arrays. The array API doesn't strictly
+        # define __iter__, but it doesn't disallow it. The default Python
+        # behavior is to implement iter as a[0], a[1], ... when __getitem__ is
+        # implemented, which implies iteration on 1-D arrays.
+        return (Array._new(i) for i in self._array)
 
     def __le__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
