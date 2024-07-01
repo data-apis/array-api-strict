@@ -1,4 +1,5 @@
 import operator
+from builtins import all as all_
 
 from numpy.testing import assert_raises, suppress_warnings
 import numpy as np
@@ -21,6 +22,7 @@ from .._dtypes import (
     int32,
     int64,
     uint64,
+    float64,
     bool as bool_,
 )
 from .._flags import set_array_api_strict_flags
@@ -423,8 +425,12 @@ def test_array_namespace():
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
 
-def test_no_iter():
-    pytest.raises(TypeError, lambda: iter(ones(3)))
+def test_iter():
+    pytest.raises(TypeError, lambda: iter(asarray(3)))
+    assert list(ones(3)) == [asarray(1.), asarray(1.), asarray(1.)]
+    assert all_(isinstance(a, Array) for a in iter(ones(3)))
+    assert all_(a.shape == () for a in iter(ones(3)))
+    assert all_(a.dtype == float64 for a in iter(ones(3)))
     pytest.raises(TypeError, lambda: iter(ones((3, 3))))
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
