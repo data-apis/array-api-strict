@@ -1,7 +1,7 @@
 import operator
 from builtins import all as all_
 
-from numpy.testing import assert_raises, suppress_warnings
+import numpy.testing
 import numpy as np
 import pytest
 
@@ -28,6 +28,10 @@ from .._dtypes import (
 from .._flags import set_array_api_strict_flags
 
 import array_api_strict
+
+def assert_raises(exception, func, msg=None):
+    with numpy.testing.assert_raises(exception, msg=msg):
+        func()
 
 def test_validate_index():
     # The indexing tests in the official array API test suite test that the
@@ -90,7 +94,7 @@ def test_validate_index():
 
 def test_operators():
     # For every operator, we test that it works for the required type
-    # combinations and raises TypeError otherwise
+    # combinations and assert_raises TypeError otherwise
     binary_op_dtypes = {
         "__add__": "numeric",
         "__and__": "integer_or_boolean",
@@ -111,6 +115,7 @@ def test_operators():
         "__truediv__": "floating",
         "__xor__": "integer_or_boolean",
     }
+    comparison_ops = ["__eq__", "__ne__", "__le__", "__ge__", "__lt__", "__gt__"]
     # Recompute each time because of in-place ops
     def _array_vals():
         for d in _integer_dtypes:
@@ -124,7 +129,7 @@ def test_operators():
     BIG_INT = int(1e30)
     for op, dtypes in binary_op_dtypes.items():
         ops = [op]
-        if op not in ["__eq__", "__ne__", "__le__", "__ge__", "__lt__", "__gt__"]:
+        if op not in comparison_ops:
             rop = "__r" + op[2:]
             iop = "__i" + op[2:]
             ops += [rop, iop]
@@ -155,16 +160,16 @@ def test_operators():
                              or a.dtype in _complex_floating_dtypes and type(s) in [complex, float, int]
                         )):
                         if a.dtype in _integer_dtypes and s == BIG_INT:
-                            assert_raises(OverflowError, lambda: getattr(a, _op)(s))
+                            assert_raises(OverflowError, lambda: getattr(a, _op)(s), _op)
                         else:
                             # Only test for no error
-                            with suppress_warnings() as sup:
+                            with numpy.testing.suppress_warnings() as sup:
                                 # ignore warnings from pow(BIG_INT)
                                 sup.filter(RuntimeWarning,
                                            "invalid value encountered in power")
                                 getattr(a, _op)(s)
                     else:
-                        assert_raises(TypeError, lambda: getattr(a, _op)(s))
+                        assert_raises(TypeError, lambda: getattr(a, _op)(s), _op)
 
                 # Test array op array.
                 for _op in ops:
@@ -173,25 +178,25 @@ def test_operators():
                             # See the promotion table in NEP 47 or the array
                             # API spec page on type promotion. Mixed kind
                             # promotion is not defined.
-                            if (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
-                                or y.dtype == uint64 and x.dtype in [int8, int16, int32, int64]
-                                or x.dtype in _integer_dtypes and y.dtype not in _integer_dtypes
-                                or y.dtype in _integer_dtypes and x.dtype not in _integer_dtypes
-                                or x.dtype in _boolean_dtypes and y.dtype not in _boolean_dtypes
-                                or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
-                                or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
-                                or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
-                                ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                            if (op not in comparison_ops and
+                                (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
+                                 or y.dtype == uint64 and x.dtype in [int8, int16, int32, int64]
+                                 or x.dtype in _integer_dtypes and y.dtype not in _integer_dtypes
+                                 or y.dtype in _integer_dtypes and x.dtype not in _integer_dtypes
+                                 or x.dtype in _boolean_dtypes and y.dtype not in _boolean_dtypes
+                                 or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
+                                 or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
+                                 or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
+                                 )):
+                                assert_raises(TypeError, lambda: getattr(x, _op)(y), _op)
                             # Ensure in-place operators only promote to the same dtype as the left operand.
                             elif (
                                 _op.startswith("__i")
                                 and result_type(x.dtype, y.dtype) != x.dtype
                             ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                                assert_raises(TypeError, lambda: getattr(x, _op)(y), _op)
                             # Ensure only those dtypes that are required for every operator are allowed.
-                            elif (dtypes == "all" and (x.dtype in _boolean_dtypes and y.dtype in _boolean_dtypes
-                                                      or x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
+                            elif (dtypes == "all"
                                 or (dtypes == "real numeric" and x.dtype in _real_numeric_dtypes and y.dtype in _real_numeric_dtypes)
                                 or (dtypes == "numeric" and x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
                                 or dtypes == "integer" and x.dtype in _integer_dtypes and y.dtype in _integer_dtypes
@@ -202,7 +207,7 @@ def test_operators():
                             ):
                                 getattr(x, _op)(y)
                             else:
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                                assert_raises(TypeError, lambda: getattr(x, _op)(y), (x, _op, y))
 
     unary_op_dtypes = {
         "__abs__": "numeric",
@@ -221,7 +226,7 @@ def test_operators():
                 # Only test for no error
                 getattr(a, op)()
             else:
-                assert_raises(TypeError, lambda: getattr(a, op)())
+                assert_raises(TypeError, lambda: getattr(a, op)(), _op)
 
     # Finally, matmul() must be tested separately, because it works a bit
     # different from the other operations.
@@ -240,9 +245,9 @@ def test_operators():
                     or type(s) == int and a.dtype in _integer_dtypes):
                     # Type promotion is valid, but @ is not allowed on 0-D
                     # inputs, so the error is a ValueError
-                    assert_raises(ValueError, lambda: getattr(a, _op)(s))
+                    assert_raises(ValueError, lambda: getattr(a, _op)(s), _op)
                 else:
-                    assert_raises(TypeError, lambda: getattr(a, _op)(s))
+                    assert_raises(TypeError, lambda: getattr(a, _op)(s), _op)
 
     for x in _matmul_array_vals():
         for y in _matmul_array_vals():
@@ -356,20 +361,17 @@ def test_allow_newaxis():
 
 def test_disallow_flat_indexing_with_newaxis():
     a = ones((3, 3, 3))
-    with pytest.raises(IndexError):
-        a[None, 0, 0]
+    assert_raises(IndexError, lambda: a[None, 0, 0])
 
 def test_disallow_mask_with_newaxis():
     a = ones((3, 3, 3))
-    with pytest.raises(IndexError):
-        a[None, asarray(True)]
+    assert_raises(IndexError, lambda: a[None, asarray(True)])
 
 @pytest.mark.parametrize("shape", [(), (5,), (3, 3, 3)])
 @pytest.mark.parametrize("index", ["string", False, True])
 def test_error_on_invalid_index(shape, index):
     a = ones(shape)
-    with pytest.raises(IndexError):
-        a[index]
+    assert_raises(IndexError, lambda: a[index])
 
 def test_mask_0d_array_without_errors():
     a = ones(())
@@ -380,10 +382,8 @@ def test_mask_0d_array_without_errors():
 )
 def test_error_on_invalid_index_with_ellipsis(i):
     a = ones((3, 3, 3))
-    with pytest.raises(IndexError):
-        a[..., i]
-    with pytest.raises(IndexError):
-        a[i, ...]
+    assert_raises(IndexError, lambda: a[..., i])
+    assert_raises(IndexError, lambda: a[i, ...])
 
 def test_array_keys_use_private_array():
     """
@@ -400,8 +400,7 @@ def test_array_keys_use_private_array():
 
     a = ones((0,), dtype=bool_)
     key = ones((0, 0), dtype=bool_)
-    with pytest.raises(IndexError):
-        a[key]
+    assert_raises(IndexError, lambda: a[key])
 
 def test_array_namespace():
     a = ones((3, 3))
@@ -422,16 +421,16 @@ def test_array_namespace():
         assert a.__array_namespace__(api_version="2021.12") is array_api_strict
     assert array_api_strict.__array_api_version__ == "2021.12"
 
-    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
-    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
+    assert_raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
+    assert_raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
 
 def test_iter():
-    pytest.raises(TypeError, lambda: iter(asarray(3)))
+    assert_raises(TypeError, lambda: iter(asarray(3)))
     assert list(ones(3)) == [asarray(1.), asarray(1.), asarray(1.)]
     assert all_(isinstance(a, Array) for a in iter(ones(3)))
     assert all_(a.shape == () for a in iter(ones(3)))
     assert all_(a.dtype == float64 for a in iter(ones(3)))
-    pytest.raises(TypeError, lambda: iter(ones((3, 3))))
+    assert_raises(TypeError, lambda: iter(ones((3, 3))))
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
 def dlpack_2023_12(api_version):
@@ -447,17 +446,17 @@ def dlpack_2023_12(api_version):
 
 
     exception = NotImplementedError if api_version >= '2023.12' else ValueError
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                   a.__dlpack__(dl_device=CPU_DEVICE))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                   a.__dlpack__(dl_device=None))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                   a.__dlpack__(max_version=(1, 0)))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                   a.__dlpack__(max_version=None))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                     a.__dlpack__(copy=False))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                     a.__dlpack__(copy=True))
-    pytest.raises(exception, lambda:
+    assert_raises(exception, lambda:
                     a.__dlpack__(copy=None))
