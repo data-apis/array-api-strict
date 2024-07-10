@@ -94,7 +94,7 @@ def test_validate_index():
 
 def test_operators():
     # For every operator, we test that it works for the required type
-    # combinations and raises TypeError otherwise
+    # combinations and assert_raises TypeError otherwise
     binary_op_dtypes = {
         "__add__": "numeric",
         "__and__": "integer_or_boolean",
@@ -178,16 +178,17 @@ def test_operators():
                             # See the promotion table in NEP 47 or the array
                             # API spec page on type promotion. Mixed kind
                             # promotion is not defined.
-                            if (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
-                                or y.dtype == uint64 and x.dtype in [int8, int16, int32, int64]
-                                or x.dtype in _integer_dtypes and y.dtype not in _integer_dtypes
-                                or y.dtype in _integer_dtypes and x.dtype not in _integer_dtypes
-                                or x.dtype in _boolean_dtypes and y.dtype not in _boolean_dtypes
-                                or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
-                                or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
-                                or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
-                                ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                            if (op not in comparison_ops and
+                                (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
+                                 or y.dtype == uint64 and x.dtype in [int8, int16, int32, int64]
+                                 or x.dtype in _integer_dtypes and y.dtype not in _integer_dtypes
+                                 or y.dtype in _integer_dtypes and x.dtype not in _integer_dtypes
+                                 or x.dtype in _boolean_dtypes and y.dtype not in _boolean_dtypes
+                                 or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
+                                 or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
+                                 or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
+                                 )):
+                                assert_raises(TypeError, lambda: getattr(x, _op)(y), _op)
                             # Ensure in-place operators only promote to the same dtype as the left operand.
                             elif (
                                 _op.startswith("__i")
@@ -195,8 +196,7 @@ def test_operators():
                             ):
                                 assert_raises(TypeError, lambda: getattr(x, _op)(y), _op)
                             # Ensure only those dtypes that are required for every operator are allowed.
-                            elif (dtypes == "all" and (x.dtype in _boolean_dtypes and y.dtype in _boolean_dtypes
-                                                      or x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
+                            elif (dtypes == "all"
                                 or (dtypes == "real numeric" and x.dtype in _real_numeric_dtypes and y.dtype in _real_numeric_dtypes)
                                 or (dtypes == "numeric" and x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
                                 or dtypes == "integer" and x.dtype in _integer_dtypes and y.dtype in _integer_dtypes
@@ -207,7 +207,7 @@ def test_operators():
                             ):
                                 getattr(x, _op)(y)
                             else:
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y), _op)
+                                assert_raises(TypeError, lambda: getattr(x, _op)(y), (x, _op, y))
 
     unary_op_dtypes = {
         "__abs__": "numeric",

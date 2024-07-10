@@ -157,6 +157,7 @@ class Array:
             other: bool | int | float | Array,
             dtype_category: str,
             op: str,
+            *,
             check_promotion: bool = True,
     ) -> Array:
         """
@@ -577,7 +578,7 @@ class Array:
         """
         # Even though "all" dtypes are allowed, we still require them to be
         # promotable with each other.
-        other = self._check_allowed_dtypes(other, "all", "__eq__")
+        other = self._check_allowed_dtypes(other, "all", "__eq__", check_promotion=False)
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -766,7 +767,7 @@ class Array:
         """
         Performs the operation __ne__.
         """
-        other = self._check_allowed_dtypes(other, "all", "__ne__")
+        other = self._check_allowed_dtypes(other, "all", "__ne__", check_promotion=False)
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
