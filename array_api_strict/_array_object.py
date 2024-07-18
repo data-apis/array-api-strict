@@ -152,14 +152,7 @@ class Array:
     # spec in places where it either deviates from or is more strict than
     # NumPy behavior
 
-    def _check_allowed_dtypes(
-            self,
-            other: bool | int | float | Array,
-            dtype_category: str,
-            op: str,
-            *,
-            check_promotion: bool = True,
-    ) -> Array:
+    def _check_allowed_dtypes(self, other: bool | int | float | Array, dtype_category: str, op: str) -> Array:
         """
         Helper function for operators to only allow specific input dtypes
 
@@ -183,8 +176,7 @@ class Array:
         # This will raise TypeError for type combinations that are not allowed
         # to promote in the spec (even if the NumPy array operator would
         # promote them).
-        if check_promotion:
-            res_dtype = _result_type(self.dtype, other.dtype)
+        res_dtype = _result_type(self.dtype, other.dtype)
         if op.startswith("__i"):
             # Note: NumPy will allow in-place operators in some cases where
             # the type promoted operator does not match the left-hand side
@@ -578,7 +570,7 @@ class Array:
         """
         # Even though "all" dtypes are allowed, we still require them to be
         # promotable with each other.
-        other = self._check_allowed_dtypes(other, "all", "__eq__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "all", "__eq__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -612,7 +604,7 @@ class Array:
         """
         Performs the operation __ge__.
         """
-        other = self._check_allowed_dtypes(other, "real numeric", "__ge__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "real numeric", "__ge__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -646,7 +638,7 @@ class Array:
         """
         Performs the operation __gt__.
         """
-        other = self._check_allowed_dtypes(other, "real numeric", "__gt__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "real numeric", "__gt__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -700,7 +692,7 @@ class Array:
         """
         Performs the operation __le__.
         """
-        other = self._check_allowed_dtypes(other, "real numeric", "__le__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "real numeric", "__le__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -722,7 +714,7 @@ class Array:
         """
         Performs the operation __lt__.
         """
-        other = self._check_allowed_dtypes(other, "real numeric", "__lt__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "real numeric", "__lt__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
@@ -767,7 +759,7 @@ class Array:
         """
         Performs the operation __ne__.
         """
-        other = self._check_allowed_dtypes(other, "all", "__ne__", check_promotion=False)
+        other = self._check_allowed_dtypes(other, "all", "__ne__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)

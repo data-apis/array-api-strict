@@ -1,6 +1,6 @@
 from inspect import getfullargspec, getmodule
 
-from .test_array_object import assert_raises
+from numpy.testing import assert_raises
 
 from .. import asarray, _elementwise_functions
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
@@ -91,15 +91,6 @@ elementwise_function_input_types = {
     "trunc": "real numeric",
 }
 
-comparison_functions = [
-    'equal',
-    'greater',
-    'greater_equal',
-    'less',
-    'less_equal',
-    'not_equal',
-]
-
 def test_missing_functions():
     # Ensure the above dictionary is complete.
     import array_api_strict._elementwise_functions as mod
@@ -130,8 +121,7 @@ def test_function_types():
             if nargs(func) == 2:
                 for y in _array_vals():
                     # Disallow dtypes that aren't type promotable
-                    if (func_name not in comparison_functions and
-                        (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
+                    if (x.dtype == uint64 and y.dtype in [int8, int16, int32, int64]
                          or y.dtype == uint64 and x.dtype in [int8, int16, int32, int64]
                          or x.dtype in _integer_dtypes and y.dtype not in _integer_dtypes
                          or y.dtype in _integer_dtypes and x.dtype not in _integer_dtypes
@@ -139,10 +129,10 @@ def test_function_types():
                          or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
                          or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
                          or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
-                         )):
-                        assert_raises(TypeError, lambda: func(x, y), (func_name, x, y))
+                         ):
+                        assert_raises(TypeError, lambda: func(x, y))
                     if x.dtype not in dtypes or y.dtype not in dtypes:
-                        assert_raises(TypeError, lambda: func(x, y), (func_name, x, y))
+                        assert_raises(TypeError, lambda: func(x, y))
             else:
                 if x.dtype not in dtypes:
                     assert_raises(TypeError, lambda: func(x))
