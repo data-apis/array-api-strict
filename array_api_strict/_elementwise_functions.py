@@ -375,6 +375,8 @@ def equal(x1: Array, x2: Array, /) -> Array:
 
     See its docstring for more information.
     """
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.equal(x1._array, x2._array))
 
@@ -437,6 +439,8 @@ def greater(x1: Array, x2: Array, /) -> Array:
     """
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in greater")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.greater(x1._array, x2._array))
 
@@ -449,6 +453,8 @@ def greater_equal(x1: Array, x2: Array, /) -> Array:
     """
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in greater_equal")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.greater_equal(x1._array, x2._array))
 
@@ -518,6 +524,8 @@ def less(x1: Array, x2: Array, /) -> Array:
     """
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in less")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.less(x1._array, x2._array))
 
@@ -530,6 +538,8 @@ def less_equal(x1: Array, x2: Array, /) -> Array:
     """
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in less_equal")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.less_equal(x1._array, x2._array))
 
@@ -705,6 +715,8 @@ def not_equal(x1: Array, x2: Array, /) -> Array:
 
     See its docstring for more information.
     """
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.not_equal(x1._array, x2._array))
 
