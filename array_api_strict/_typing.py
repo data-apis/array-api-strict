@@ -27,7 +27,7 @@ from typing import (
     Protocol,
 )
 
-from ._array_object import Array, _cpu_device
+from ._array_object import Array, _device
 from ._dtypes import _DType
 
 _T_co = TypeVar("_T_co", covariant=True)
@@ -37,7 +37,7 @@ class NestedSequence(Protocol[_T_co]):
     def __len__(self, /) -> int: ...
 
 
-Device = _cpu_device
+Device = _device
 
 Dtype = _DType
 

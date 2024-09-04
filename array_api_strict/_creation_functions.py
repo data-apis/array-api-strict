@@ -32,9 +32,9 @@ def _supports_buffer_protocol(obj):
 def _check_device(device):
     # _array_object imports in this file are inside the functions to avoid
     # circular imports
-    from ._array_object import CPU_DEVICE
+    from ._array_object import Device
 
-    if device not in [CPU_DEVICE, None]:
+    if device is not None and not isinstance(device, Device):
         raise ValueError(f"Unsupported device {device!r}")
 
 def asarray(
@@ -79,7 +79,7 @@ def asarray(
                 return Array._new(new_array)
             elif _supports_buffer_protocol(obj):
                 # Buffer protocol will always support no-copy
-                return Array._new(np.array(obj, copy=copy, dtype=_np_dtype))
+                return Array._new(np.array(obj, copy=copy, dtype=_np_dtype), device=device)
             else:
                 # No-copy is unsupported for Python built-in types.
                 raise ValueError("Unable to avoid copy while creating an array from given object.")
@@ -89,13 +89,13 @@ def asarray(
             copy = False
 
     if isinstance(obj, Array):
-        return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype))
+        return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype), device=device)
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
         # Give a better error message in this case. NumPy would convert this
         # to an object array. TODO: This won't handle large integers in lists.
         raise OverflowError("Integer out of bounds for array dtypes")
     res = np.array(obj, dtype=_np_dtype, copy=copy)
-    return Array._new(res)
+    return Array._new(res, device=device)
 
 
 def arange(
@@ -119,7 +119,7 @@ def arange(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.arange(start, stop=stop, step=step, dtype=dtype))
+    return Array._new(np.arange(start, stop=stop, step=step, dtype=dtype), device=device)
 
 
 def empty(
@@ -140,7 +140,7 @@ def empty(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.empty(shape, dtype=dtype))
+    return Array._new(np.empty(shape, dtype=dtype), device=device)
 
 
 def empty_like(
@@ -158,7 +158,7 @@ def empty_like(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.empty_like(x._array, dtype=dtype))
+    return Array._new(np.empty_like(x._array, dtype=dtype), device=device)
 
 
 def eye(
@@ -182,7 +182,7 @@ def eye(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=dtype))
+    return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=dtype), device=device)
 
 
 _default = object()
@@ -237,7 +237,7 @@ def full(
         # This will happen if the fill value is not something that NumPy
         # coerces to one of the acceptable dtypes.
         raise TypeError("Invalid input to full")
-    return Array._new(res)
+    return Array._new(res, device=device)
 
 
 def full_like(
@@ -265,7 +265,7 @@ def full_like(
         # This will happen if the fill value is not something that NumPy
         # coerces to one of the acceptable dtypes.
         raise TypeError("Invalid input to full_like")
-    return Array._new(res)
+    return Array._new(res, device=device)
 
 
 def linspace(
@@ -290,7 +290,7 @@ def linspace(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.linspace(start, stop, num, dtype=dtype, endpoint=endpoint))
+    return Array._new(np.linspace(start, stop, num, dtype=dtype, endpoint=endpoint), device=device)
 
 
 def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
@@ -308,7 +308,7 @@ def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
         raise ValueError("meshgrid inputs must all have the same dtype")
 
     return [
-        Array._new(array)
+        Array._new(array, device=device)
         for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
     ]
 
@@ -331,7 +331,7 @@ def ones(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.ones(shape, dtype=dtype))
+    return Array._new(np.ones(shape, dtype=dtype), device=device)
 
 
 def ones_like(
@@ -349,7 +349,7 @@ def ones_like(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.ones_like(x._array, dtype=dtype))
+    return Array._new(np.ones_like(x._array, dtype=dtype), device=device)
 
 
 def tril(x: Array, /, *, k: int = 0) -> Array:
@@ -377,7 +377,7 @@ def triu(x: Array, /, *, k: int = 0) -> Array:
     if x.ndim < 2:
         # Note: Unlike np.triu, x must be at least 2-D
         raise ValueError("x must be at least 2-dimensional for triu")
-    return Array._new(np.triu(x._array, k=k))
+    return Array._new(np.triu(x._array, k=k), device=device)
 
 
 def zeros(
@@ -398,7 +398,7 @@ def zeros(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.zeros(shape, dtype=dtype))
+    return Array._new(np.zeros(shape, dtype=dtype), device=device)
 
 
 def zeros_like(
@@ -416,4 +416,4 @@ def zeros_like(
 
     if dtype is not None:
         dtype = dtype._np_dtype
-    return Array._new(np.zeros_like(x._array, dtype=dtype))
+    return Array._new(np.zeros_like(x._array, dtype=dtype), device=device)

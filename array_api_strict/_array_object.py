@@ -43,13 +43,17 @@ if TYPE_CHECKING:
 
 import numpy as np
 
-# Placeholder object to represent the "cpu" device (the only device NumPy
-# supports).
-class _cpu_device:
-    def __repr__(self):
-        return "CPU_DEVICE"
+class Device:
+    def __init__(self, device="CPU_DEVICE"):
+        self._device = device
 
-CPU_DEVICE = _cpu_device()
+    def __repr__(self):
+        return f"Device('{self._device}')"
+
+    def __eq__(self, other):
+        return self._device == other._device
+
+CPU_DEVICE = Device()
 
 _default = object()
 
@@ -73,7 +77,7 @@ class Array:
     # Use a custom constructor instead of __init__, as manually initializing
     # this class is not supported API.
     @classmethod
-    def _new(cls, x, /):
+    def _new(cls, x, /, device=CPU_DEVICE):
         """
         This is a private method for initializing the array API Array
         object.
@@ -95,6 +99,9 @@ class Array:
             )
         obj._array = x
         obj._dtype = _dtype
+        if device is None:
+            device = CPU_DEVICE
+        obj._device = device
         return obj
 
     # Prevent Array() from working
@@ -134,6 +141,8 @@ class Array:
         will be present in other implementations.
 
         """
+        if self._device != CPU_DEVICE:
+            raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
         # copy keyword is new in 2.0.0; for older versions don't use it
         # retry without that keyword.
         if np.__version__[0] < '2':
@@ -1154,8 +1163,11 @@ class Array:
     def to_device(self: Array, device: Device, /, stream: None = None) -> Array:
         if stream is not None:
             raise ValueError("The stream argument to to_device() is not supported")
-        if device == CPU_DEVICE:
+        if device == self._device:
             return self
+        elif isinstance(device, Device):
+            arr = np.asarray(self._array, copy=True)
+            return self.__class__._new(arr, device=device)
         raise ValueError(f"Unsupported device {device!r}")
 
     @property
@@ -1169,7 +1181,7 @@ class Array:
 
     @property
     def device(self) -> Device:
-        return CPU_DEVICE
+        return self._device
 
     # Note: mT is new in array API spec (see matrix_transpose)
     @property

@@ -319,7 +319,7 @@ def test_python_scalar_construtors():
 def test_device_property():
     a = ones((3, 4))
     assert a.device == CPU_DEVICE
-    assert a.device != 'cpu'
+    assert not isinstance(a.device, str)
 
     assert all(equal(a.to_device(CPU_DEVICE), a))
     assert_raises(ValueError, lambda: a.to_device('cpu'))

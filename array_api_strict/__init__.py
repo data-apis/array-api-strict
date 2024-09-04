@@ -309,6 +309,9 @@ from ._utility_functions import all, any
 
 __all__ += ["all", "any"]
 
+from ._array_object import Device
+__all__ += ["Device"]
+
 # Helper functions that are not part of the standard
 
 from ._flags import (
