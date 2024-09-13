@@ -8,14 +8,17 @@ import array_api_strict as xp
 
 # Technically this is linear_algebra, not linalg, but it's simpler to keep
 # both of these tests together
-def test_vecdot_2023_12():
-    # Test the axis < 0 restriction for 2023.12, and also the 2022.12 axis >=
-    # 0 behavior (which is primarily kept for backwards compatibility).
+
+
+# Test the axis < 0 restriction for 2023.12, and also the 2022.12 axis >=
+# 0 behavior (which is primarily kept for backwards compatibility).
+def test_vecdot_2022_12():
+    # 2022.12 behavior, which is to apply axis >= 0 after broadcasting
+    set_array_api_strict_flags(api_version='2022.12')
 
     a = xp.ones((2, 3, 4, 5))
     b = xp.ones((   3, 4, 1))
 
-    # 2022.12 behavior, which is to apply axis >= 0 after broadcasting
     pytest.raises(ValueError, lambda: xp.linalg.vecdot(a, b, axis=0))
     assert xp.linalg.vecdot(a, b, axis=1).shape == (2, 4, 5)
     assert xp.linalg.vecdot(a, b, axis=2).shape == (2, 3, 5)
@@ -34,10 +37,13 @@ def test_vecdot_2023_12():
     assert xp.linalg.vecdot(a, b, axis=-2).shape == (2, 3, 5)
     assert xp.linalg.vecdot(a, b, axis=-3).shape == (2, 4, 5)
 
+def test_vecdot_2023_12():
     # 2023.12 behavior, which is to only allow axis < 0 and axis >=
     # min(x1.ndim, x2.ndim), which is unambiguous
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2023.12')
+    set_array_api_strict_flags(api_version='2023.12')
+
+    a = xp.ones((2, 3, 4, 5))
+    b = xp.ones((   3, 4, 1))
 
     pytest.raises(ValueError, lambda: xp.linalg.vecdot(a, b, axis=0))
     pytest.raises(ValueError, lambda: xp.linalg.vecdot(a, b, axis=1))
@@ -56,7 +62,7 @@ def test_cross(api_version):
     # This test tests everything that should be the same across all supported
     # API versions.
 
-    if api_version != '2022.12':
+    if api_version == '2021.12':
         with pytest.warns(UserWarning):
             set_array_api_strict_flags(api_version=api_version)
     else:
@@ -88,7 +94,7 @@ def test_cross_2022_12(api_version):
     # backwards compatibility. Note that unlike vecdot, array_api_strict
     # cross() never implemented the "after broadcasting" axis behavior, but
     # just reused NumPy cross(), which applies axes before broadcasting.
-    if api_version != '2022.12':
+    if api_version == '2021.12':
         with pytest.warns(UserWarning):
             set_array_api_strict_flags(api_version=api_version)
     else:
@@ -104,11 +110,6 @@ def test_cross_2022_12(api_version):
     assert xp.linalg.cross(a, b, axis=0).shape == (3, 2, 4, 5)
 
 def test_cross_2023_12():
-    # 2023.12 behavior, which is to only allow axis < 0 and axis >=
-    # min(x1.ndim, x2.ndim), which is unambiguous
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2023.12')
-
     a = xp.ones((3, 2, 4, 5))
     b = xp.ones((3, 2, 4, 1))
     pytest.raises(ValueError, lambda: xp.linalg.cross(a, b, axis=0))
