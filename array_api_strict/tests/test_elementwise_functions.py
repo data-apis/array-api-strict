@@ -17,7 +17,6 @@ from .._dtypes import (
 )
 from .._flags import set_array_api_strict_flags
 
-import pytest
 
 def nargs(func):
     return len(getfullargspec(func).args)
