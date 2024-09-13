@@ -371,6 +371,15 @@ assert 'fft' not in globals()
     assert 'linalg' not in ns
     assert 'fft' not in ns
 
+    reset_array_api_strict_flags()
+    assert 'linalg' in xp.__all__
+    assert 'fft' in xp.__all__
+    xp.linalg # No error
+    xp.fft # No error
+    ns = {}
+    exec('from array_api_strict import *', ns)
+    assert 'linalg' in ns
+    assert 'fft' in ns
 
 def test_environment_variables():
     # Test that the environment variables work as expected

@@ -262,7 +262,9 @@ def reset_array_api_strict_flags():
     BOOLEAN_INDEXING = True
     DATA_DEPENDENT_SHAPES = True
     ENABLED_EXTENSIONS = default_extensions
-
+    array_api_strict.__all__[:] = sorted(set(ENABLED_EXTENSIONS) |
+                                         set(array_api_strict.__all__) -
+                                         set(default_extensions))
 
 class ArrayAPIStrictFlags:
     """
