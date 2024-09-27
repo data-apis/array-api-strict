@@ -310,8 +310,14 @@ def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
     if len({a.device for a in arrays}) > 1:
         raise ValueError("meshgrid inputs must all be on the same device")
 
+    # arrays is allowed to be empty
+    if arrays:
+        device = arrays[0].device
+    else:
+        device = None
+
     return [
-        Array._new(array, device=array.device)
+        Array._new(array, device=device)
         for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
     ]
 
