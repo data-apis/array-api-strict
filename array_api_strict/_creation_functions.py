@@ -349,6 +349,8 @@ def ones_like(
 
     _check_valid_dtype(dtype)
     _check_device(device)
+    if device is None:
+        device = x.device
 
     if dtype is not None:
         dtype = dtype._np_dtype
@@ -366,7 +368,7 @@ def tril(x: Array, /, *, k: int = 0) -> Array:
     if x.ndim < 2:
         # Note: Unlike np.tril, x must be at least 2-D
         raise ValueError("x must be at least 2-dimensional for tril")
-    return Array._new(np.tril(x._array, k=k))
+    return Array._new(np.tril(x._array, k=k), device=x.device)
 
 
 def triu(x: Array, /, *, k: int = 0) -> Array:
@@ -380,7 +382,7 @@ def triu(x: Array, /, *, k: int = 0) -> Array:
     if x.ndim < 2:
         # Note: Unlike np.triu, x must be at least 2-D
         raise ValueError("x must be at least 2-dimensional for triu")
-    return Array._new(np.triu(x._array, k=k), device=device)
+    return Array._new(np.triu(x._array, k=k), device=x.device)
 
 
 def zeros(
@@ -416,6 +418,8 @@ def zeros_like(
 
     _check_valid_dtype(dtype)
     _check_device(device)
+    if device is None:
+        device = x.device
 
     if dtype is not None:
         dtype = dtype._np_dtype
