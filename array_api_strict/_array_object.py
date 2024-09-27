@@ -53,7 +53,13 @@ class Device:
         return f"array_api_strict.Device('{self._device}')"
 
     def __eq__(self, other):
+        if not isinstance(other, Device):
+            return False
         return self._device == other._device
+
+    def __hash__(self):
+        return hash(("Device", self._device))
+
 
 CPU_DEVICE = Device()
 

@@ -307,8 +307,11 @@ def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
     if len({a.dtype for a in arrays}) > 1:
         raise ValueError("meshgrid inputs must all have the same dtype")
 
+    if len({a.device for a in arrays}) > 1:
+        raise ValueError("meshgrid inputs must all be on the same device")
+
     return [
-        Array._new(array, device=device)
+        Array._new(array, device=array.device)
         for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
     ]
 
