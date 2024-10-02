@@ -121,7 +121,7 @@ _dtype_categories = {
     "integer": _integer_dtypes,
     "integer or boolean": _integer_or_boolean_dtypes,
     "boolean": _boolean_dtypes,
-    "real floating-point": _floating_dtypes,
+    "real floating-point": _real_floating_dtypes,
     "complex floating-point": _complex_floating_dtypes,
     "floating-point": _floating_dtypes,
 }

@@ -1,4 +1,4 @@
-from inspect import getfullargspec, getmodule
+from inspect import signature, getmodule
 
 from numpy.testing import assert_raises
 
@@ -19,8 +19,16 @@ from .._flags import set_array_api_strict_flags
 
 import pytest
 
+import array_api_strict
+
+
 def nargs(func):
-    return len(getfullargspec(func).args)
+    """Count number of 'array' arguments a function takes."""
+    positional_only = 0
+    for param in signature(func).parameters.values():
+        if param.kind == param.POSITIONAL_ONLY:
+            positional_only += 1
+    return positional_only
 
 
 elementwise_function_input_types = {
@@ -91,11 +99,56 @@ elementwise_function_input_types = {
     "trunc": "real numeric",
 }
 
+
+def test_nargs():
+    # Explicitly check number of arguments for a few functions
+    assert nargs(array_api_strict.logaddexp) == 2
+    assert nargs(array_api_strict.atan2) == 2
+    assert nargs(array_api_strict.clip) == 1
+
+    # All elementwise functions take one or two array arguments
+    # if not, it is probably a bug in `nargs` or the definition
+    # of the function (missing trailing `, /`).
+    for func_name in elementwise_function_input_types:
+        func = getattr(_elementwise_functions, func_name)
+        assert nargs(func) in (1, 2)
+
+
 def test_missing_functions():
     # Ensure the above dictionary is complete.
     import array_api_strict._elementwise_functions as mod
     mod_funcs = [n for n in dir(mod) if getmodule(getattr(mod, n)) is mod]
     assert set(mod_funcs) == set(elementwise_function_input_types)
+
+
+def test_function_device_persists():
+    # Test that the device of the input and output array are the same
+    def _array_vals(dtypes):
+        for d in dtypes:
+            yield asarray(1., dtype=d)
+
+    # Use the latest version of the standard so all functions are included
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version="2023.12")
+
+    for func_name, types in elementwise_function_input_types.items():
+        dtypes = _dtype_categories[types]
+        func = getattr(_elementwise_functions, func_name)
+        print(f"{func_name=} {nargs(func)=} {types=} {dtypes=}")
+
+        for x in _array_vals(dtypes):
+            if nargs(func) == 2:
+                # This way we don't have to deal with incompatible
+                # types of the two arguments.
+                r = func(x, x)
+                assert r.device == x.device
+
+            else:
+                if func_name == "atanh":
+                    x -= 0.1
+                r = func(x)
+                assert r.device == x.device
+
 
 def test_function_types():
     # Test that every function accepts only the required input types. We only
@@ -130,12 +183,12 @@ def test_function_types():
                          or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
                          or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
                          ):
-                        assert_raises(TypeError, lambda: func(x, y))
+                        assert_raises(TypeError, func, x, y)
                     if x.dtype not in dtypes or y.dtype not in dtypes:
-                        assert_raises(TypeError, lambda: func(x, y))
+                        assert_raises(TypeError, func, x, y)
             else:
                 if x.dtype not in dtypes:
-                    assert_raises(TypeError, lambda: func(x))
+                    assert_raises(TypeError, func, x)
 
 
 def test_bitwise_shift_error():

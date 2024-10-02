@@ -354,7 +354,7 @@ def copysign(x1: Array, x2: Array, /) -> Array:
     if x1.device != x2.device:
         raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
+    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in copysign")
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)
@@ -632,7 +632,7 @@ def log10(x: Array, /) -> Array:
     return Array._new(np.log10(x._array), device=x.device)
 
 
-def logaddexp(x1: Array, x2: Array) -> Array:
+def logaddexp(x1: Array, x2: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.logaddexp <numpy.logaddexp>`.
 
