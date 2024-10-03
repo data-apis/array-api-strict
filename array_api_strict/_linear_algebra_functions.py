@@ -30,7 +30,10 @@ def matmul(x1: Array, x2: Array, /) -> Array:
     if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
         raise TypeError('Only numeric dtypes are allowed in matmul')
 
-    return Array._new(np.matmul(x1._array, x2._array))
+    if x1.device != x2.device:
+        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+
+    return Array._new(np.matmul(x1._array, x2._array), device=x1.device)
 
 # Note: tensordot is the numpy top-level namespace but not in np.linalg
 
@@ -41,14 +44,17 @@ def tensordot(x1: Array, x2: Array, /, *, axes: Union[int, Tuple[Sequence[int], 
     if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
         raise TypeError('Only numeric dtypes are allowed in tensordot')
 
-    return Array._new(np.tensordot(x1._array, x2._array, axes=axes))
+    if x1.device != x2.device:
+        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+
+    return Array._new(np.tensordot(x1._array, x2._array, axes=axes), device=x1.device)
 
 # Note: this function is new in the array API spec. Unlike transpose, it only
 # transposes the last two axes.
 def matrix_transpose(x: Array, /) -> Array:
     if x.ndim < 2:
         raise ValueError("x must be at least 2-dimensional for matrix_transpose")
-    return Array._new(np.swapaxes(x._array, -1, -2))
+    return Array._new(np.swapaxes(x._array, -1, -2), device=x.device)
 
 # Note: vecdot is not in NumPy
 def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
@@ -60,6 +66,9 @@ def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
             raise ValueError("axis must be negative in vecdot")
         elif axis < min(-1, -x1.ndim, -x2.ndim):
             raise ValueError("axis is out of bounds for x1 and x2")
+
+    if x1.device != x2.device:
+        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     # In versions of the standard prior to 2023.12, vecdot applied axis after
     # broadcasting. This is different from applying it before broadcasting
@@ -78,4 +87,4 @@ def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
     x2_ = np.moveaxis(x2_, axis, -1)
 
     res = x1_[..., None, :] @ x2_[..., None]
-    return Array._new(res[..., 0, 0])
+    return Array._new(res[..., 0, 0], device=x1.device)
