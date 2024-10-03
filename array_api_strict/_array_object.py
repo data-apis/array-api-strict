@@ -62,6 +62,7 @@ class Device:
 
 
 CPU_DEVICE = Device()
+ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 _default = object()
 

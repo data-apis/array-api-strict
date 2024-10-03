@@ -14,7 +14,7 @@ from ._dtypes import (
     float32,
     complex64,
 )
-from ._array_object import Array, CPU_DEVICE
+from ._array_object import Array, ALL_DEVICES
 from ._data_type_functions import astype
 from ._flags import requires_extension
 
@@ -36,7 +36,7 @@ def fft(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in fft")
-    res = Array._new(np.fft.fft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.fft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -59,7 +59,7 @@ def ifft(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in ifft")
-    res = Array._new(np.fft.ifft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.ifft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -82,7 +82,7 @@ def fftn(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in fftn")
-    res = Array._new(np.fft.fftn(x._array, s=s, axes=axes, norm=norm))
+    res = Array._new(np.fft.fftn(x._array, s=s, axes=axes, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -105,7 +105,7 @@ def ifftn(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in ifftn")
-    res = Array._new(np.fft.ifftn(x._array, s=s, axes=axes, norm=norm))
+    res = Array._new(np.fft.ifftn(x._array, s=s, axes=axes, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -128,7 +128,7 @@ def rfft(
     """
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in rfft")
-    res = Array._new(np.fft.rfft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.rfft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == float32:
@@ -151,7 +151,7 @@ def irfft(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in irfft")
-    res = Array._new(np.fft.irfft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.irfft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -174,7 +174,7 @@ def rfftn(
     """
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in rfftn")
-    res = Array._new(np.fft.rfftn(x._array, s=s, axes=axes, norm=norm))
+    res = Array._new(np.fft.rfftn(x._array, s=s, axes=axes, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == float32:
@@ -197,7 +197,7 @@ def irfftn(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in irfftn")
-    res = Array._new(np.fft.irfftn(x._array, s=s, axes=axes, norm=norm))
+    res = Array._new(np.fft.irfftn(x._array, s=s, axes=axes, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -220,7 +220,7 @@ def hfft(
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in hfft")
-    res = Array._new(np.fft.hfft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.hfft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == complex64:
@@ -243,7 +243,7 @@ def ihfft(
     """
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in ihfft")
-    res = Array._new(np.fft.ihfft(x._array, n=n, axis=axis, norm=norm))
+    res = Array._new(np.fft.ihfft(x._array, n=n, axis=axis, norm=norm), device=x.device)
     # Note: np.fft functions improperly upcast float32 and complex64 to
     # complex128
     if x.dtype == float32:
@@ -257,9 +257,9 @@ def fftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Ar
 
     See its docstring for more information.
     """
-    if device not in [CPU_DEVICE, None]:
+    if device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
-    return Array._new(np.fft.fftfreq(n, d=d))
+    return Array._new(np.fft.fftfreq(n, d=d), device=device)
 
 @requires_extension('fft')
 def rfftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Array:
@@ -268,9 +268,9 @@ def rfftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> A
 
     See its docstring for more information.
     """
-    if device not in [CPU_DEVICE, None]:
+    if device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
-    return Array._new(np.fft.rfftfreq(n, d=d))
+    return Array._new(np.fft.rfftfreq(n, d=d), device=device)
 
 @requires_extension('fft')
 def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
@@ -281,7 +281,7 @@ def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
     """
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in fftshift")
-    return Array._new(np.fft.fftshift(x._array, axes=axes))
+    return Array._new(np.fft.fftshift(x._array, axes=axes), device=x.device)
 
 @requires_extension('fft')
 def ifftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
@@ -292,7 +292,7 @@ def ifftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
     """
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in ifftshift")
-    return Array._new(np.fft.ifftshift(x._array, axes=axes))
+    return Array._new(np.fft.ifftshift(x._array, axes=axes), device=x.device)
 
 __all__ = [
     "fft",

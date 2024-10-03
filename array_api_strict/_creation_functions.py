@@ -32,9 +32,12 @@ def _supports_buffer_protocol(obj):
 def _check_device(device):
     # _array_object imports in this file are inside the functions to avoid
     # circular imports
-    from ._array_object import Device
+    from ._array_object import Device, ALL_DEVICES
 
     if device is not None and not isinstance(device, Device):
+        raise ValueError(f"Unsupported device {device!r}")
+
+    if device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
 
 def asarray(

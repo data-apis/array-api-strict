@@ -37,10 +37,12 @@ def astype(
             _check_device(device)
         else:
             raise TypeError("The device argument to astype requires at least version 2023.12 of the array API")
+    else:
+        device = x.device
 
     if not copy and dtype == x.dtype:
         return x
-    return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy))
+    return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy), device=device)
 
 
 def broadcast_arrays(*arrays: Array) -> List[Array]:
