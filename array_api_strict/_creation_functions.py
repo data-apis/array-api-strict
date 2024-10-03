@@ -37,7 +37,7 @@ def _check_device(device):
     if device is not None and not isinstance(device, Device):
         raise ValueError(f"Unsupported device {device!r}")
 
-    if device not in ALL_DEVICES:
+    if device is not None and device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
 
 def asarray(

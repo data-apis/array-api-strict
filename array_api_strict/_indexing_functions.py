@@ -22,4 +22,6 @@ def take(x: Array, indices: Array, /, *, axis: Optional[int] = None) -> Array:
         raise TypeError("Only integer dtypes are allowed in indexing")
     if indices.ndim != 1:
         raise ValueError("Only 1-dim indices array is supported")
-    return Array._new(np.take(x._array, indices._array, axis=axis))
+    if x.device != indices.device:
+        raise RuntimeError(f"Arrays from two different devices ({x.device} and {indices.device}) can not be combined.")
+    return Array._new(np.take(x._array, indices._array, axis=axis), device=x.device)
