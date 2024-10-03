@@ -134,7 +134,6 @@ def test_function_device_persists():
     for func_name, types in elementwise_function_input_types.items():
         dtypes = _dtype_categories[types]
         func = getattr(_elementwise_functions, func_name)
-        print(f"{func_name=} {nargs(func)=} {types=} {dtypes=}")
 
         for x in _array_vals(dtypes):
             if nargs(func) == 2:
@@ -144,6 +143,8 @@ def test_function_device_persists():
                 assert r.device == x.device
 
             else:
+                # `atanh` needs a slightly different input value from
+                # everyone else
                 if func_name == "atanh":
                     x -= 0.1
                 r = func(x)
