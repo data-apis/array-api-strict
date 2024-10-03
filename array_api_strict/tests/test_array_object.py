@@ -349,6 +349,17 @@ def test___array__():
     assert np.all(np.equal(b, np.ones((2, 3), dtype=np.float64)))
     assert b.dtype == np.float64
 
+def test_array_conversion():
+    # Check that arrays on the CPU device can be converted to NumPy
+    # but arrays on other devices can't
+    a = ones((2, 3))
+    np.asarray(a)
+
+    for device in ("device1", "device2"):
+        a = ones((2, 3), device=array_api_strict.Device(device))
+        with pytest.raises(RuntimeError, match="Can not convert array"):
+            np.asarray(a)
+
 def test_allow_newaxis():
     a = ones(5)
     indexed_a = a[None, :]
