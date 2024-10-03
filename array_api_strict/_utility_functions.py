@@ -21,7 +21,7 @@ def all(
 
     See its docstring for more information.
     """
-    return Array._new(np.asarray(np.all(x._array, axis=axis, keepdims=keepdims)))
+    return Array._new(np.asarray(np.all(x._array, axis=axis, keepdims=keepdims)), device=x.device)
 
 
 def any(
@@ -36,4 +36,4 @@ def any(
 
     See its docstring for more information.
     """
-    return Array._new(np.asarray(np.any(x._array, axis=axis, keepdims=keepdims)))
+    return Array._new(np.asarray(np.any(x._array, axis=axis, keepdims=keepdims)), device=x.device)
