@@ -417,16 +417,15 @@ def test_array_keys_use_private_array():
 def test_array_namespace():
     a = ones((3, 3))
     assert a.__array_namespace__() == array_api_strict
-    assert array_api_strict.__array_api_version__ == "2022.12"
+    assert array_api_strict.__array_api_version__ == "2023.12"
 
     assert a.__array_namespace__(api_version=None) is array_api_strict
-    assert array_api_strict.__array_api_version__ == "2022.12"
+    assert array_api_strict.__array_api_version__ == "2023.12"
 
     assert a.__array_namespace__(api_version="2022.12") is array_api_strict
     assert array_api_strict.__array_api_version__ == "2022.12"
 
-    with pytest.warns(UserWarning):
-        assert a.__array_namespace__(api_version="2023.12") is array_api_strict
+    assert a.__array_namespace__(api_version="2023.12") is array_api_strict
     assert array_api_strict.__array_api_version__ == "2023.12"
 
     with pytest.warns(UserWarning):
@@ -446,7 +445,7 @@ def test_iter():
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
 def dlpack_2023_12(api_version):
-    if api_version != '2022.12':
+    if api_version == '2021.12':
         with pytest.warns(UserWarning):
             set_array_api_strict_flags(api_version=api_version)
     else:

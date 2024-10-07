@@ -18,21 +18,38 @@ import array_api_strict as xp
 
 import pytest
 
-def test_flags():
-    # Test defaults
+def test_flag_defaults():
     flags = get_array_api_strict_flags()
     assert flags == {
-        'api_version': '2022.12',
+        'api_version': '2023.12',
         'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
     }
 
-    # Test setting flags
+
+def test_reset_flags():
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(
+            api_version='2021.12',
+            boolean_indexing=False,
+            data_dependent_shapes=False,
+            enabled_extensions=())
+    reset_array_api_strict_flags()
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2023.12',
+        'boolean_indexing': True,
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
+
+
+def test_setting_flags():
     set_array_api_strict_flags(data_dependent_shapes=False)
     flags = get_array_api_strict_flags()
     assert flags == {
-        'api_version': '2022.12',
+        'api_version': '2023.12',
         'boolean_indexing': True,
         'data_dependent_shapes': False,
         'enabled_extensions': ('linalg', 'fft'),
@@ -40,11 +57,13 @@ def test_flags():
     set_array_api_strict_flags(enabled_extensions=('fft',))
     flags = get_array_api_strict_flags()
     assert flags == {
-        'api_version': '2022.12',
+        'api_version': '2023.12',
         'boolean_indexing': True,
         'data_dependent_shapes': False,
         'enabled_extensions': ('fft',),
     }
+
+def test_flags_api_version_2021_12():
     # Make sure setting the version to 2021.12 disables fft and issues a
     # warning.
     with pytest.warns(UserWarning) as record:
@@ -55,27 +74,23 @@ def test_flags():
     assert flags == {
         'api_version': '2021.12',
         'boolean_indexing': True,
-        'data_dependent_shapes': False,
-        'enabled_extensions': (),
-    }
-    reset_array_api_strict_flags()
-
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2021.12')
-    flags = get_array_api_strict_flags()
-    assert flags == {
-        'api_version': '2021.12',
-        'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg',),
     }
-    reset_array_api_strict_flags()
 
-    # 2023.12 should issue a warning
-    with pytest.warns(UserWarning) as record:
-        set_array_api_strict_flags(api_version='2023.12')
-    assert len(record) == 1
-    assert '2023.12' in str(record[0].message)
+def test_flags_api_version_2022_12():
+    set_array_api_strict_flags(api_version='2022.12')
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2022.12',
+        'boolean_indexing': True,
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
+
+
+def test_flags_api_version_2023_12():
+    set_array_api_strict_flags(api_version='2023.12')
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2023.12',
@@ -84,6 +99,7 @@ def test_flags():
         'enabled_extensions': ('linalg', 'fft'),
     }
 
+def test_setting_flags_invalid():
     # Test setting flags with invalid values
     pytest.raises(ValueError, lambda:
                   set_array_api_strict_flags(api_version='2020.12'))
@@ -94,35 +110,15 @@ def test_flags():
             api_version='2021.12',
             enabled_extensions=('linalg', 'fft')))
 
-    # Test resetting flags
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(
-            api_version='2021.12',
-            boolean_indexing=False,
-            data_dependent_shapes=False,
-            enabled_extensions=())
-    reset_array_api_strict_flags()
-    flags = get_array_api_strict_flags()
-    assert flags == {
-        'api_version': '2022.12',
-        'boolean_indexing': True,
-        'data_dependent_shapes': True,
-        'enabled_extensions': ('linalg', 'fft'),
-    }
-
 def test_api_version():
     # Test defaults
-    assert xp.__array_api_version__ == '2022.12'
+    assert xp.__array_api_version__ == '2023.12'
 
     # Test setting the version
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2021.12')
-    assert xp.__array_api_version__ == '2021.12'
+    set_array_api_strict_flags(api_version='2022.12')
+    assert xp.__array_api_version__ == '2022.12'
 
 def test_data_dependent_shapes():
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2023.12') # to enable repeat()
-
     a = asarray([0, 0, 1, 2, 2])
     mask = asarray([True, False, True, False, True])
     repeats = asarray([1, 1, 2, 2, 2])
@@ -275,12 +271,16 @@ api_version_2023_12_examples = {
 def test_api_version_2023_12(func_name):
     func = api_version_2023_12_examples[func_name]
 
-    # By default, these functions should error
+    # By default, these functions should not error
+    func()
+
+    # In 2022.12, these functions should error
+    set_array_api_strict_flags(api_version='2022.12')
     pytest.raises(RuntimeError, func)
 
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version='2023.12')
-        func()
+    # Test the behavior gets updated properly
+    set_array_api_strict_flags(api_version='2023.12')
+    func()
 
     set_array_api_strict_flags(api_version='2022.12')
     pytest.raises(RuntimeError, func)
@@ -371,6 +371,15 @@ assert 'fft' not in globals()
     assert 'linalg' not in ns
     assert 'fft' not in ns
 
+    reset_array_api_strict_flags()
+    assert 'linalg' in xp.__all__
+    assert 'fft' in xp.__all__
+    xp.linalg # No error
+    xp.fft # No error
+    ns = {}
+    exec('from array_api_strict import *', ns)
+    assert 'linalg' in ns
+    assert 'fft' in ns
 
 def test_environment_variables():
     # Test that the environment variables work as expected
@@ -378,9 +387,9 @@ def test_environment_variables():
         # ARRAY_API_STRICT_API_VERSION
         ('''\
 import array_api_strict as xp
-assert xp.__array_api_version__ == '2022.12'
+assert xp.__array_api_version__ == '2023.12'
 
-assert xp.get_array_api_strict_flags()['api_version'] == '2022.12'
+assert xp.get_array_api_strict_flags()['api_version'] == '2023.12'
 
 ''', {}),
         *[

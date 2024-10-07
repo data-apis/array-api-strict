@@ -15,8 +15,4 @@ libraries. Consuming library code should use the
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
-array-api-strict currently supports the 2022.12 version of the standard.
-2023.12 support is planned and is tracked by [this
-issue](https://github.com/data-apis/array-api-strict/issues/25).
-
 See the documentation for more details https://data-apis.org/array-api-strict/
