@@ -27,9 +27,10 @@ def concat(
     dtype = result_type(*arrays)
     if len({a.device for a in arrays}) > 1:
         raise ValueError("concat inputs must all be on the same device")
+    result_device = arrays[0].device
 
     arrays = tuple(a._array for a in arrays)
-    return Array._new(np.concatenate(arrays, axis=axis, dtype=dtype._np_dtype), device=arrays[0].device)
+    return Array._new(np.concatenate(arrays, axis=axis, dtype=dtype._np_dtype), device=result_device)
 
 
 def expand_dims(x: Array, /, *, axis: int) -> Array:
@@ -157,8 +158,9 @@ def stack(arrays: Union[Tuple[Array, ...], List[Array]], /, *, axis: int = 0) ->
     result_type(*arrays)
     if len({a.device for a in arrays}) > 1:
         raise ValueError("concat inputs must all be on the same device")
+    result_device = arrays[0].device
     arrays = tuple(a._array for a in arrays)
-    return Array._new(np.stack(arrays, axis=axis), device=arrays[0].device)
+    return Array._new(np.stack(arrays, axis=axis), device=result_device)
 
 
 @requires_api_version('2023.12')
