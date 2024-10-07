@@ -1,7 +1,5 @@
 from inspect import signature, getmodule
 
-import pytest
-
 from numpy.testing import assert_raises
 
 from .. import asarray, _elementwise_functions
@@ -128,8 +126,7 @@ def test_function_device_persists():
             yield asarray(1., dtype=d)
 
     # Use the latest version of the standard so all functions are included
-    with pytest.warns(UserWarning):
-        set_array_api_strict_flags(api_version="2023.12")
+    set_array_api_strict_flags(api_version="2023.12")
 
     for func_name, types in elementwise_function_input_types.items():
         dtypes = _dtype_categories[types]
