@@ -257,7 +257,7 @@ def fftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> Ar
 
     See its docstring for more information.
     """
-    if device not in ALL_DEVICES:
+    if device is not None and device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
     return Array._new(np.fft.fftfreq(n, d=d), device=device)
 
@@ -268,7 +268,7 @@ def rfftfreq(n: int, /, *, d: float = 1.0, device: Optional[Device] = None) -> A
 
     See its docstring for more information.
     """
-    if device not in ALL_DEVICES:
+    if device is not None and device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
     return Array._new(np.fft.rfftfreq(n, d=d), device=device)
 
