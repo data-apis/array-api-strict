@@ -1,5 +1,7 @@
 from inspect import signature, getmodule
 
+import pytest
+
 from numpy.testing import assert_raises
 
 from .. import asarray, _elementwise_functions
@@ -16,8 +18,6 @@ from .._dtypes import (
     uint64,
 )
 from .._flags import set_array_api_strict_flags
-
-import pytest
 
 import array_api_strict
 
