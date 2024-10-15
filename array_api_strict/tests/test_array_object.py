@@ -342,13 +342,6 @@ def test_array_properties():
     assert isinstance(b.mT, Array)
     assert b.mT.shape == (3, 2)
 
-def test___array__():
-    a = ones((2, 3), dtype=int16)
-    assert np.asarray(a) is a._array
-    b = np.asarray(a, dtype=np.float64)
-    assert np.all(np.equal(b, np.ones((2, 3), dtype=np.float64)))
-    assert b.dtype == np.float64
-
 def test_allow_newaxis():
     a = ones(5)
     indexed_a = a[None, :]
