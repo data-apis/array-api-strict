@@ -258,10 +258,10 @@ libraries. Consuming library code should use the
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.</p>
 <p>array-api-strict currently supports the
-<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2022-12">2022.12</a>
-version of the standard. Experimental
-<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2023-12">2023.12</a>
-support is implemented, <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">but must be enabled with a
+<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2022-12">2023.12</a>
+version of the standard.
+<a class="reference external" href="https://data-apis.org/array-api/latest/changelog.html#v2023-12">2022.12</a>
+support is also implemented, <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">and can be enabled with a
 flag</span></a>.</p>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h2>
@@ -394,11 +394,6 @@ you may get <code class="docutils literal notranslate"><span class="pre">Attribu
 signatures have type annotations (based on those from the standard), so
 this deviation may be tested with type checking. This <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/6">behavior may improve
 in the future</a>.</p></li>
-<li><p>array-api-strict currently uses the 2022.12 version of the array API
-standard by default. Support for 2023.12 is implemented but is still
-experimental and not fully tested. It can be enabled with
-<a class="reference internal" href="api.html#array_api_strict.set_array_api_strict_flags" title="array_api_strict.set_array_api_strict_flags"><code class="xref py py-func docutils literal notranslate"><span class="pre">array_api_strict.set_array_api_strict_flags(api_version='2023.12')</span></code></a> or by setting the
-environment variable <span class="target" id="index-0"></span><a class="reference internal" href="api.html#envvar-ARRAY_API_STRICT_API_VERSION"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">ARRAY_API_STRICT_API_VERSION=2023.12</span></code></a>.</p></li>
 </ol>
 </section>
 <section id="relationship-to-numpy-array-api">

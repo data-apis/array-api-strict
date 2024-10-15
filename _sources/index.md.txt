@@ -16,10 +16,10 @@ support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
 array-api-strict currently supports the
-[2022.12](https://data-apis.org/array-api/latest/changelog.html#v2022-12)
-version of the standard. Experimental
-[2023.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
-support is implemented, [but must be enabled with a
+[2023.12](https://data-apis.org/array-api/latest/changelog.html#v2022-12)
+version of the standard.
+[2022.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
+support is also implemented, [and can be enabled with a
 flag](array-api-strict-flags).
 
 ## Install
@@ -175,14 +175,6 @@ issue, but this hasn't necessarily been tested thoroughly.
    signatures have type annotations (based on those from the standard), so
    this deviation may be tested with type checking. This [behavior may improve
    in the future](https://github.com/data-apis/array-api-strict/issues/6).
-
-5. array-api-strict currently uses the 2022.12 version of the array API
-   standard by default. Support for 2023.12 is implemented but is still
-   experimental and not fully tested. It can be enabled with
-   {func}`array_api_strict.set_array_api_strict_flags(api_version='2023.12')
-   <array_api_strict.set_array_api_strict_flags>` or by setting the
-   environment variable {envvar}`ARRAY_API_STRICT_API_VERSION=2023.12
-   <ARRAY_API_STRICT_API_VERSION>`.
 
 (numpy.array_api)=
 ## Relationship to `numpy.array_api`
