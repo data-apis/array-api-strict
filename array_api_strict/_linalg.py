@@ -84,7 +84,7 @@ def cross(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
         raise ValueError('cross() dimension must equal 3')
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     if get_array_api_strict_flags()['api_version'] >= '2023.12':
         if axis >= 0:
@@ -246,7 +246,7 @@ def outer(x1: Array, x2: Array, /) -> Array:
         raise ValueError('The input arrays to outer must be 1-dimensional')
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     return Array._new(np.outer(x1._array, x2._array), device=x1.device)
 
@@ -357,7 +357,7 @@ def solve(x1: Array, x2: Array, /) -> Array:
         raise TypeError('Only floating-point dtypes are allowed in solve')
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     return Array._new(_solve(x1._array, x2._array), device=x1.device)
 

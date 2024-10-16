@@ -31,7 +31,7 @@ def matmul(x1: Array, x2: Array, /) -> Array:
         raise TypeError('Only numeric dtypes are allowed in matmul')
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     return Array._new(np.matmul(x1._array, x2._array), device=x1.device)
 
@@ -45,7 +45,7 @@ def tensordot(x1: Array, x2: Array, /, *, axes: Union[int, Tuple[Sequence[int], 
         raise TypeError('Only numeric dtypes are allowed in tensordot')
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     return Array._new(np.tensordot(x1._array, x2._array, axes=axes), device=x1.device)
 
@@ -68,7 +68,7 @@ def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
             raise ValueError("axis is out of bounds for x1 and x2")
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     # In versions of the standard prior to 2023.12, vecdot applied axis after
     # broadcasting. This is different from applying it before broadcasting

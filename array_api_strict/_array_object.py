@@ -221,7 +221,7 @@ class Array:
             return
         elif isinstance(other, Array):
             if self.device != other.device:
-                raise RuntimeError(f"Arrays from two different devices ({self.device} and {other.device}) can not be combined.")
+                raise ValueError(f"Arrays from two different devices ({self.device} and {other.device}) can not be combined.")
 
     # Helper function to match the type promotion rules in the spec
     def _promote_scalar(self, scalar):

@@ -63,7 +63,7 @@ def searchsorted(
         raise TypeError("Only real numeric dtypes are allowed in searchsorted")
 
     if x1.device != x2.device:
-        raise RuntimeError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
     sorter = sorter._array if sorter is not None else None
     # TODO: The sort order of nans and signed zeros is implementation

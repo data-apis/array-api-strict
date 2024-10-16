@@ -94,7 +94,7 @@ def repeat(
         if repeats.dtype not in _integer_dtypes:
             raise TypeError("The repeats array must have an integer dtype")
         if x.device != repeats.device:
-            raise RuntimeError(f"Arrays from two different devices ({x.device} and {repeats.device}) can not be combined.")
+            raise ValueError(f"Arrays from two different devices ({x.device} and {repeats.device}) can not be combined.")
     elif isinstance(repeats, int):
         repeats = asarray(repeats)
     else:

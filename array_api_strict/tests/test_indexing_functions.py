@@ -31,12 +31,12 @@ def test_take_device():
 
     x = xp.asarray([2, 3])
     indices = xp.asarray([1, 1, 0], device=xp.Device("device1"))
-    with pytest.raises(RuntimeError, match="Arrays from two different devices"):
+    with pytest.raises(ValueError, match="Arrays from two different devices"):
         xp.take(x, indices)
 
     x = xp.asarray([2, 3], device=xp.Device("device1"))
     indices = xp.asarray([1, 1, 0])
-    with pytest.raises(RuntimeError, match="Arrays from two different devices"):
+    with pytest.raises(ValueError, match="Arrays from two different devices"):
         xp.take(x, indices)
 
     x = xp.asarray([2, 3], device=xp.Device("device1"))
