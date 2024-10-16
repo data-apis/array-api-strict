@@ -93,6 +93,8 @@ def repeat(
             raise RuntimeError("repeat() with repeats as an array requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
         if repeats.dtype not in _integer_dtypes:
             raise TypeError("The repeats array must have an integer dtype")
+        if x.device != repeats.device:
+            raise RuntimeError(f"Arrays from two different devices ({x.device} and {repeats.device}) can not be combined.")
     elif isinstance(repeats, int):
         repeats = asarray(repeats)
     else:
