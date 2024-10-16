@@ -342,7 +342,7 @@ def conj(x: Array, /) -> Array:
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in conj")
-    return Array._new(np.conj(x), device=x.device)
+    return Array._new(np.conj(x._array), device=x.device)
 
 @requires_api_version('2023.12')
 def copysign(x1: Array, x2: Array, /) -> Array:
@@ -520,7 +520,7 @@ def imag(x: Array, /) -> Array:
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in imag")
-    return Array._new(np.imag(x), device=x.device)
+    return Array._new(np.imag(x._array), device=x.device)
 
 
 def isfinite(x: Array, /) -> Array:
@@ -817,7 +817,7 @@ def real(x: Array, /) -> Array:
     """
     if x.dtype not in _complex_floating_dtypes:
         raise TypeError("Only complex floating-point dtypes are allowed in real")
-    return Array._new(np.real(x), device=x.device)
+    return Array._new(np.real(x._array), device=x.device)
 
 
 def remainder(x1: Array, x2: Array, /) -> Array:

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from ._array_object import Array
 from ._creation_functions import asarray
-from ._data_type_functions import result_type
-from ._dtypes import _integer_dtypes
+from ._data_type_functions import astype, result_type
+from ._dtypes import _integer_dtypes, int64, uint64
 from ._flags import requires_api_version, get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
@@ -98,7 +98,13 @@ def repeat(
     else:
         raise TypeError("repeats must be an int or array")
 
-    return Array._new(np.repeat(x._array, repeats, axis=axis), device=x.device)
+    if repeats.dtype == uint64:
+        # NumPy does not allow uint64 because can't be cast down to x.dtype
+        # with 'safe' casting. However, repeats values larger than 2**63 are
+        # infeasable, and even if they are present by mistake, this will
+        # lead to underflow and an error.
+        repeats = astype(repeats, int64)
+    return Array._new(np.repeat(x._array, repeats._array, axis=axis), device=x.device)
 
 # Note: the optional argument is called 'shape', not 'newshape'
 def reshape(x: Array,
