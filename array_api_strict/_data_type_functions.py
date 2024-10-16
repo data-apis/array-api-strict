@@ -54,7 +54,7 @@ def broadcast_arrays(*arrays: Array) -> List[Array]:
     from ._array_object import Array
 
     return [
-        Array._new(array) for array in np.broadcast_arrays(*[a._array for a in arrays])
+        Array._new(array, device=arrays[0].device) for array in np.broadcast_arrays(*[a._array for a in arrays])
     ]
 
 
@@ -66,7 +66,7 @@ def broadcast_to(x: Array, /, shape: Tuple[int, ...]) -> Array:
     """
     from ._array_object import Array
 
-    return Array._new(np.broadcast_to(x._array, shape))
+    return Array._new(np.broadcast_to(x._array, shape), device=x.device)
 
 
 def can_cast(from_: Union[Dtype, Array], to: Dtype, /) -> bool:

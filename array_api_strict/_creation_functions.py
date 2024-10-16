@@ -79,7 +79,7 @@ def asarray(
                 new_array = np.array(obj._array, copy=copy, dtype=_np_dtype)
                 if new_array is not obj._array:
                     raise ValueError("Unable to avoid copy while creating an array from given array.")
-                return Array._new(new_array)
+                return Array._new(new_array, device=device)
             elif _supports_buffer_protocol(obj):
                 # Buffer protocol will always support no-copy
                 return Array._new(np.array(obj, copy=copy, dtype=_np_dtype), device=device)
@@ -211,7 +211,7 @@ def from_dlpack(
     if copy not in [_default, None]:
         raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
 
-    return Array._new(np.from_dlpack(x))
+    return Array._new(np.from_dlpack(x), device=device)
 
 
 def full(

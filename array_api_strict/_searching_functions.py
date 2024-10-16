@@ -43,7 +43,7 @@ def nonzero(x: Array, /) -> Tuple[Array, ...]:
     # Note: nonzero is disallowed on 0-dimensional arrays
     if x.ndim == 0:
         raise ValueError("nonzero is not allowed on 0-dimensional arrays")
-    return tuple(Array._new(i) for i in np.nonzero(x._array))
+    return tuple(Array._new(i, device=x.device) for i in np.nonzero(x._array))
 
 @requires_api_version('2023.12')
 def searchsorted(
