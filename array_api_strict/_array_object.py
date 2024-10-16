@@ -43,13 +43,26 @@ if TYPE_CHECKING:
 
 import numpy as np
 
-# Placeholder object to represent the "cpu" device (the only device NumPy
-# supports).
-class _cpu_device:
-    def __repr__(self):
-        return "CPU_DEVICE"
+class Device:
+    def __init__(self, device="CPU_DEVICE"):
+        if device not in ("CPU_DEVICE", "device1", "device2"):
+            raise ValueError(f"The device '{device}' is not a valid choice.")
+        self._device = device
 
-CPU_DEVICE = _cpu_device()
+    def __repr__(self):
+        return f"array_api_strict.Device('{self._device}')"
+
+    def __eq__(self, other):
+        if not isinstance(other, Device):
+            return False
+        return self._device == other._device
+
+    def __hash__(self):
+        return hash(("Device", self._device))
+
+
+CPU_DEVICE = Device()
+ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 _default = object()
 
@@ -73,7 +86,7 @@ class Array:
     # Use a custom constructor instead of __init__, as manually initializing
     # this class is not supported API.
     @classmethod
-    def _new(cls, x, /):
+    def _new(cls, x, /, device):
         """
         This is a private method for initializing the array API Array
         object.
@@ -95,6 +108,9 @@ class Array:
             )
         obj._array = x
         obj._dtype = _dtype
+        if device is None:
+            device = CPU_DEVICE
+        obj._device = device
         return obj
 
     # Prevent Array() from working
@@ -116,7 +132,11 @@ class Array:
         """
         Performs the operation __repr__.
         """
-        suffix = f", dtype={self.dtype})"
+        suffix = f", dtype={self.dtype}"
+        if self.device != CPU_DEVICE:
+            suffix += f", device={self.device})"
+        else:
+            suffix += ")"
         if 0 in self.shape:
             prefix = "empty("
             mid = str(self.shape)
@@ -134,6 +154,8 @@ class Array:
         will be present in other implementations.
 
         """
+        if self._device != CPU_DEVICE:
+            raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
         # copy keyword is new in 2.0.0; for older versions don't use it
         # retry without that keyword.
         if np.__version__[0] < '2':
@@ -193,6 +215,14 @@ class Array:
 
         return other
 
+    def _check_device(self, other):
+        """Check that other is on a device compatible with the current array"""
+        if isinstance(other, (int, complex, float, bool)):
+            return
+        elif isinstance(other, Array):
+            if self.device != other.device:
+                raise ValueError(f"Arrays from two different devices ({self.device} and {other.device}) can not be combined.")
+
     # Helper function to match the type promotion rules in the spec
     def _promote_scalar(self, scalar):
         """
@@ -244,7 +274,7 @@ class Array:
         # behavior for integers within the bounds of the integer dtype.
         # Outside of those bounds we use the default NumPy behavior (either
         # cast or raise OverflowError).
-        return Array._new(np.array(scalar, dtype=self.dtype._np_dtype))
+        return Array._new(np.array(scalar, dtype=self.dtype._np_dtype), device=CPU_DEVICE)
 
     @staticmethod
     def _normalize_two_args(x1, x2) -> Tuple[Array, Array]:
@@ -276,9 +306,9 @@ class Array:
             # performant. broadcast_to(x1._array, x2.shape) is much slower. We
             # could also manually type promote x2, but that is more complicated
             # and about the same performance as this.
-            x1 = Array._new(x1._array[None])
+            x1 = Array._new(x1._array[None], device=x1.device)
         elif x2.ndim == 0 and x1.ndim != 0:
-            x2 = Array._new(x2._array[None])
+            x2 = Array._new(x2._array[None], device=x2.device)
         return (x1, x2)
 
     # Note: A large fraction of allowed indices are disallowed here (see the
@@ -462,29 +492,31 @@ class Array:
         if self.dtype not in _numeric_dtypes:
             raise TypeError("Only numeric dtypes are allowed in __abs__")
         res = self._array.__abs__()
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __add__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __add__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__add__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__add__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __and__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
         Performs the operation __and__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__and__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__and__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __array_namespace__(
         self: Array, /, *, api_version: Optional[str] = None
@@ -568,6 +600,7 @@ class Array:
         """
         Performs the operation __eq__.
         """
+        self._check_device(other)
         # Even though "all" dtypes are allowed, we still require them to be
         # promotable with each other.
         other = self._check_allowed_dtypes(other, "all", "__eq__")
@@ -575,7 +608,7 @@ class Array:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__eq__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __float__(self: Array, /) -> float:
         """
@@ -593,23 +626,25 @@ class Array:
         """
         Performs the operation __floordiv__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__floordiv__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__floordiv__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ge__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __ge__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__ge__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__ge__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __getitem__(
         self: Array,
@@ -625,6 +660,7 @@ class Array:
         """
         Performs the operation __getitem__.
         """
+        # XXX Does key have to be on the same device? Is there an exception for CPU_DEVICE?
         # Note: Only indices required by the spec are allowed. See the
         # docstring of _validate_index
         self._validate_index(key)
@@ -632,18 +668,19 @@ class Array:
             # Indexing self._array with array_api_strict arrays can be erroneous
             key = key._array
         res = self._array.__getitem__(key)
-        return self._new(res)
+        return self._new(res, device=self.device)
 
     def __gt__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __gt__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__gt__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__gt__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=other.device)
 
     def __int__(self: Array, /) -> int:
         """
@@ -671,7 +708,7 @@ class Array:
         if self.dtype not in _integer_or_boolean_dtypes:
             raise TypeError("Only integer or boolean dtypes are allowed in __invert__")
         res = self._array.__invert__()
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __iter__(self: Array, /):
         """
@@ -686,85 +723,92 @@ class Array:
         # define __iter__, but it doesn't disallow it. The default Python
         # behavior is to implement iter as a[0], a[1], ... when __getitem__ is
         # implemented, which implies iteration on 1-D arrays.
-        return (Array._new(i) for i in self._array)
+        return (Array._new(i, device=self.device) for i in self._array)
 
     def __le__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __le__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__le__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__le__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __lshift__(self: Array, other: Union[int, Array], /) -> Array:
         """
         Performs the operation __lshift__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__lshift__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__lshift__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __lt__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __lt__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__lt__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__lt__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __matmul__(self: Array, other: Array, /) -> Array:
         """
         Performs the operation __matmul__.
         """
+        self._check_device(other)
         # matmul is not defined for scalars, but without this, we may get
         # the wrong error message from asarray.
         other = self._check_allowed_dtypes(other, "numeric", "__matmul__")
         if other is NotImplemented:
             return other
         res = self._array.__matmul__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __mod__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __mod__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__mod__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__mod__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __mul__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __mul__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__mul__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__mul__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ne__(self: Array, other: Union[int, float, bool, Array], /) -> Array:
         """
         Performs the operation __ne__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "all", "__ne__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__ne__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __neg__(self: Array, /) -> Array:
         """
@@ -773,18 +817,19 @@ class Array:
         if self.dtype not in _numeric_dtypes:
             raise TypeError("Only numeric dtypes are allowed in __neg__")
         res = self._array.__neg__()
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __or__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
         Performs the operation __or__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__or__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__or__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __pos__(self: Array, /) -> Array:
         """
@@ -793,7 +838,7 @@ class Array:
         if self.dtype not in _numeric_dtypes:
             raise TypeError("Only numeric dtypes are allowed in __pos__")
         res = self._array.__pos__()
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __pow__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
@@ -801,6 +846,7 @@ class Array:
         """
         from ._elementwise_functions import pow
 
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__pow__")
         if other is NotImplemented:
             return other
@@ -812,12 +858,13 @@ class Array:
         """
         Performs the operation __rshift__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__rshift__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rshift__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __setitem__(
         self,
@@ -842,12 +889,13 @@ class Array:
         """
         Performs the operation __sub__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__sub__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__sub__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     # PEP 484 requires int to be a subtype of float, but __truediv__ should
     # not accept int.
@@ -855,28 +903,31 @@ class Array:
         """
         Performs the operation __truediv__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "floating-point", "__truediv__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__truediv__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __xor__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
         Performs the operation __xor__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__xor__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__xor__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __iadd__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __iadd__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__iadd__")
         if other is NotImplemented:
             return other
@@ -887,17 +938,19 @@ class Array:
         """
         Performs the operation __radd__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__radd__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__radd__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __iand__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
         Performs the operation __iand__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__iand__")
         if other is NotImplemented:
             return other
@@ -908,17 +961,19 @@ class Array:
         """
         Performs the operation __rand__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__rand__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rand__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ifloordiv__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
         Performs the operation __ifloordiv__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__ifloordiv__")
         if other is NotImplemented:
             return other
@@ -929,17 +984,19 @@ class Array:
         """
         Performs the operation __rfloordiv__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__rfloordiv__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rfloordiv__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ilshift__(self: Array, other: Union[int, Array], /) -> Array:
         """
         Performs the operation __ilshift__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__ilshift__")
         if other is NotImplemented:
             return other
@@ -950,12 +1007,13 @@ class Array:
         """
         Performs the operation __rlshift__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__rlshift__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rlshift__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __imatmul__(self: Array, other: Array, /) -> Array:
         """
@@ -966,8 +1024,9 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__imatmul__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         res = self._array.__imatmul__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __rmatmul__(self: Array, other: Array, /) -> Array:
         """
@@ -978,8 +1037,9 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rmatmul__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         res = self._array.__rmatmul__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __imod__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
@@ -998,9 +1058,10 @@ class Array:
         other = self._check_allowed_dtypes(other, "real numeric", "__rmod__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rmod__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __imul__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
@@ -1019,9 +1080,10 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rmul__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rmul__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ior__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
@@ -1037,12 +1099,13 @@ class Array:
         """
         Performs the operation __ror__.
         """
+        self._check_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__ror__")
         if other is NotImplemented:
             return other
         self, other = self._normalize_two_args(self, other)
         res = self._array.__ror__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ipow__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
@@ -1084,9 +1147,10 @@ class Array:
         other = self._check_allowed_dtypes(other, "integer", "__rrshift__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rrshift__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __isub__(self: Array, other: Union[int, float, Array], /) -> Array:
         """
@@ -1105,9 +1169,10 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rsub__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rsub__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __itruediv__(self: Array, other: Union[float, Array], /) -> Array:
         """
@@ -1126,9 +1191,10 @@ class Array:
         other = self._check_allowed_dtypes(other, "floating-point", "__rtruediv__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rtruediv__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def __ixor__(self: Array, other: Union[int, bool, Array], /) -> Array:
         """
@@ -1147,15 +1213,19 @@ class Array:
         other = self._check_allowed_dtypes(other, "integer or boolean", "__rxor__")
         if other is NotImplemented:
             return other
+        self._check_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rxor__(other._array)
-        return self.__class__._new(res)
+        return self.__class__._new(res, device=self.device)
 
     def to_device(self: Array, device: Device, /, stream: None = None) -> Array:
         if stream is not None:
             raise ValueError("The stream argument to to_device() is not supported")
-        if device == CPU_DEVICE:
+        if device == self._device:
             return self
+        elif isinstance(device, Device):
+            arr = np.asarray(self._array, copy=True)
+            return self.__class__._new(arr, device=device)
         raise ValueError(f"Unsupported device {device!r}")
 
     @property
@@ -1169,7 +1239,7 @@ class Array:
 
     @property
     def device(self) -> Device:
-        return CPU_DEVICE
+        return self._device
 
     # Note: mT is new in array API spec (see matrix_transpose)
     @property
@@ -1216,4 +1286,4 @@ class Array:
         # https://data-apis.org/array-api/latest/API_specification/array_object.html#t
         if self.ndim != 2:
             raise ValueError("x.T requires x to have 2 dimensions. Use x.mT to transpose stacks of matrices and permute_dims() to permute dimensions.")
-        return self.__class__._new(self._array.T)
+        return self.__class__._new(self._array.T, device=self.device)

@@ -25,8 +25,12 @@ def concat(
     # Note: Casting rules here are different from the np.concatenate default
     # (no for scalars with axis=None, no cross-kind casting)
     dtype = result_type(*arrays)
+    if len({a.device for a in arrays}) > 1:
+        raise ValueError("concat inputs must all be on the same device")
+    result_device = arrays[0].device
+
     arrays = tuple(a._array for a in arrays)
-    return Array._new(np.concatenate(arrays, axis=axis, dtype=dtype._np_dtype))
+    return Array._new(np.concatenate(arrays, axis=axis, dtype=dtype._np_dtype), device=result_device)
 
 
 def expand_dims(x: Array, /, *, axis: int) -> Array:
@@ -35,7 +39,7 @@ def expand_dims(x: Array, /, *, axis: int) -> Array:
 
     See its docstring for more information.
     """
-    return Array._new(np.expand_dims(x._array, axis))
+    return Array._new(np.expand_dims(x._array, axis), device=x.device)
 
 
 def flip(x: Array, /, *, axis: Optional[Union[int, Tuple[int, ...]]] = None) -> Array:
@@ -44,7 +48,7 @@ def flip(x: Array, /, *, axis: Optional[Union[int, Tuple[int, ...]]] = None) -> 
 
     See its docstring for more information.
     """
-    return Array._new(np.flip(x._array, axis=axis))
+    return Array._new(np.flip(x._array, axis=axis), device=x.device)
 
 @requires_api_version('2023.12')
 def moveaxis(
@@ -58,7 +62,7 @@ def moveaxis(
 
     See its docstring for more information.
     """
-    return Array._new(np.moveaxis(x._array, source, destination))
+    return Array._new(np.moveaxis(x._array, source, destination), device=x.device)
 
 # Note: The function name is different here (see also matrix_transpose).
 # Unlike transpose(), the axes argument is required.
@@ -68,7 +72,7 @@ def permute_dims(x: Array, /, axes: Tuple[int, ...]) -> Array:
 
     See its docstring for more information.
     """
-    return Array._new(np.transpose(x._array, axes))
+    return Array._new(np.transpose(x._array, axes), device=x.device)
 
 @requires_api_version('2023.12')
 def repeat(
@@ -89,6 +93,8 @@ def repeat(
             raise RuntimeError("repeat() with repeats as an array requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
         if repeats.dtype not in _integer_dtypes:
             raise TypeError("The repeats array must have an integer dtype")
+        if x.device != repeats.device:
+            raise ValueError(f"Arrays from two different devices ({x.device} and {repeats.device}) can not be combined.")
     elif isinstance(repeats, int):
         repeats = asarray(repeats)
     else:
@@ -100,7 +106,7 @@ def repeat(
         # infeasable, and even if they are present by mistake, this will
         # lead to underflow and an error.
         repeats = astype(repeats, int64)
-    return Array._new(np.repeat(x._array, repeats._array, axis=axis))
+    return Array._new(np.repeat(x._array, repeats._array, axis=axis), device=x.device)
 
 # Note: the optional argument is called 'shape', not 'newshape'
 def reshape(x: Array,
@@ -123,7 +129,7 @@ def reshape(x: Array,
     if copy is False and not np.shares_memory(data, reshaped):
         raise AttributeError("Incompatible shape for in-place modification.")
 
-    return Array._new(reshaped)
+    return Array._new(reshaped, device=x.device)
 
 
 def roll(
@@ -138,7 +144,7 @@ def roll(
 
     See its docstring for more information.
     """
-    return Array._new(np.roll(x._array, shift, axis=axis))
+    return Array._new(np.roll(x._array, shift, axis=axis), device=x.device)
 
 
 def squeeze(x: Array, /, axis: Union[int, Tuple[int, ...]]) -> Array:
@@ -147,7 +153,7 @@ def squeeze(x: Array, /, axis: Union[int, Tuple[int, ...]]) -> Array:
 
     See its docstring for more information.
     """
-    return Array._new(np.squeeze(x._array, axis=axis))
+    return Array._new(np.squeeze(x._array, axis=axis), device=x.device)
 
 
 def stack(arrays: Union[Tuple[Array, ...], List[Array]], /, *, axis: int = 0) -> Array:
@@ -158,8 +164,11 @@ def stack(arrays: Union[Tuple[Array, ...], List[Array]], /, *, axis: int = 0) ->
     """
     # Call result type here just to raise on disallowed type combinations
     result_type(*arrays)
+    if len({a.device for a in arrays}) > 1:
+        raise ValueError("concat inputs must all be on the same device")
+    result_device = arrays[0].device
     arrays = tuple(a._array for a in arrays)
-    return Array._new(np.stack(arrays, axis=axis))
+    return Array._new(np.stack(arrays, axis=axis), device=result_device)
 
 
 @requires_api_version('2023.12')
@@ -172,7 +181,7 @@ def tile(x: Array, repetitions: Tuple[int, ...], /) -> Array:
     # Note: NumPy allows repetitions to be an int or array
     if not isinstance(repetitions, tuple):
         raise TypeError("repetitions must be a tuple")
-    return Array._new(np.tile(x._array, repetitions))
+    return Array._new(np.tile(x._array, repetitions), device=x.device)
 
 # Note: this function is new
 @requires_api_version('2023.12')

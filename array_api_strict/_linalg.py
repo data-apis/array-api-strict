@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from functools import partial
+
 from ._dtypes import (
     _floating_dtypes,
     _numeric_dtypes,
@@ -59,11 +61,11 @@ def cholesky(x: Array, /, *, upper: bool = False) -> Array:
         raise TypeError('Only floating-point dtypes are allowed in cholesky')
     L = np.linalg.cholesky(x._array)
     if upper:
-        U = Array._new(L).mT
+        U = Array._new(L, device=x.device).mT
         if U.dtype in [complex64, complex128]:
             U = conj(U)
         return U
-    return Array._new(L)
+    return Array._new(L, device=x.device)
 
 # Note: cross is the numpy top-level namespace, not np.linalg
 @requires_extension('linalg')
@@ -81,6 +83,9 @@ def cross(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
     if x1.shape[axis] != 3:
         raise ValueError('cross() dimension must equal 3')
 
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+
     if get_array_api_strict_flags()['api_version'] >= '2023.12':
         if axis >= 0:
             raise ValueError("axis must be negative in cross")
@@ -91,7 +96,7 @@ def cross(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
         # positive axis applied before or after broadcasting. NumPy applies
         # the axis before broadcasting. Since that behavior is what has always
         # been implemented here, we keep it for backwards compatibility.
-    return Array._new(np.cross(x1._array, x2._array, axis=axis))
+    return Array._new(np.cross(x1._array, x2._array, axis=axis), device=x1.device)
 
 @requires_extension('linalg')
 def det(x: Array, /) -> Array:
@@ -104,7 +109,7 @@ def det(x: Array, /) -> Array:
     # np.linalg.det.
     if x.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in det')
-    return Array._new(np.linalg.det(x._array))
+    return Array._new(np.linalg.det(x._array), device=x.device)
 
 # Note: diagonal is the numpy top-level namespace, not np.linalg
 @requires_extension('linalg')
@@ -116,7 +121,7 @@ def diagonal(x: Array, /, *, offset: int = 0) -> Array:
     """
     # Note: diagonal always operates on the last two axes, whereas np.diagonal
     # operates on the first two axes by default
-    return Array._new(np.diagonal(x._array, offset=offset, axis1=-2, axis2=-1))
+    return Array._new(np.diagonal(x._array, offset=offset, axis1=-2, axis2=-1), device=x.device)
 
 @requires_extension('linalg')
 def eigh(x: Array, /) -> EighResult:
@@ -132,7 +137,7 @@ def eigh(x: Array, /) -> EighResult:
 
     # Note: the return type here is a namedtuple, which is different from
     # np.eigh, which only returns a tuple.
-    return EighResult(*map(Array._new, np.linalg.eigh(x._array)))
+    return EighResult(*map(partial(Array._new, device=x.device), np.linalg.eigh(x._array)))
 
 
 @requires_extension('linalg')
@@ -147,7 +152,7 @@ def eigvalsh(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in eigvalsh')
 
-    return Array._new(np.linalg.eigvalsh(x._array))
+    return Array._new(np.linalg.eigvalsh(x._array), device=x.device)
 
 @requires_extension('linalg')
 def inv(x: Array, /) -> Array:
@@ -161,7 +166,7 @@ def inv(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in inv')
 
-    return Array._new(np.linalg.inv(x._array))
+    return Array._new(np.linalg.inv(x._array), device=x.device)
 
 # Note: the name here is different from norm(). The array API norm is split
 # into matrix_norm and vector_norm().
@@ -181,7 +186,7 @@ def matrix_norm(x: Array, /, *, keepdims: bool = False, ord: Optional[Union[int,
     if x.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in matrix_norm')
 
-    return Array._new(np.linalg.norm(x._array, axis=(-2, -1), keepdims=keepdims, ord=ord))
+    return Array._new(np.linalg.norm(x._array, axis=(-2, -1), keepdims=keepdims, ord=ord), device=x.device)
 
 
 @requires_extension('linalg')
@@ -197,7 +202,7 @@ def matrix_power(x: Array, n: int, /) -> Array:
         raise TypeError('Only floating-point dtypes are allowed for the first argument of matrix_power')
 
     # np.matrix_power already checks if n is an integer
-    return Array._new(np.linalg.matrix_power(x._array, n))
+    return Array._new(np.linalg.matrix_power(x._array, n), device=x.device)
 
 # Note: the keyword argument name rtol is different from np.linalg.matrix_rank
 @requires_extension('linalg')
@@ -220,7 +225,7 @@ def matrix_rank(x: Array, /, *, rtol: Optional[Union[float, Array]] = None) -> A
         # Note: this is different from np.linalg.matrix_rank, which does not multiply
         # the tolerance by the largest singular value.
         tol = S.max(axis=-1, keepdims=True)*np.asarray(rtol)[..., np.newaxis]
-    return Array._new(np.count_nonzero(S > tol, axis=-1))
+    return Array._new(np.count_nonzero(S > tol, axis=-1), device=x.device)
 
 
 # Note: outer is the numpy top-level namespace, not np.linalg
@@ -240,7 +245,10 @@ def outer(x1: Array, x2: Array, /) -> Array:
     if x1.ndim != 1 or x2.ndim != 1:
         raise ValueError('The input arrays to outer must be 1-dimensional')
 
-    return Array._new(np.outer(x1._array, x2._array))
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+
+    return Array._new(np.outer(x1._array, x2._array), device=x1.device)
 
 # Note: the keyword argument name rtol is different from np.linalg.pinv
 @requires_extension('linalg')
@@ -259,7 +267,7 @@ def pinv(x: Array, /, *, rtol: Optional[Union[float, Array]] = None) -> Array:
     # default tolerance by max(M, N).
     if rtol is None:
         rtol = max(x.shape[-2:]) * finfo(x.dtype).eps
-    return Array._new(np.linalg.pinv(x._array, rcond=rtol))
+    return Array._new(np.linalg.pinv(x._array, rcond=rtol), device=x.device)
 
 @requires_extension('linalg')
 def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRResult:  # noqa: F821
@@ -275,7 +283,7 @@ def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRRe
 
     # Note: the return type here is a namedtuple, which is different from
     # np.linalg.qr, which only returns a tuple.
-    return QRResult(*map(Array._new, np.linalg.qr(x._array, mode=mode)))
+    return QRResult(*map(partial(Array._new, device=x.device), np.linalg.qr(x._array, mode=mode)))
 
 @requires_extension('linalg')
 def slogdet(x: Array, /) -> SlogdetResult:
@@ -291,7 +299,7 @@ def slogdet(x: Array, /) -> SlogdetResult:
 
     # Note: the return type here is a namedtuple, which is different from
     # np.linalg.slogdet, which only returns a tuple.
-    return SlogdetResult(*map(Array._new, np.linalg.slogdet(x._array)))
+    return SlogdetResult(*map(partial(Array._new, device=x.device), np.linalg.slogdet(x._array)))
 
 # Note: unlike np.linalg.solve, the array API solve() only accepts x2 as a
 # vector when it is exactly 1-dimensional. All other cases treat x2 as a stack
@@ -348,7 +356,10 @@ def solve(x1: Array, x2: Array, /) -> Array:
     if x1.dtype not in _floating_dtypes or x2.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in solve')
 
-    return Array._new(_solve(x1._array, x2._array))
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+
+    return Array._new(_solve(x1._array, x2._array), device=x1.device)
 
 @requires_extension('linalg')
 def svd(x: Array, /, *, full_matrices: bool = True) -> SVDResult:
@@ -364,7 +375,7 @@ def svd(x: Array, /, *, full_matrices: bool = True) -> SVDResult:
 
     # Note: the return type here is a namedtuple, which is different from
     # np.svd, which only returns a tuple.
-    return SVDResult(*map(Array._new, np.linalg.svd(x._array, full_matrices=full_matrices)))
+    return SVDResult(*map(partial(Array._new, device=x.device), np.linalg.svd(x._array, full_matrices=full_matrices)))
 
 # Note: svdvals is not in NumPy (but it is in SciPy). It is equivalent to
 # np.linalg.svd(compute_uv=False).
@@ -372,7 +383,7 @@ def svd(x: Array, /, *, full_matrices: bool = True) -> SVDResult:
 def svdvals(x: Array, /) -> Union[Array, Tuple[Array, ...]]:
     if x.dtype not in _floating_dtypes:
         raise TypeError('Only floating-point dtypes are allowed in svdvals')
-    return Array._new(np.linalg.svd(x._array, compute_uv=False))
+    return Array._new(np.linalg.svd(x._array, compute_uv=False), device=x.device)
 
 # Note: trace is the numpy top-level namespace, not np.linalg
 @requires_extension('linalg')
@@ -397,7 +408,7 @@ def trace(x: Array, /, *, offset: int = 0, dtype: Optional[Dtype] = None) -> Arr
         dtype = dtype._np_dtype
     # Note: trace always operates on the last two axes, whereas np.trace
     # operates on the first two axes by default
-    return Array._new(np.asarray(np.trace(x._array, offset=offset, axis1=-2, axis2=-1, dtype=dtype)))
+    return Array._new(np.asarray(np.trace(x._array, offset=offset, axis1=-2, axis2=-1, dtype=dtype)), device=x.device)
 
 # Note: the name here is different from norm(). The array API norm is split
 # into matrix_norm and vector_norm().
@@ -437,7 +448,7 @@ def vector_norm(x: Array, /, *, axis: Optional[Union[int, Tuple[int, ...]]] = No
     else:
         _axis = axis
 
-    res = Array._new(np.linalg.norm(a, axis=_axis, ord=ord))
+    res = Array._new(np.linalg.norm(a, axis=_axis, ord=ord), device=x.device)
 
     if keepdims:
         # We can't reuse np.linalg.norm(keepdims) because of the reshape hacks

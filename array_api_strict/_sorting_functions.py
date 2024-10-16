@@ -33,7 +33,7 @@ def argsort(
         normalised_axis = axis if axis >= 0 else x.ndim + axis
         max_i = x.shape[normalised_axis] - 1
         res = max_i - res
-    return Array._new(res)
+    return Array._new(res, device=x.device)
 
 # Note: the descending keyword argument is new in this function
 def sort(
@@ -51,4 +51,4 @@ def sort(
     res = np.sort(x._array, axis=axis, kind=kind)
     if descending:
         res = np.flip(res, axis=axis)
-    return Array._new(res)
+    return Array._new(res, device=x.device)

@@ -55,10 +55,10 @@ def unique_all(x: Array, /) -> UniqueAllResult:
     # See https://github.com/numpy/numpy/issues/20638
     inverse_indices = inverse_indices.reshape(x.shape)
     return UniqueAllResult(
-        Array._new(values),
-        Array._new(indices),
-        Array._new(inverse_indices),
-        Array._new(counts),
+        Array._new(values, device=x.device),
+        Array._new(indices, device=x.device),
+        Array._new(inverse_indices, device=x.device),
+        Array._new(counts, device=x.device),
     )
 
 
@@ -72,7 +72,7 @@ def unique_counts(x: Array, /) -> UniqueCountsResult:
         equal_nan=False,
     )
 
-    return UniqueCountsResult(*[Array._new(i) for i in res])
+    return UniqueCountsResult(*[Array._new(i, device=x.device) for i in res])
 
 
 @requires_data_dependent_shapes
@@ -92,7 +92,8 @@ def unique_inverse(x: Array, /) -> UniqueInverseResult:
     # np.unique() flattens inverse indices, but they need to share x's shape
     # See https://github.com/numpy/numpy/issues/20638
     inverse_indices = inverse_indices.reshape(x.shape)
-    return UniqueInverseResult(Array._new(values), Array._new(inverse_indices))
+    return UniqueInverseResult(Array._new(values, device=x.device),
+                               Array._new(inverse_indices, device=x.device))
 
 
 @requires_data_dependent_shapes
@@ -109,4 +110,4 @@ def unique_values(x: Array, /) -> Array:
         return_inverse=False,
         equal_nan=False,
     )
-    return Array._new(res)
+    return Array._new(res, device=x.device)

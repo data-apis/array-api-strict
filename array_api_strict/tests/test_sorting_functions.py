@@ -21,3 +21,17 @@ def test_stable_desc_argsort(obj, axis, expected):
     x = xp.asarray(obj)
     out = xp.argsort(x, axis=axis, stable=True, descending=True)
     assert xp.all(out == xp.asarray(expected))
+
+
+def test_argsort_device():
+    x = xp.asarray([1., 2., -1., 3.141], device=xp.Device("device1"))
+    y = xp.argsort(x)
+
+    assert y.device == x.device
+
+
+def test_sort_device():
+    x = xp.asarray([1., 2., -1., 3.141], device=xp.Device("device1"))
+    y = xp.sort(x)
+
+    assert y.device == x.device
