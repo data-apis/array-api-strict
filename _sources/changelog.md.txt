@@ -1,8 +1,32 @@
 # Changelog
 
-### 2.0.1 (2024-07-01)
 
-## Minor Changes
+## 2.1 (2024-10-18)
+
+## Major Changes
+
+- The default version of the array API standard is now 2023.12. 2022.12 can
+  still be enabled via the [flags API](array-api-strict-flags).
+
+- Added support for multiple fake "devices", so that code testing against
+  array-api-strict can check for proper device support. Currently there are
+  three "devices", the "CPU" device, which is the default devices, and two
+  pseudo "device" objects. This set of devices can be accessed with
+  `array_api_strict.__array_namespace_info__().devices()` (requires the array
+  API version to be set to 2023.12), and via the other array API APIs that
+  return devices (like `x.device`). These devices do not correspond to any
+  actual hardware and only exist for testing array API device semantics; for
+  instance, implicitly combining arrays on different devices results in an
+  exception. (Thanks to [@betatim](https://github.com/betatim)).
+
+### Minor Changes
+
+- Avoid implicitly relying on `__array__` in some places. These changes should
+  not be usef visible.
+
+## 2.0.1 (2024-07-01)
+
+### Minor Changes
 
 - Re-allow iteration on 1-D arrays. A change from 2.0 fixed iter() raising on
   n-D arrays but also made 1-D arrays raise. The standard does not explicitly
