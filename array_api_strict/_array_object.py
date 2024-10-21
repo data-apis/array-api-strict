@@ -274,7 +274,7 @@ class Array:
         # behavior for integers within the bounds of the integer dtype.
         # Outside of those bounds we use the default NumPy behavior (either
         # cast or raise OverflowError).
-        return Array._new(np.array(scalar, dtype=self.dtype._np_dtype), device=CPU_DEVICE)
+        return Array._new(np.array(scalar, dtype=self.dtype._np_dtype), device=self.device)
 
     @staticmethod
     def _normalize_two_args(x1, x2) -> Tuple[Array, Array]:

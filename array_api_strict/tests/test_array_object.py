@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from .. import ones, asarray, result_type, all, equal
-from .._array_object import Array, CPU_DEVICE
+from .._array_object import Array, CPU_DEVICE, Device
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
@@ -87,6 +87,14 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[0,])
     assert_raises(IndexError, lambda: a[0])
     assert_raises(IndexError, lambda: a[:])
+
+def test_promoted_scalar_inherits_device():
+    device1 = Device("device1")
+    x = asarray([1., 2, 3], device=device1)
+
+    y = x ** 2
+
+    assert y.device == device1
 
 def test_operators():
     # For every operator, we test that it works for the required type
