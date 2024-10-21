@@ -23,7 +23,7 @@ from .._creation_functions import (
     zeros_like,
 )
 from .._dtypes import float32, float64
-from .._array_object import Array, CPU_DEVICE
+from .._array_object import Array, CPU_DEVICE, Device
 from .._flags import set_array_api_strict_flags
 
 def test_asarray_errors():
@@ -96,6 +96,17 @@ def test_asarray_copy():
     assert isinstance(b, Array)
     a[0] = 0
     assert all(b[0] == 0)
+
+
+def test_asarray_device_inference():
+    assert asarray([1, 2, 3]).device == CPU_DEVICE
+
+    x = asarray([1, 2, 3])
+    assert asarray(x).device == CPU_DEVICE
+
+    device1 = Device("device1")
+    x = asarray([1, 2, 3], device=device1)
+    assert asarray(x).device == device1
 
 def test_arange_errors():
     arange(1, device=CPU_DEVICE)  # Doesn't error
