@@ -67,6 +67,8 @@ def asarray(
     if dtype is not None:
         _np_dtype = dtype._np_dtype
     _check_device(device)
+    if isinstance(obj, Array) and device is None:
+        device = obj.device
 
     if np.__version__[0] < '2':
         if copy is False:
@@ -158,6 +160,8 @@ def empty_like(
 
     _check_valid_dtype(dtype)
     _check_device(device)
+    if device is None:
+        device = x.device
 
     if dtype is not None:
         dtype = dtype._np_dtype
@@ -260,6 +264,8 @@ def full_like(
 
     _check_valid_dtype(dtype)
     _check_device(device)
+    if device is None:
+        device = x.device
 
     if dtype is not None:
         dtype = dtype._np_dtype
