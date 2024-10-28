@@ -53,6 +53,8 @@ CPU_DEVICE = _cpu_device()
 
 _default = object()
 
+_allow_array = False
+
 class Array:
     """
     n-d array object for the array API namespace.
@@ -135,6 +137,22 @@ class Array:
     # lead to code assuming np.asarray(other_array) would always work in the
     # standard.
     def __array__(self, dtype: None | np.dtype[Any] = None, copy: None | bool = None) -> npt.NDArray[Any]:
+        # We have to allow this to be internally enabled as there's no other
+        # easy way to parse a list of Array objects in asarray().
+        if _allow_array:
+            # copy keyword is new in 2.0.0; for older versions don't use it
+            # retry without that keyword.
+            if np.__version__[0] < '2':
+                return np.asarray(self._array, dtype=dtype)
+            elif np.__version__.startswith('2.0.0-dev0'):
+                # Handle dev version for which we can't know based on version
+                # number whether or not the copy keyword is supported.
+                try:
+                    return np.asarray(self._array, dtype=dtype, copy=copy)
+                except TypeError:
+                    return np.asarray(self._array, dtype=dtype)
+            else:
+                return np.asarray(self._array, dtype=dtype, copy=copy)
         raise ValueError("Conversion from an array_api_strict array to a NumPy ndarray is not supported")
 
     # These are various helper functions to make the array behavior match the
