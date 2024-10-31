@@ -267,6 +267,8 @@ def pinv(x: Array, /, *, rtol: Optional[Union[float, Array]] = None) -> Array:
     # default tolerance by max(M, N).
     if rtol is None:
         rtol = max(x.shape[-2:]) * finfo(x.dtype).eps
+    if isinstance(rtol, Array):
+        rtol = rtol._array
     return Array._new(np.linalg.pinv(x._array, rcond=rtol), device=x.device)
 
 @requires_extension('linalg')
