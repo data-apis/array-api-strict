@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ._array_object import Array
 from ._dtypes import _result_type, _real_numeric_dtypes
-from ._flags import requires_data_dependent_shapes, requires_api_version
+from ._flags import requires_data_dependent_shapes, requires_api_version, get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -72,12 +72,19 @@ def searchsorted(
     # x1 must be 1-D, but NumPy already requires this.
     return Array._new(np.searchsorted(x1._array, x2._array, side=side, sorter=sorter), device=x1.device)
 
-def where(condition: Array, x1: Array, x2: Array, /) -> Array:
+def where(condition: Array, x1: bool | int | float | Array, x2: bool | int | float | Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.where <numpy.where>`.
 
     See its docstring for more information.
     """
+    if get_array_api_strict_flags()['api_version'] > '2023.12':
+        if isinstance(x1, (bool, float, int)):
+            x1 = Array._new(np.asarray(x1), device=condition.device)
+
+        if isinstance(x2, (bool, float, int)):
+            x2 = Array._new(np.asarray(x2), device=condition.device)
+
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)
 
