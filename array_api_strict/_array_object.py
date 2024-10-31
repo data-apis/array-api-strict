@@ -160,8 +160,8 @@ class Array:
         # We have to allow this to be internally enabled as there's no other
         # easy way to parse a list of Array objects in asarray().
         if _allow_array:
-        if self._device != CPU_DEVICE:
-            raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
+            if self._device != CPU_DEVICE:
+                raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
             # copy keyword is new in 2.0.0; for older versions don't use it
             # retry without that keyword.
             if np.__version__[0] < '2':
