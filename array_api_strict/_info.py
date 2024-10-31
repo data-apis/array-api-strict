@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Optional, Union, Tuple, List
     from ._typing import device, DefaultDataTypes, DataTypes, Capabilities, Info
 
-from ._array_object import CPU_DEVICE
+from ._array_object import ALL_DEVICES, CPU_DEVICE
 from ._flags import get_array_api_strict_flags, requires_api_version
 from ._dtypes import bool, int8, int16, int32, int64, uint8, uint16, uint32, uint64, float32, float64, complex64, complex128
 
@@ -121,7 +121,7 @@ def dtypes(
 
 @requires_api_version('2023.12')
 def devices() -> List[device]:
-    return [CPU_DEVICE]
+    return list(ALL_DEVICES)
 
 __all__ = [
     "capabilities",

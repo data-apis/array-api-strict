@@ -44,7 +44,7 @@ def cumulative_sum(
         if axis < 0:
             axis += x.ndim
         x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
-    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype))
+    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype), device=x.device)
 
 def max(
     x: Array,
@@ -55,7 +55,7 @@ def max(
 ) -> Array:
     if x.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in max")
-    return Array._new(np.max(x._array, axis=axis, keepdims=keepdims))
+    return Array._new(np.max(x._array, axis=axis, keepdims=keepdims), device=x.device)
 
 
 def mean(
@@ -67,7 +67,7 @@ def mean(
 ) -> Array:
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in mean")
-    return Array._new(np.mean(x._array, axis=axis, keepdims=keepdims))
+    return Array._new(np.mean(x._array, axis=axis, keepdims=keepdims), device=x.device)
 
 
 def min(
@@ -79,7 +79,7 @@ def min(
 ) -> Array:
     if x.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in min")
-    return Array._new(np.min(x._array, axis=axis, keepdims=keepdims))
+    return Array._new(np.min(x._array, axis=axis, keepdims=keepdims), device=x.device)
 
 
 def prod(
@@ -104,7 +104,7 @@ def prod(
                 dtype = np.complex128
     else:
         dtype = dtype._np_dtype
-    return Array._new(np.prod(x._array, dtype=dtype, axis=axis, keepdims=keepdims))
+    return Array._new(np.prod(x._array, dtype=dtype, axis=axis, keepdims=keepdims), device=x.device)
 
 
 def std(
@@ -118,7 +118,7 @@ def std(
     # Note: the keyword argument correction is different here
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in std")
-    return Array._new(np.std(x._array, axis=axis, ddof=correction, keepdims=keepdims))
+    return Array._new(np.std(x._array, axis=axis, ddof=correction, keepdims=keepdims), device=x.device)
 
 
 def sum(
@@ -143,7 +143,7 @@ def sum(
                 dtype = np.complex128
     else:
         dtype = dtype._np_dtype
-    return Array._new(np.sum(x._array, axis=axis, dtype=dtype, keepdims=keepdims))
+    return Array._new(np.sum(x._array, axis=axis, dtype=dtype, keepdims=keepdims), device=x.device)
 
 
 def var(
@@ -157,4 +157,4 @@ def var(
     # Note: the keyword argument correction is different here
     if x.dtype not in _real_floating_dtypes:
         raise TypeError("Only real floating-point dtypes are allowed in var")
-    return Array._new(np.var(x._array, axis=axis, ddof=correction, keepdims=keepdims))
+    return Array._new(np.var(x._array, axis=axis, ddof=correction, keepdims=keepdims), device=x.device)
