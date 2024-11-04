@@ -29,6 +29,7 @@ from typing import (
 
 from ._array_object import Array, _device
 from ._dtypes import _DType
+from ._info import __array_namespace_info__
 
 _T_co = TypeVar("_T_co", covariant=True)
 
@@ -41,7 +42,7 @@ Device = _device
 
 Dtype = _DType
 
-Info = ModuleType
+Info = __array_namespace_info__
 
 if sys.version_info >= (3, 12):
     from collections.abc import Buffer as SupportsBufferProtocol

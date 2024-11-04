@@ -3,8 +3,7 @@ import subprocess
 
 from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
                       reset_array_api_strict_flags)
-from .._info import (capabilities, default_device, default_dtypes, devices,
-                     dtypes)
+from .._info import __array_namespace_info__
 from .._fft import (fft, ifft, fftn, ifftn, rfft, irfft, rfftn, irfftn, hfft,
                     ihfft, fftfreq, rfftfreq, fftshift, ifftshift)
 from .._linalg import (cholesky, cross, det, diagonal, eigh, eigvalsh, inv,
@@ -260,14 +259,17 @@ def test_fft(func_name):
     set_array_api_strict_flags(enabled_extensions=('fft',))
     func()
 
+# Test functionality even if the info object is already created
+_info = xp.__array_namespace_info__()
+
 api_version_2023_12_examples = {
     '__array_namespace_info__': lambda: xp.__array_namespace_info__(),
     # Test these functions directly to ensure they are properly decorated
-    'capabilities': capabilities,
-    'default_device': default_device,
-    'default_dtypes': default_dtypes,
-    'devices': devices,
-    'dtypes': dtypes,
+    'capabilities': _info.capabilities,
+    'default_device': _info.default_device,
+    'default_dtypes': _info.default_dtypes,
+    'devices': _info.devices,
+    'dtypes': _info.dtypes,
     'clip': lambda: xp.clip(xp.asarray([1, 2, 3]), 1, 2),
     'copysign': lambda: xp.copysign(xp.asarray([1., 2., 3.]), xp.asarray([-1., -1., -1.])),
     'cumulative_sum': lambda: xp.cumulative_sum(xp.asarray([1, 2, 3])),
