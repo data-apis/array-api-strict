@@ -805,6 +805,20 @@ def negative(x: Array, /) -> Array:
     return Array._new(np.negative(x._array), device=x.device)
 
 
+@requires_api_version('2024.12')
+def nextafter(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.nextafter <numpy.nextafter>`.
+
+    See its docstring for more information.
+    """
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
+        raise TypeError("Only real floating-point dtypes are allowed in nextafter")
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.nextafter(x1._array, x2._array), device=x1.device)
+
 def not_equal(x1: Array, x2: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.not_equal <numpy.not_equal>`.

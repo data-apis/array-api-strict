@@ -2,6 +2,8 @@ from inspect import signature, getmodule
 
 from numpy.testing import assert_raises
 
+import pytest
+
 from .. import asarray, _elementwise_functions
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._dtypes import (
@@ -79,6 +81,7 @@ elementwise_function_input_types = {
     "minimum": "real numeric",
     "multiply": "numeric",
     "negative": "numeric",
+    "nextafter": "real floating-point",
     "not_equal": "all",
     "positive": "numeric",
     "pow": "numeric",
@@ -126,7 +129,8 @@ def test_function_device_persists():
             yield asarray(1., dtype=d)
 
     # Use the latest version of the standard so all functions are included
-    set_array_api_strict_flags(api_version="2023.12")
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version="2024.12")
 
     for func_name, types in elementwise_function_input_types.items():
         dtypes = _dtype_categories[types]
@@ -162,7 +166,8 @@ def test_function_types():
             yield asarray(1.0, dtype=d)
 
     # Use the latest version of the standard so all functions are included
-    set_array_api_strict_flags(api_version="2023.12")
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version="2024.12")
 
     for x in _array_vals():
         for func_name, types in elementwise_function_input_types.items():
