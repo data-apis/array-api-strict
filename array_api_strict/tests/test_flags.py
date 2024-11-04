@@ -99,6 +99,21 @@ def test_flags_api_version_2023_12():
         'enabled_extensions': ('linalg', 'fft'),
     }
 
+def test_flags_api_version_2024_12():
+    # Make sure setting the version to 2024.12 issues a warning.
+    with pytest.warns(UserWarning) as record:
+        set_array_api_strict_flags(api_version='2024.12')
+    assert len(record) == 1
+    assert '2024.12' in str(record[0].message)
+    assert 'draft' in str(record[0].message)
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2024.12',
+        'boolean_indexing': True,
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
+
 def test_setting_flags_invalid():
     # Test setting flags with invalid values
     pytest.raises(ValueError, lambda:

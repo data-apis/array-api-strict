@@ -24,6 +24,8 @@ supported_versions = (
     "2023.12",
 )
 
+draft_version = "2024.12"
+
 API_VERSION = default_version = "2023.12"
 
 BOOLEAN_INDEXING = True
@@ -70,8 +72,8 @@ def set_array_api_strict_flags(
     ----------
     api_version : str, optional
         The version of the standard to use. Supported versions are:
-        ``{supported_versions}``. The default version number is
-        ``{default_version!r}``.
+        ``{supported_versions}``, plus the draft version ``{draft_version}``.
+        The default version number is ``{default_version!r}``.
 
         Note that 2021.12 is supported, but currently gives the same thing as
         2022.12 (except that the fft extension will be disabled).
@@ -134,10 +136,12 @@ def set_array_api_strict_flags(
     global API_VERSION, BOOLEAN_INDEXING, DATA_DEPENDENT_SHAPES, ENABLED_EXTENSIONS
 
     if api_version is not None:
-        if api_version not in supported_versions:
+        if api_version not in [*supported_versions, draft_version]:
             raise ValueError(f"Unsupported standard version {api_version!r}")
         if api_version == "2021.12":
             warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12", stacklevel=2)
+        if api_version == draft_version:
+            warnings.warn(f"The {draft_version} version of the array API specification is in draft status. Not all features are implemented in array_api_strict, and behaviors are subject to change before the final standard release.")
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 
@@ -169,6 +173,7 @@ set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
     supported_versions=supported_versions,
     default_version=default_version,
     default_extensions=default_extensions,
+    draft_version=draft_version,
 )
 
 def get_array_api_strict_flags():
