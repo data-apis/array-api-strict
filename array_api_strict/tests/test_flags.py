@@ -282,6 +282,10 @@ api_version_2023_12_examples = {
     'unstack': lambda: xp.unstack(xp.ones((3, 3)), axis=0),
 }
 
+api_version_2024_12_examples = {
+    'diff': lambda: xp.diff(xp.asarray([0, 1, 2])),
+}
+
 @pytest.mark.parametrize('func_name', api_version_2023_12_examples.keys())
 def test_api_version_2023_12(func_name):
     func = api_version_2023_12_examples[func_name]
@@ -298,6 +302,28 @@ def test_api_version_2023_12(func_name):
     func()
 
     set_array_api_strict_flags(api_version='2022.12')
+    pytest.raises(RuntimeError, func)
+
+@pytest.mark.parametrize('func_name', api_version_2024_12_examples.keys())
+def test_api_version_2024_12(func_name):
+    func = api_version_2024_12_examples[func_name]
+
+    # By default, these functions should error
+    pytest.raises(RuntimeError, func)
+
+    # In 2022.12 and 2023.12, these functions should error
+    set_array_api_strict_flags(api_version='2022.12')
+    pytest.raises(RuntimeError, func)
+    set_array_api_strict_flags(api_version='2023.12')
+    pytest.raises(RuntimeError, func)
+
+    # They should not error in 2024.12
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2024.12')
+    func()
+
+    # Test the behavior gets updated properly
+    set_array_api_strict_flags(api_version='2023.12')
     pytest.raises(RuntimeError, func)
 
 def test_disabled_extensions():
