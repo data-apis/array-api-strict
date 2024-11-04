@@ -141,7 +141,7 @@ def set_array_api_strict_flags(
         if api_version == "2021.12":
             warnings.warn("The 2021.12 version of the array API specification was requested but the returned namespace is actually version 2022.12", stacklevel=2)
         if api_version == draft_version:
-            warnings.warn(f"The {draft_version} version of the array API specification is in draft status. Not all features are implemented in array_api_strict, and behaviors are subject to change before the final standard release.")
+            warnings.warn(f"The {draft_version} version of the array API specification is in draft status. Not all features are implemented in array_api_strict, some functions may not be fully tested, and behaviors are subject to change before the final standard release.")
         API_VERSION = api_version
         array_api_strict.__array_api_version__ = API_VERSION
 
