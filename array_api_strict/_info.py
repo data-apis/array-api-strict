@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from typing import Optional, Union, Tuple, List
     from ._typing import device, DefaultDataTypes, DataTypes, Capabilities, Info
@@ -18,9 +20,23 @@ def __array_namespace_info__() -> Info:
 @requires_api_version('2023.12')
 def capabilities() -> Capabilities:
     flags = get_array_api_strict_flags()
-    return {"boolean indexing": flags['boolean_indexing'],
+    res = {"boolean indexing": flags['boolean_indexing'],
             "data-dependent shapes": flags['data_dependent_shapes'],
             }
+    if flags['api_version'] >= '2024.12':
+        # maxdims is 32 for NumPy 1.x and 64 for NumPy 2.0. Eventually we will
+        # drop support for NumPy 1 but for now, just compute the number
+        # directly
+        for i in range(1, 100):
+            try:
+                np.zeros((1,)*i)
+            except ValueError:
+                maxdims = i - 1
+                break
+        else:
+            raise RuntimeError("Could not get max dimensions (this is a bug in array-api-strict)")
+        res['max dimensions'] = maxdims
+    return res
 
 @requires_api_version('2023.12')
 def default_device() -> device:
