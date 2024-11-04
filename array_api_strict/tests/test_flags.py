@@ -287,6 +287,7 @@ api_version_2023_12_examples = {
 api_version_2024_12_examples = {
     'diff': lambda: xp.diff(xp.asarray([0, 1, 2])),
     'nextafter': lambda: xp.nextafter(xp.asarray(0.), xp.asarray(1.)),
+    'reciprocal': lambda: xp.reciprocal(xp.asarray([2.])),
 }
 
 @pytest.mark.parametrize('func_name', api_version_2023_12_examples.keys())

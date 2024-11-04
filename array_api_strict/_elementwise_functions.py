@@ -872,6 +872,17 @@ def real(x: Array, /) -> Array:
     return Array._new(np.real(x._array), device=x.device)
 
 
+@requires_api_version('2024.12')
+def reciprocal(x: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.reciprocal <numpy.reciprocal>`.
+
+    See its docstring for more information.
+    """
+    if x.dtype not in _floating_dtypes:
+        raise TypeError("Only floating-point dtypes are allowed in reciprocal")
+    return Array._new(np.reciprocal(x._array), device=x.device)
+
 def remainder(x1: Array, x2: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.remainder <numpy.remainder>`.

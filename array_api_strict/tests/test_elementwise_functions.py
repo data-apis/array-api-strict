@@ -86,6 +86,7 @@ elementwise_function_input_types = {
     "positive": "numeric",
     "pow": "numeric",
     "real": "complex floating-point",
+    "reciprocal": "floating-point",
     "remainder": "real numeric",
     "round": "numeric",
     "sign": "numeric",
