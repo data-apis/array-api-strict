@@ -54,7 +54,8 @@ class SupportsDLPack(Protocol):
     def __dlpack__(self, /, *, stream: None = ...) -> PyCapsule: ...
 
 Capabilities = TypedDict(
-    "Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool}
+    "Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool,
+                     "max dimensions": int}
 )
 
 DefaultDataTypes = TypedDict(
