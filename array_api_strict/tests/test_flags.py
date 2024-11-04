@@ -284,12 +284,6 @@ api_version_2023_12_examples = {
     'unstack': lambda: xp.unstack(xp.ones((3, 3)), axis=0),
 }
 
-api_version_2024_12_examples = {
-    'diff': lambda: xp.diff(xp.asarray([0, 1, 2])),
-    'nextafter': lambda: xp.nextafter(xp.asarray(0.), xp.asarray(1.)),
-    'reciprocal': lambda: xp.reciprocal(xp.asarray([2.])),
-}
-
 @pytest.mark.parametrize('func_name', api_version_2023_12_examples.keys())
 def test_api_version_2023_12(func_name):
     func = api_version_2023_12_examples[func_name]
@@ -307,6 +301,14 @@ def test_api_version_2023_12(func_name):
 
     set_array_api_strict_flags(api_version='2022.12')
     pytest.raises(RuntimeError, func)
+
+api_version_2024_12_examples = {
+    'diff': lambda: xp.diff(xp.asarray([0, 1, 2])),
+    'nextafter': lambda: xp.nextafter(xp.asarray(0.), xp.asarray(1.)),
+    'reciprocal': lambda: xp.reciprocal(xp.asarray([2.])),
+    'take_along_axis': lambda: xp.take_along_axis(xp.zeros((2, 3)),
+                                                  xp.zeros((1, 4), dtype=xp.int64)),
+}
 
 @pytest.mark.parametrize('func_name', api_version_2024_12_examples.keys())
 def test_api_version_2024_12(func_name):

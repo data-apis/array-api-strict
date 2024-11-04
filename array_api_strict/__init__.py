@@ -262,9 +262,9 @@ __all__ += [
     "trunc",
 ]
 
-from ._indexing_functions import take
+from ._indexing_functions import take, take_along_axis
 
-__all__ += ["take"]
+__all__ += ["take", "take_along_axis"]
 
 from ._info import __array_namespace_info__
 
