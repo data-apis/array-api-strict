@@ -21,7 +21,6 @@ import sys
 
 from typing import (
     Any,
-    ModuleType,
     TypedDict,
     TypeVar,
     Protocol,

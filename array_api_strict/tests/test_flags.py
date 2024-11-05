@@ -3,7 +3,6 @@ import subprocess
 
 from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
                       reset_array_api_strict_flags)
-from .._info import __array_namespace_info__
 from .._fft import (fft, ifft, fftn, ifftn, rfft, irfft, rfftn, irfftn, hfft,
                     ihfft, fftfreq, rfftfreq, fftshift, ifftshift)
 from .._linalg import (cholesky, cross, det, diagonal, eigh, eigvalsh, inv,

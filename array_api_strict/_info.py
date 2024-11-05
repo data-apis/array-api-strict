@@ -130,7 +130,7 @@ class __array_namespace_info__:
         if isinstance(kind, tuple):
             res = {}
             for k in kind:
-                res.update(dtypes(kind=k))
+                res.update(self.dtypes(kind=k))
             return res
         raise ValueError(f"unsupported kind: {kind!r}")
 
