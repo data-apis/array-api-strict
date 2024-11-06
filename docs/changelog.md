@@ -2,6 +2,14 @@
 
 ## 2.1.1 (2024-11-06)
 
+### Major Changes
+
+- Remove the `__array__` method from array-api-strict arrays. This means they
+  will no longer be implicitly converted to NumPy arrays when passed to `np`
+  functions. This method was previously implemented as a convenience, but it
+  isn't part of the array API standard. To portably convert an array API
+  strict array to a NumPy array, use `np.from_dlpack(x)`
+
 ### Minor Changes
 
 - Use a more robust implementation of `clip()` that handles corner cases better.
