@@ -49,6 +49,7 @@ jobs:
       run: |
         # Parameterizing this in the CI matrix is wasteful. Just do a loop here.
         for ARRAY_API_STRICT_API_VERSION in ${API_VERSIONS}; do
+            export ARRAY_API_STRICT_API_VERSION
             cd ${GITHUB_WORKSPACE}/array-api-tests
             pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
         done

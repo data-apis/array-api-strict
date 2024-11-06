@@ -350,23 +350,19 @@ def test_array_properties():
     assert isinstance(b.mT, Array)
     assert b.mT.shape == (3, 2)
 
-def test___array__():
-    a = ones((2, 3), dtype=int16)
-    assert np.asarray(a) is a._array
-    b = np.asarray(a, dtype=np.float64)
-    assert np.all(np.equal(b, np.ones((2, 3), dtype=np.float64)))
-    assert b.dtype == np.float64
 
 def test_array_conversion():
     # Check that arrays on the CPU device can be converted to NumPy
-    # but arrays on other devices can't
+    # but arrays on other devices can't. Note this is testing the logic in
+    # __array__, which is only used in asarray when converting lists of
+    # arrays.
     a = ones((2, 3))
-    np.asarray(a)
+    asarray([a])
 
     for device in ("device1", "device2"):
         a = ones((2, 3), device=array_api_strict.Device(device))
         with pytest.raises(RuntimeError, match="Can not convert array"):
-            np.asarray(a)
+            asarray([a])
 
 def test_allow_newaxis():
     a = ones(5)
