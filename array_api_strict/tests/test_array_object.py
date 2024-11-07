@@ -460,7 +460,7 @@ def dlpack_2023_12(api_version):
     a.__dlpack__()
 
 
-    exception = NotImplementedError if api_version >= '2023.12' else ValueError
+    exception = NotImplementedError if api_version >= '2023.12' and np.__version__ < '2.1' else ValueError
     pytest.raises(exception, lambda:
                   a.__dlpack__(dl_device=CPU_DEVICE))
     pytest.raises(exception, lambda:
