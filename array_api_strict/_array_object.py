@@ -38,7 +38,7 @@ import types
 
 if TYPE_CHECKING:
     from typing import Optional, Tuple, Union, Any
-    from ._typing import PyCapsule, Device, Dtype
+    from ._typing import PyCapsule, Dtype
     import numpy.typing as npt
 
 import numpy as np
