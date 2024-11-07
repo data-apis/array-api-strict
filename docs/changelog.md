@@ -1,9 +1,30 @@
 # Changelog
 
+## 2.1.1 (2024-11-07)
+
+### Major Changes
+
+- Remove the `__array__` method from array-api-strict arrays. This means they
+  will no longer be implicitly converted to NumPy arrays when passed to `np`
+  functions. This method was previously implemented as a convenience, but it
+  isn't part of the array API standard. To portably convert an array API
+  strict array to a NumPy array, use `np.from_dlpack(x)`
+
+### Minor Changes
+
+- Use a more robust implementation of `clip()` that handles corner cases better.
+
+- Fix the definition of `sign()` for complex numbers when using NumPy 1.x.
+
+- Correctly use the array's device when promoting scalars. (Thanks to
+  [@betatim](https://github.com/betatim))
+
+- Correctly propagate the input array's device in `asarray()`. (Thanks to
+  [@betatim](https://github.com/betatim))
 
 ## 2.1 (2024-10-18)
 
-## Major Changes
+### Major Changes
 
 - The default version of the array API standard is now 2023.12. 2022.12 can
   still be enabled via the [flags API](array-api-strict-flags).
