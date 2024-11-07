@@ -586,7 +586,7 @@ class Array:
             if copy is not _default:
                 raise ValueError("The copy argument to __dlpack__ requires at least version 2023.12 of the array API")
 
-        if np.__version__ < '2.1':
+        if np.__version__[0] < '2.1':
             if max_version not in [_default, None]:
                 raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
             if dl_device not in [_default, None]:
