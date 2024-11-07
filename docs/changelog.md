@@ -1,11 +1,6 @@
 # Changelog
 
-## 2.1.2 (2024-11-06)
-
-2.1.2 is identical to 2.1.1 and exists to fix issues with the PyPI publishing
-that occured with the 2.1.1 release.
-
-## 2.1.1 (2024-11-06)
+## 2.1.1 (2024-11-07)
 
 ### Major Changes
 
