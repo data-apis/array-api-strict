@@ -595,7 +595,15 @@ class Array:
                 raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
             return self._array.__dlpack__(stream=stream)
-        return self._array.__dlpack__(stream=stream, max_version=max_version, dl_device=dl_device, copy=copy)
+        else:
+            kwargs = {'stream': stream}
+            if max_version is not _default:
+                kwargs['max_version'] = max_version
+            if dl_device is not _default:
+                kwargs['dl_device'] = dl_device
+            if copy is not _default:
+                kwargs['copy'] = copy
+            return self._array.__dlpack__(**kwargs)
 
     def __dlpack_device__(self: Array, /) -> Tuple[IntEnum, int]:
         """
