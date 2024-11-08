@@ -364,6 +364,23 @@ def test_array_conversion():
         with pytest.raises(RuntimeError, match="Can not convert array"):
             asarray([a])
 
+def test__array__():
+    # __array__ should work for now
+    a = ones((2, 3))
+    np.array(a)
+
+    # Test the _allow_array private global flag for disabling it in the
+    # future.
+    from .. import _array_object
+    original_value = _array_object._allow_array
+    try:
+        _array_object._allow_array = False
+        a = ones((2, 3))
+        with pytest.raises(ValueError, match="Conversion from an array_api_strict array to a NumPy ndarray is not supported"):
+            np.array(a)
+    finally:
+        _array_object._allow_array = original_value
+
 def test_allow_newaxis():
     a = ones(5)
     indexed_a = a[None, :]

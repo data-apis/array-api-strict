@@ -66,7 +66,9 @@ ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 _default = object()
 
-_allow_array = False
+# See https://github.com/data-apis/array-api-strict/issues/67 and the comment
+# on __array__ below.
+_allow_array = True
 
 class Array:
     """
@@ -147,15 +149,18 @@ class Array:
             mid = np.array2string(self._array, separator=', ', prefix=prefix, suffix=suffix)
         return prefix + mid + suffix
 
-    # Disallow __array__, meaning calling `np.func()` on an array_api_strict
-    # array will give an error. If we don't explicitly disallow it, NumPy
-    # defaults to creating an object dtype array, which would lead to
-    # confusing error messages at best and surprising bugs at worst.
-    #
-    # The alternative of course is to just support __array__, which is what we
-    # used to do. But this isn't actually supported by the standard, so it can
+    # In the future, _allow_array will be set to False, which will disallow
+    # __array__. This means calling `np.func()` on an array_api_strict array
+    # will give an error. If we don't explicitly disallow it, NumPy defaults
+    # to creating an object dtype array, which would lead to confusing error
+    # messages at best and surprising bugs at worst. The reason for doing this
+    # is that __array__ is not actually supported by the standard, so it can
     # lead to code assuming np.asarray(other_array) would always work in the
     # standard.
+    #
+    # This was implemented historically for compatibility, and removing it has
+    # caused issues for some libraries (see
+    # https://github.com/data-apis/array-api-strict/issues/67).
     def __array__(self, dtype: None | np.dtype[Any] = None, copy: None | bool = None) -> npt.NDArray[Any]:
         # We have to allow this to be internally enabled as there's no other
         # easy way to parse a list of Array objects in asarray().
