@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.2 (2024-11-07)
+
+## Major Changes
+
+- array-api-strict now requires NumPy >= 2.1 and Python >= 3.10
+
 ## 2.1.1 (2024-11-07)
 
 ### Major Changes
