@@ -364,6 +364,11 @@ def test_array_conversion():
         with pytest.raises(RuntimeError, match="Can not convert array"):
             asarray([a])
 
+def test__array__warning():
+    a = ones((2, 3))
+    with pytest.warns(FutureWarning):
+        np.array(a)
+
 def test_allow_newaxis():
     a = ones(5)
     indexed_a = a[None, :]
