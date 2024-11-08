@@ -83,7 +83,7 @@ def asarray(
     if isinstance(obj, Array) and device is None:
         device = obj.device
 
-    if np.__version__[0] < '2':
+    if np.lib.NumpyVersion(np.__version__) < '2.0.0':
         if copy is False:
             # Note: copy=False is not yet implemented in np.asarray for
             # NumPy 1
