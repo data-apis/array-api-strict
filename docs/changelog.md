@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1.3 (2024-11-08)
+
+## Major Changes
+
+- Revert the change to require NumPy >= 2.1 and Python >= 3.10 from
+  array-api-strict 2.1.2. array-api-strict now requires NumPy >= 1.21 and
+  Python >= 3.9, as before. These changes were made to improve the maintenance
+  of array-api-strict, but they caused some issues in upstream packages that
+  cannot yet support NumPy 2.0, so this will be postponed to a later date.
+
+- Revert the removal of `__array__` from array-api-strict 2.1.1. This caused
+  some difficulties for upstream libraries, so it will be postponed to a later
+  date. This is still planned because `__array__` is not part of the array API
+  standard. See https://github.com/data-apis/array-api-strict/issues/67 for
+  more discussion about this.
+
 ## 2.1.2 (2024-11-07)
 
 ## Major Changes
