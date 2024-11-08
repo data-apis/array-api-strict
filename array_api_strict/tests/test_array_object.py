@@ -448,7 +448,7 @@ def test_iter():
     pytest.raises(TypeError, lambda: iter(ones((3, 3))))
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
-def dlpack_2023_12(api_version):
+def test_dlpack_2023_12(api_version):
     if api_version == '2021.12':
         with pytest.warns(UserWarning):
             set_array_api_strict_flags(api_version=api_version)
@@ -459,25 +459,35 @@ def dlpack_2023_12(api_version):
     # Never an error
     a.__dlpack__()
 
-
-    if np.__version__ < '2.1':
-        exception = NotImplementedError if api_version >= '2023.12' else ValueError
-        pytest.raises(exception, lambda:
-                      a.__dlpack__(dl_device=CPU_DEVICE))
-        pytest.raises(exception, lambda:
+    if api_version < '2023.12':
+        pytest.raises(ValueError, lambda:
+                      a.__dlpack__(dl_device=a.__dlpack_device__()))
+        pytest.raises(ValueError, lambda:
                       a.__dlpack__(dl_device=None))
-        pytest.raises(exception, lambda:
+        pytest.raises(ValueError, lambda:
                       a.__dlpack__(max_version=(1, 0)))
-        pytest.raises(exception, lambda:
+        pytest.raises(ValueError, lambda:
                       a.__dlpack__(max_version=None))
-        pytest.raises(exception, lambda:
-                        a.__dlpack__(copy=False))
-        pytest.raises(exception, lambda:
-                        a.__dlpack__(copy=True))
-        pytest.raises(exception, lambda:
-                        a.__dlpack__(copy=None))
+        pytest.raises(ValueError, lambda:
+                      a.__dlpack__(copy=False))
+        pytest.raises(ValueError, lambda:
+                      a.__dlpack__(copy=True))
+        pytest.raises(ValueError, lambda:
+                      a.__dlpack__(copy=None))
+    elif np.lib.NumpyVersion(np.__version__) < '2.1.0':
+        pytest.raises(NotImplementedError, lambda:
+                      a.__dlpack__(dl_device=CPU_DEVICE))
+        a.__dlpack__(dl_device=None)
+        pytest.raises(NotImplementedError, lambda:
+                      a.__dlpack__(max_version=(1, 0)))
+        a.__dlpack__(max_version=None)
+        pytest.raises(NotImplementedError, lambda:
+                      a.__dlpack__(copy=False))
+        pytest.raises(NotImplementedError, lambda:
+                      a.__dlpack__(copy=True))
+        a.__dlpack__(copy=None)
     else:
-        a.__dlpack__(dl_device=CPU_DEVICE)
+        a.__dlpack__(dl_device=a.__dlpack_device__())
         a.__dlpack__(dl_device=None)
         a.__dlpack__(max_version=(1, 0))
         a.__dlpack__(max_version=None)
