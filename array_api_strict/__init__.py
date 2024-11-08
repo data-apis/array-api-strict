@@ -16,6 +16,12 @@ consuming libraries to test their array API usage.
 
 """
 
+import numpy as np
+from numpy.lib import NumpyVersion
+
+if NumpyVersion(np.__version__) < NumpyVersion('2.1.0'):
+    raise ImportError("array-api-strict requires NumPy >= 2.1.0")
+
 __all__ = []
 
 # Warning: __array_api_version__ could change globally with

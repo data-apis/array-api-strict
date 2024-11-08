@@ -16,7 +16,7 @@ setup(
     url="https://data-apis.org/array-api-strict/",
     license="MIT",
     python_requires=">=3.9",
-    install_requires=["numpy"],
+    install_requires=["numpy>=2.1"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
