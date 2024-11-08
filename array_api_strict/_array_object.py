@@ -38,7 +38,7 @@ import types
 
 if TYPE_CHECKING:
     from typing import Optional, Tuple, Union, Any
-    from ._typing import PyCapsule, Device, Dtype
+    from ._typing import PyCapsule, Dtype
     import numpy.typing as npt
 
 import numpy as np
@@ -586,15 +586,24 @@ class Array:
             if copy is not _default:
                 raise ValueError("The copy argument to __dlpack__ requires at least version 2023.12 of the array API")
 
-        # Going to wait for upstream numpy support
-        if max_version not in [_default, None]:
-            raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
-        if dl_device not in [_default, None]:
-            raise NotImplementedError("The device argument to __dlpack__ is not yet implemented")
-        if copy not in [_default, None]:
-            raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
+        if np.__version__[0] < '2.1':
+            if max_version not in [_default, None]:
+                raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
+            if dl_device not in [_default, None]:
+                raise NotImplementedError("The device argument to __dlpack__ is not yet implemented")
+            if copy not in [_default, None]:
+                raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
-        return self._array.__dlpack__(stream=stream)
+            return self._array.__dlpack__(stream=stream)
+        else:
+            kwargs = {'stream': stream}
+            if max_version is not _default:
+                kwargs['max_version'] = max_version
+            if dl_device is not _default:
+                kwargs['dl_device'] = dl_device
+            if copy is not _default:
+                kwargs['copy'] = copy
+            return self._array.__dlpack__(**kwargs)
 
     def __dlpack_device__(self: Array, /) -> Tuple[IntEnum, int]:
         """
