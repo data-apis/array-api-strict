@@ -83,6 +83,29 @@ def asarray(
     if isinstance(obj, Array) and device is None:
         device = obj.device
 
+    if np.__version__[0] < '2':
+        if copy is False:
+            # Note: copy=False is not yet implemented in np.asarray for
+            # NumPy 1
+
+            # Work around it by creating the new array and seeing if NumPy
+            # copies it.
+            if isinstance(obj, Array):
+                new_array = np.array(obj._array, copy=copy, dtype=_np_dtype)
+                if new_array is not obj._array:
+                    raise ValueError("Unable to avoid copy while creating an array from given array.")
+                return Array._new(new_array, device=device)
+            elif _supports_buffer_protocol(obj):
+                # Buffer protocol will always support no-copy
+                return Array._new(np.array(obj, copy=copy, dtype=_np_dtype), device=device)
+            else:
+                # No-copy is unsupported for Python built-in types.
+                raise ValueError("Unable to avoid copy while creating an array from given object.")
+
+        if copy is None:
+            # NumPy 1 treats copy=False the same as the standard copy=None
+            copy = False
+
     if isinstance(obj, Array):
         return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype), device=device)
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
