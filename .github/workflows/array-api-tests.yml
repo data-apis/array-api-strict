@@ -35,7 +35,7 @@ jobs:
         if [[ "${{ matrix.numpy-version }}" == "dev" ]]; then
           python -m pip install --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple numpy;
         else
-          python -m pip install 'numpy==${{ matrix.numpy-version }}';
+          python -m pip install 'numpy>=${{ matrix.numpy-version }},<${{ matrix.numpy-version }}.99';
         fi
         python -m pip install ${GITHUB_WORKSPACE}/array-api-strict
         python -m pip install -r ${GITHUB_WORKSPACE}/array-api-tests/requirements.txt
