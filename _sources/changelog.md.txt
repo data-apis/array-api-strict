@@ -1,8 +1,39 @@
 # Changelog
 
+## 2.2 (2024-11-11)
+
+### Major Changes
+
+- Preliminary support for the draft 2024.12 version of the standard is now
+  implemented. This is disabled by default, but can be enabled with the [flags
+  API](array-api-strict-flags), e.g., by calling
+  `set_array_api_strict_flags(api_version='2024.12')` or setting
+  `ARRAY_API_STRICT_API_VERSION=2024.12`.
+
+  Note that this support is still preliminary and still relatively untested.
+  Please [report any
+  issues](https://github.com/data-apis/array-api-strict/issues) you find.
+
+  The following functions are implemented for 2024:
+
+  - `diff`
+  - `nextafter`
+  - `reciprocal`
+  - `take_along_axis`
+  - The `'max dimensions'` key of `__array_namespace_info__().capabilities()`.
+
+  Some planned changes to the 2024.12 standard, including scalar support for
+  array functions, is not yet implemented but will be in a future version.
+
+### Minor Changes
+
+- `__array_namespace_info__()` now returns a class instead of a module. This
+  prevents extraneous names that aren't part of the standard from appearing on
+  it.
+
 ## 2.1.3 (2024-11-08)
 
-## Major Changes
+### Major Changes
 
 - Revert the change to require NumPy >= 2.1 and Python >= 3.10 from
   array-api-strict 2.1.2. array-api-strict now requires NumPy >= 1.21 and
@@ -18,7 +49,7 @@
 
 ## 2.1.2 (2024-11-07)
 
-## Major Changes
+### Major Changes
 
 - array-api-strict now requires NumPy >= 2.1 and Python >= 3.10
 
