@@ -197,4 +197,5 @@ git_filter_repo.py --path numpy/array_api/ --path-rename numpy/array_api:array_a
 
 api.rst
 changelog.md
+releasing.md
 ```
