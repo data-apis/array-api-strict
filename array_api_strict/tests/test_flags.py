@@ -3,8 +3,6 @@ import subprocess
 
 from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
                       reset_array_api_strict_flags)
-from .._info import (capabilities, default_device, default_dtypes, devices,
-                     dtypes)
 from .._fft import (fft, ifft, fftn, ifftn, rfft, irfft, rfftn, irfftn, hfft,
                     ihfft, fftfreq, rfftfreq, fftshift, ifftshift)
 from .._linalg import (cholesky, cross, det, diagonal, eigh, eigvalsh, inv,
@@ -94,6 +92,21 @@ def test_flags_api_version_2023_12():
     flags = get_array_api_strict_flags()
     assert flags == {
         'api_version': '2023.12',
+        'boolean_indexing': True,
+        'data_dependent_shapes': True,
+        'enabled_extensions': ('linalg', 'fft'),
+    }
+
+def test_flags_api_version_2024_12():
+    # Make sure setting the version to 2024.12 issues a warning.
+    with pytest.warns(UserWarning) as record:
+        set_array_api_strict_flags(api_version='2024.12')
+    assert len(record) == 1
+    assert '2024.12' in str(record[0].message)
+    assert 'draft' in str(record[0].message)
+    flags = get_array_api_strict_flags()
+    assert flags == {
+        'api_version': '2024.12',
         'boolean_indexing': True,
         'data_dependent_shapes': True,
         'enabled_extensions': ('linalg', 'fft'),
@@ -245,14 +258,17 @@ def test_fft(func_name):
     set_array_api_strict_flags(enabled_extensions=('fft',))
     func()
 
+# Test functionality even if the info object is already created
+_info = xp.__array_namespace_info__()
+
 api_version_2023_12_examples = {
     '__array_namespace_info__': lambda: xp.__array_namespace_info__(),
     # Test these functions directly to ensure they are properly decorated
-    'capabilities': capabilities,
-    'default_device': default_device,
-    'default_dtypes': default_dtypes,
-    'devices': devices,
-    'dtypes': dtypes,
+    'capabilities': _info.capabilities,
+    'default_device': _info.default_device,
+    'default_dtypes': _info.default_dtypes,
+    'devices': _info.devices,
+    'dtypes': _info.dtypes,
     'clip': lambda: xp.clip(xp.asarray([1, 2, 3]), 1, 2),
     'copysign': lambda: xp.copysign(xp.asarray([1., 2., 3.]), xp.asarray([-1., -1., -1.])),
     'cumulative_sum': lambda: xp.cumulative_sum(xp.asarray([1, 2, 3])),
@@ -283,6 +299,36 @@ def test_api_version_2023_12(func_name):
     func()
 
     set_array_api_strict_flags(api_version='2022.12')
+    pytest.raises(RuntimeError, func)
+
+api_version_2024_12_examples = {
+    'diff': lambda: xp.diff(xp.asarray([0, 1, 2])),
+    'nextafter': lambda: xp.nextafter(xp.asarray(0.), xp.asarray(1.)),
+    'reciprocal': lambda: xp.reciprocal(xp.asarray([2.])),
+    'take_along_axis': lambda: xp.take_along_axis(xp.zeros((2, 3)),
+                                                  xp.zeros((1, 4), dtype=xp.int64)),
+}
+
+@pytest.mark.parametrize('func_name', api_version_2024_12_examples.keys())
+def test_api_version_2024_12(func_name):
+    func = api_version_2024_12_examples[func_name]
+
+    # By default, these functions should error
+    pytest.raises(RuntimeError, func)
+
+    # In 2022.12 and 2023.12, these functions should error
+    set_array_api_strict_flags(api_version='2022.12')
+    pytest.raises(RuntimeError, func)
+    set_array_api_strict_flags(api_version='2023.12')
+    pytest.raises(RuntimeError, func)
+
+    # They should not error in 2024.12
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2024.12')
+    func()
+
+    # Test the behavior gets updated properly
+    set_array_api_strict_flags(api_version='2023.12')
     pytest.raises(RuntimeError, func)
 
 def test_disabled_extensions():

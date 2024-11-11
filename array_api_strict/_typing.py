@@ -21,7 +21,6 @@ import sys
 
 from typing import (
     Any,
-    ModuleType,
     TypedDict,
     TypeVar,
     Protocol,
@@ -29,6 +28,7 @@ from typing import (
 
 from ._array_object import Array, _device
 from ._dtypes import _DType
+from ._info import __array_namespace_info__
 
 _T_co = TypeVar("_T_co", covariant=True)
 
@@ -41,7 +41,7 @@ Device = _device
 
 Dtype = _DType
 
-Info = ModuleType
+Info = __array_namespace_info__
 
 if sys.version_info >= (3, 12):
     from collections.abc import Buffer as SupportsBufferProtocol
@@ -54,7 +54,8 @@ class SupportsDLPack(Protocol):
     def __dlpack__(self, /, *, stream: None = ...) -> PyCapsule: ...
 
 Capabilities = TypedDict(
-    "Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool}
+    "Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool,
+                     "max dimensions": int}
 )
 
 DefaultDataTypes = TypedDict(

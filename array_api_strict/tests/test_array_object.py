@@ -453,8 +453,12 @@ def test_array_namespace():
         assert a.__array_namespace__(api_version="2021.12") is array_api_strict
     assert array_api_strict.__array_api_version__ == "2021.12"
 
+    with pytest.warns(UserWarning):
+        assert a.__array_namespace__(api_version="2024.12") is array_api_strict
+    assert array_api_strict.__array_api_version__ == "2024.12"
+
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
-    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2024.12"))
+    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2025.12"))
 
 def test_iter():
     pytest.raises(TypeError, lambda: iter(asarray(3)))

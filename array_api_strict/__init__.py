@@ -172,10 +172,12 @@ from ._elementwise_functions import (
     minimum,
     multiply,
     negative,
+    nextafter,
     not_equal,
     positive,
     pow,
     real,
+    reciprocal,
     remainder,
     round,
     sign,
@@ -240,10 +242,12 @@ __all__ += [
     "minimum",
     "multiply",
     "negative",
+    "nextafter",
     "not_equal",
     "positive",
     "pow",
     "real",
+    "reciprocal",
     "remainder",
     "round",
     "sign",
@@ -258,9 +262,9 @@ __all__ += [
     "trunc",
 ]
 
-from ._indexing_functions import take
+from ._indexing_functions import take, take_along_axis
 
-__all__ += ["take"]
+__all__ += ["take", "take_along_axis"]
 
 from ._info import __array_namespace_info__
 
@@ -305,9 +309,9 @@ from ._statistical_functions import cumulative_sum, max, mean, min, prod, std, s
 
 __all__ += ["cumulative_sum", "max", "mean", "min", "prod", "std", "sum", "var"]
 
-from ._utility_functions import all, any
+from ._utility_functions import all, any, diff
 
-__all__ += ["all", "any"]
+__all__ += ["all", "any", "diff"]
 
 from ._array_object import Device
 __all__ += ["Device"]

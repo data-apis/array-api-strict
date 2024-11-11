@@ -805,6 +805,20 @@ def negative(x: Array, /) -> Array:
     return Array._new(np.negative(x._array), device=x.device)
 
 
+@requires_api_version('2024.12')
+def nextafter(x1: Array, x2: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.nextafter <numpy.nextafter>`.
+
+    See its docstring for more information.
+    """
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
+        raise TypeError("Only real floating-point dtypes are allowed in nextafter")
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np.nextafter(x1._array, x2._array), device=x1.device)
+
 def not_equal(x1: Array, x2: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.not_equal <numpy.not_equal>`.
@@ -857,6 +871,17 @@ def real(x: Array, /) -> Array:
         raise TypeError("Only complex floating-point dtypes are allowed in real")
     return Array._new(np.real(x._array), device=x.device)
 
+
+@requires_api_version('2024.12')
+def reciprocal(x: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.reciprocal <numpy.reciprocal>`.
+
+    See its docstring for more information.
+    """
+    if x.dtype not in _floating_dtypes:
+        raise TypeError("Only floating-point dtypes are allowed in reciprocal")
+    return Array._new(np.reciprocal(x._array), device=x.device)
 
 def remainder(x1: Array, x2: Array, /) -> Array:
     """
