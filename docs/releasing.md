@@ -2,15 +2,15 @@
 
 To release array-api-strict:
 
-- Create a release branch and make a PR on GitHub.
+- [ ] Create a release branch and make a PR on GitHub.
 
-- Update `changelog.md` with the changes for the release.
+- [ ] Update `changelog.md` with the changes for the release.
 
-- Make sure the CI is passing on the release branch PR. Also double check that
+- [ ] Make sure the CI is passing on the release branch PR. Also double check that
   you have properly pulled `main` and merged it into the release branch so
   that the branch contains all the necessary changes for the release.
 
-- When you are ready to make the release, create a tag with the release number
+- [ ] When you are ready to make the release, create a tag with the release number
 
   ```
   git tag -a 2.2 -m "array-api-strict 2.2"
@@ -30,8 +30,8 @@ To release array-api-strict:
   in the package metadata is all automatically computed from the tag, so it is
   not necessary to update the version anywhere else.
 
-- Once the release is published, you can merge the PR.
+- [ ] Once the release is published, you can merge the PR.
 
-- The conda-forge bot will automatically send a PR to the
+- [ ] The conda-forge bot will automatically send a PR to the
   [array-api-strict-feedstock](https://github.com/conda-forge/array-api-strict-feedstock)
   updating the version, which you should merge.
