@@ -10,15 +10,131 @@ from ._dtypes import (
     _real_numeric_dtypes,
     _numeric_dtypes,
     _result_type,
+    _dtype_categories as _dtype_dtype_categories,
 )
 from ._array_object import Array
 from ._flags import requires_api_version
 from ._creation_functions import asarray
 from ._data_type_functions import broadcast_to, iinfo
+from ._helpers import _maybe_normalize_py_scalars
 
 from typing import Optional, Union
 
 import numpy as np
+
+
+def _binary_ufunc_proto(x1, x2, dtype_category, func_name, np_func):
+    """Base implementation of a binary function, `func_name`, defined for
+       dtypes from `dtype_category`
+    """
+    x1, x2 = _maybe_normalize_py_scalars(x1, x2, dtype_category, func_name)
+
+    if x1.device != x2.device:
+        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+    # Call result type here just to raise on disallowed type combinations
+    _result_type(x1.dtype, x2.dtype)
+    x1, x2 = Array._normalize_two_args(x1, x2)
+    return Array._new(np_func(x1._array, x2._array), device=x1.device)
+
+
+_binary_docstring_template=\
+"""
+Array API compatible wrapper for :py:func:`np.%s <numpy.%s>`.
+
+See its docstring for more information.
+"""
+
+
+def create_binary_func(func_name, dtype_category, np_func):
+    def inner(x1: Array, x2: Array, /) -> Array:
+        return _binary_ufunc_proto(x1, x2, dtype_category, func_name, np_func)
+    return inner
+
+
+# func_name: dtype_category (must match that from _dtypes.py)
+_binary_funcs = {
+    "add": "numeric",
+    "atan2": "real floating-point",
+    "bitwise_and": "integer or boolean",
+    "bitwise_or": "integer or boolean",
+    "bitwise_xor": "integer or boolean",
+    "_bitwise_left_shift": "integer",  # leading underscore deliberate
+    "_bitwise_right_shift": "integer",
+    # XXX: copysign: real fp or numeric? 
+    "copysign": "real floating-point",
+    "divide": "floating-point",
+    "equal": "all",
+    "greater": "real numeric",
+    "greater_equal": "real numeric",
+    "less": "real numeric",
+    "less_equal": "real numeric",
+    "not_equal": "all",
+    "floor_divide": "real numeric",
+    "hypot": "real floating-point",
+    "logaddexp": "real floating-point",
+    "logical_and": "boolean",
+    "logical_or": "boolean",
+    "logical_xor": "boolean",
+    "maximum": "real numeric",
+    "minimum": "real numeric",
+    "multiply": "numeric",
+    "nextafter": "real floating-point",
+    "pow": "numeric",
+    "remainder": "real numeric",
+    "subtract": "numeric",
+}
+
+
+# map array-api-name : numpy-name
+_numpy_renames = {
+    "atan2": "arctan2",
+    "_bitwise_left_shift": "left_shift",
+    "_bitwise_right_shift": "right_shift",
+    "pow": "power"
+}
+
+
+# create and attach functions to the module
+for func_name, dtype_category in _binary_funcs.items():
+    # sanity check
+    assert dtype_category in _dtype_dtype_categories
+
+    numpy_name = _numpy_renames.get(func_name, func_name)
+    np_func = getattr(np, numpy_name)
+
+    func = create_binary_func(func_name, dtype_category, np_func)
+    func.__name__ = func_name
+
+    func.__doc__ = _binary_docstring_template % (numpy_name, numpy_name)
+
+    vars()[func_name] = func
+
+
+copysign = requires_api_version('2023.12')(copysign)  # noqa: F821
+hypot = requires_api_version('2023.12')(hypot)  # noqa: F821
+maximum = requires_api_version('2023.12')(maximum)  # noqa: F821
+minimum = requires_api_version('2023.12')(minimum)  # noqa: F821
+nextafter = requires_api_version('2024.12')(nextafter)  # noqa: F821
+
+
+def bitwise_left_shift(x1: Array, x2: Array, /) -> Array:
+    is_negative = np.any(x2._array < 0) if isinstance(x2, Array) else x2 < 0
+    if is_negative:
+        raise ValueError("bitwise_left_shift(x1, x2) is only defined for x2 >= 0")
+    return _bitwise_left_shift(x1, x2)   # noqa: F821
+bitwise_left_shift.__doc__ = _bitwise_left_shift.__doc__   # noqa: F821
+
+
+def bitwise_right_shift(x1: Array, x2: Array, /) -> Array:
+    is_negative = np.any(x2._array < 0) if isinstance(x2, Array) else x2 < 0
+    if is_negative:
+        raise ValueError("bitwise_left_shift(x1, x2) is only defined for x2 >= 0")
+    return _bitwise_right_shift(x1, x2)   # noqa: F821
+bitwise_right_shift.__doc__ = _bitwise_right_shift.__doc__   # noqa: F821
+
+
+# clean up to not pollute the namespace
+del func, create_binary_func
 
 
 def abs(x: Array, /) -> Array:
@@ -54,23 +170,6 @@ def acosh(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in acosh")
     return Array._new(np.arccosh(x._array), device=x.device)
-
-
-def add(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.add <numpy.add>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in add")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.add(x1._array, x2._array), device=x1.device)
 
 
 # Note: the function name is different here
@@ -110,23 +209,6 @@ def atan(x: Array, /) -> Array:
 
 
 # Note: the function name is different here
-def atan2(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arctan2 <numpy.arctan2>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in atan2")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.arctan2(x1._array, x2._array), device=x1.device)
-
-
-# Note: the function name is different here
 def atanh(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.arctanh <numpy.arctanh>`.
@@ -136,47 +218,6 @@ def atanh(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in atanh")
     return Array._new(np.arctanh(x._array), device=x.device)
-
-
-def bitwise_and(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.bitwise_and <numpy.bitwise_and>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if (
-        x1.dtype not in _integer_or_boolean_dtypes
-        or x2.dtype not in _integer_or_boolean_dtypes
-    ):
-        raise TypeError("Only integer or boolean dtypes are allowed in bitwise_and")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.bitwise_and(x1._array, x2._array), device=x1.device)
-
-
-# Note: the function name is different here
-def bitwise_left_shift(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.left_shift <numpy.left_shift>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if x1.dtype not in _integer_dtypes or x2.dtype not in _integer_dtypes:
-        raise TypeError("Only integer dtypes are allowed in bitwise_left_shift")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    # Note: bitwise_left_shift is only defined for x2 nonnegative.
-    if np.any(x2._array < 0):
-        raise ValueError("bitwise_left_shift(x1, x2) is only defined for x2 >= 0")
-    return Array._new(np.left_shift(x1._array, x2._array), device=x1.device)
 
 
 # Note: the function name is different here
@@ -189,67 +230,6 @@ def bitwise_invert(x: Array, /) -> Array:
     if x.dtype not in _integer_or_boolean_dtypes:
         raise TypeError("Only integer or boolean dtypes are allowed in bitwise_invert")
     return Array._new(np.invert(x._array), device=x.device)
-
-
-def bitwise_or(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.bitwise_or <numpy.bitwise_or>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if (
-        x1.dtype not in _integer_or_boolean_dtypes
-        or x2.dtype not in _integer_or_boolean_dtypes
-    ):
-        raise TypeError("Only integer or boolean dtypes are allowed in bitwise_or")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.bitwise_or(x1._array, x2._array), device=x1.device)
-
-
-# Note: the function name is different here
-def bitwise_right_shift(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.right_shift <numpy.right_shift>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if x1.dtype not in _integer_dtypes or x2.dtype not in _integer_dtypes:
-        raise TypeError("Only integer dtypes are allowed in bitwise_right_shift")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    # Note: bitwise_right_shift is only defined for x2 nonnegative.
-    if np.any(x2._array < 0):
-        raise ValueError("bitwise_right_shift(x1, x2) is only defined for x2 >= 0")
-    return Array._new(np.right_shift(x1._array, x2._array), device=x1.device)
-
-
-def bitwise_xor(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.bitwise_xor <numpy.bitwise_xor>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if (
-        x1.dtype not in _integer_or_boolean_dtypes
-        or x2.dtype not in _integer_or_boolean_dtypes
-    ):
-        raise TypeError("Only integer or boolean dtypes are allowed in bitwise_xor")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.bitwise_xor(x1._array, x2._array), device=x1.device)
 
 
 def ceil(x: Array, /) -> Array:
@@ -372,6 +352,7 @@ def clip(
         out[ib] = b[ib]
     return Array._new(out, device=device)
 
+
 def conj(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.conj <numpy.conj>`.
@@ -382,22 +363,6 @@ def conj(x: Array, /) -> Array:
         raise TypeError("Only complex floating-point dtypes are allowed in conj")
     return Array._new(np.conj(x._array), device=x.device)
 
-@requires_api_version('2023.12')
-def copysign(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.copysign <numpy.copysign>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-
-    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in copysign")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.copysign(x1._array, x2._array), device=x1.device)
 
 def cos(x: Array, /) -> Array:
     """
@@ -419,36 +384,6 @@ def cosh(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in cosh")
     return Array._new(np.cosh(x._array), device=x.device)
-
-
-def divide(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.divide <numpy.divide>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _floating_dtypes or x2.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in divide")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.divide(x1._array, x2._array), device=x1.device)
-
-
-def equal(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.equal <numpy.equal>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.equal(x1._array, x2._array), device=x1.device)
 
 
 def exp(x: Array, /) -> Array:
@@ -486,69 +421,6 @@ def floor(x: Array, /) -> Array:
         return x
     return Array._new(np.floor(x._array), device=x.device)
 
-
-def floor_divide(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.floor_divide <numpy.floor_divide>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in floor_divide")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.floor_divide(x1._array, x2._array), device=x1.device)
-
-
-def greater(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.greater <numpy.greater>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in greater")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.greater(x1._array, x2._array), device=x1.device)
-
-
-def greater_equal(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.greater_equal <numpy.greater_equal>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in greater_equal")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.greater_equal(x1._array, x2._array), device=x1.device)
-
-@requires_api_version('2023.12')
-def hypot(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.hypot <numpy.hypot>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in hypot")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.hypot(x1._array, x2._array), device=x1.device)
 
 def imag(x: Array, /) -> Array:
     """
@@ -592,38 +464,6 @@ def isnan(x: Array, /) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in isnan")
     return Array._new(np.isnan(x._array), device=x.device)
-
-
-def less(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.less <numpy.less>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in less")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.less(x1._array, x2._array), device=x1.device)
-
-
-def less_equal(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.less_equal <numpy.less_equal>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in less_equal")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.less_equal(x1._array, x2._array), device=x1.device)
 
 
 def log(x: Array, /) -> Array:
@@ -670,38 +510,6 @@ def log10(x: Array, /) -> Array:
     return Array._new(np.log10(x._array), device=x.device)
 
 
-def logaddexp(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.logaddexp <numpy.logaddexp>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in logaddexp")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.logaddexp(x1._array, x2._array), device=x1.device)
-
-
-def logical_and(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.logical_and <numpy.logical_and>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _boolean_dtypes or x2.dtype not in _boolean_dtypes:
-        raise TypeError("Only boolean dtypes are allowed in logical_and")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.logical_and(x1._array, x2._array), device=x1.device)
-
-
 def logical_not(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.logical_not <numpy.logical_not>`.
@@ -711,87 +519,6 @@ def logical_not(x: Array, /) -> Array:
     if x.dtype not in _boolean_dtypes:
         raise TypeError("Only boolean dtypes are allowed in logical_not")
     return Array._new(np.logical_not(x._array), device=x.device)
-
-
-def logical_or(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.logical_or <numpy.logical_or>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _boolean_dtypes or x2.dtype not in _boolean_dtypes:
-        raise TypeError("Only boolean dtypes are allowed in logical_or")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.logical_or(x1._array, x2._array), device=x1.device)
-
-
-def logical_xor(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.logical_xor <numpy.logical_xor>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _boolean_dtypes or x2.dtype not in _boolean_dtypes:
-        raise TypeError("Only boolean dtypes are allowed in logical_xor")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.logical_xor(x1._array, x2._array), device=x1.device)
-
-@requires_api_version('2023.12')
-def maximum(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.maximum <numpy.maximum>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in maximum")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    # TODO: maximum(-0., 0.) is unspecified. Should we issue a warning/error
-    # in that case?
-    return Array._new(np.maximum(x1._array, x2._array), device=x1.device)
-
-@requires_api_version('2023.12')
-def minimum(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.minimum <numpy.minimum>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in minimum")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.minimum(x1._array, x2._array), device=x1.device)
-
-def multiply(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.multiply <numpy.multiply>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in multiply")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.multiply(x1._array, x2._array), device=x1.device)
 
 
 def negative(x: Array, /) -> Array:
@@ -805,34 +532,6 @@ def negative(x: Array, /) -> Array:
     return Array._new(np.negative(x._array), device=x.device)
 
 
-@requires_api_version('2024.12')
-def nextafter(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.nextafter <numpy.nextafter>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_floating_dtypes or x2.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in nextafter")
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.nextafter(x1._array, x2._array), device=x1.device)
-
-def not_equal(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.not_equal <numpy.not_equal>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.not_equal(x1._array, x2._array), device=x1.device)
-
-
 def positive(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.positive <numpy.positive>`.
@@ -842,23 +541,6 @@ def positive(x: Array, /) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in positive")
     return Array._new(np.positive(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def pow(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.power <numpy.power>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in pow")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.power(x1._array, x2._array), device=x1.device)
 
 
 def real(x: Array, /) -> Array:
@@ -882,22 +564,6 @@ def reciprocal(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in reciprocal")
     return Array._new(np.reciprocal(x._array), device=x.device)
-
-def remainder(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.remainder <numpy.remainder>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in remainder")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.remainder(x1._array, x2._array), device=x1.device)
-
 
 def round(x: Array, /) -> Array:
     """
@@ -977,22 +643,6 @@ def sqrt(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in sqrt")
     return Array._new(np.sqrt(x._array), device=x.device)
-
-
-def subtract(x1: Array, x2: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.subtract <numpy.subtract>`.
-
-    See its docstring for more information.
-    """
-    if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
-    if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in subtract")
-    # Call result type here just to raise on disallowed type combinations
-    _result_type(x1.dtype, x2.dtype)
-    x1, x2 = Array._normalize_two_args(x1, x2)
-    return Array._new(np.subtract(x1._array, x2._array), device=x1.device)
 
 
 def tan(x: Array, /) -> Array:
