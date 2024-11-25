@@ -89,7 +89,7 @@ def where(condition: Array, x1: bool | int | float | Array, x2: bool | int | flo
     _result_type(x1.dtype, x2.dtype)
 
     if len({a.device for a in (condition, x1, x2)}) > 1:
-        raise ValueError("where inputs must all be on the same device")
+        raise ValueError("Inputs to `where` must all use the same device")
 
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.where(condition._array, x1._array, x2._array), device=x1.device)
