@@ -344,6 +344,13 @@ def test_operators():
                                 getattr(x, _op)(y)
                             else:
                                 assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                            # finally, test that array op ndarray raises
+                            # XXX: as long as there is __array__ or __buffer__, __rop__s
+                            #  still return ndarrays
+                            if not _op.startswith("__r"):
+                                with assert_raises(TypeError):
+                                    getattr(x, _op)(y._array)
+
 
     for op, dtypes in unary_op_dtypes.items():
         for a in _array_vals():
