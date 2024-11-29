@@ -169,12 +169,13 @@ def set_array_api_strict_flags(
                                          set(default_extensions))
 
 # We have to do this separately or it won't get added as the docstring
-set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
-    supported_versions=supported_versions,
-    default_version=default_version,
-    default_extensions=default_extensions,
-    draft_version=draft_version,
-)
+if set_array_api_strict_flags.__doc__ is not None:
+    set_array_api_strict_flags.__doc__ = set_array_api_strict_flags.__doc__.format(
+        supported_versions=supported_versions,
+        default_version=default_version,
+        default_extensions=default_extensions,
+        draft_version=draft_version,
+    )
 
 def get_array_api_strict_flags():
     """
