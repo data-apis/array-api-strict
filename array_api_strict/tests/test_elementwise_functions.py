@@ -1,6 +1,7 @@
 from inspect import signature, getmodule
 
-from numpy.testing import assert_raises
+from pytest import raises as assert_raises
+from numpy.testing import suppress_warnings
 
 import pytest
 
@@ -18,6 +19,8 @@ from .._dtypes import (
     uint64,
 )
 from .._flags import set_array_api_strict_flags
+
+from .test_array_object import _check_op_array_scalar, BIG_INT
 
 import array_api_strict
 
@@ -120,6 +123,7 @@ def test_missing_functions():
     # Ensure the above dictionary is complete.
     import array_api_strict._elementwise_functions as mod
     mod_funcs = [n for n in dir(mod) if getmodule(getattr(mod, n)) is mod]
+    mod_funcs = [n for n in mod_funcs if not n.startswith("_")]
     assert set(mod_funcs) == set(elementwise_function_input_types)
 
 
@@ -202,3 +206,51 @@ def test_bitwise_shift_error():
     assert_raises(
         ValueError, lambda: bitwise_right_shift(asarray([1, 1]), asarray([1, -1]))
     )
+
+
+
+def test_scalars():
+    # mirror test_array_object.py::test_operators()
+    #
+    # Also check that binary functions accept (array, scalar) and (scalar, array)
+    # arguments, and reject (scalar, scalar) arguments.
+
+    # Use the latest version of the standard so that scalars are actually allowed
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version="2024.12")
+
+    def _array_vals():
+        for d in _integer_dtypes:
+            yield asarray(1, dtype=d)
+        for d in _boolean_dtypes:
+            yield asarray(False, dtype=d)
+        for d in _floating_dtypes:
+            yield asarray(1.0, dtype=d)
+
+
+    for func_name, dtypes in elementwise_function_input_types.items():
+        func = getattr(_elementwise_functions, func_name)
+        if nargs(func) != 2:
+            continue
+
+        for s in [1, 1.0, 1j, BIG_INT, False]:
+            for a in _array_vals():
+                for func1 in [lambda s: func(a, s), lambda s: func(s, a)]:
+                    allowed = _check_op_array_scalar(dtypes, a, s, func1, func_name)
+
+                    # only check `func(array, scalar) == `func(array, array)` if
+                    # the former is legal under the promotion rules
+                    if allowed:
+                        conv_scalar = asarray(s, dtype=a.dtype)
+
+                        with suppress_warnings() as sup:
+                            # ignore warnings from pow(BIG_INT)
+                            sup.filter(RuntimeWarning,
+                                       "invalid value encountered in power")
+                            assert func(s, a) == func(conv_scalar, a)
+                            assert func(a, s) == func(a, conv_scalar)
+
+                        with assert_raises(TypeError):
+                            func(s, s)
+
+
