@@ -86,5 +86,5 @@ def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
     x1_ = np.moveaxis(x1_, axis, -1)
     x2_ = np.moveaxis(x2_, axis, -1)
 
-    res = x1_[..., None, :] @ x2_[..., None]
+    res = np.conj(x1_[..., None, :]) @ x2_[..., None]
     return Array._new(res[..., 0, 0], device=x1.device)
