@@ -80,6 +80,9 @@ def where(condition: Array, x1: Array, x2: Array, /) -> Array:
     """
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)
+    
+    if condition.dtype != bool:
+        raise TypeError("`condition` must be have a boolean data type")
 
     if len({a.device for a in (condition, x1, x2)}) > 1:
         raise ValueError("where inputs must all be on the same device")
