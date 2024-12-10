@@ -236,3 +236,10 @@ def from_dlpack_2023_12(api_version):
     pytest.raises(exception, lambda: from_dlpack(capsule, copy=False))
     pytest.raises(exception, lambda: from_dlpack(capsule, copy=True))
     pytest.raises(exception, lambda: from_dlpack(capsule, copy=None))
+
+
+def test_from_dlpack_default_device():
+    x = asarray([1, 2, 3])
+    y = from_dlpack(x)
+    z = from_dlpack(np.asarray([1, 2, 3]))
+    assert x.device == y.device == z.device == CPU_DEVICE
