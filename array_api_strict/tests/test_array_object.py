@@ -212,6 +212,14 @@ def test_operators():
                             else:
                                 assert_raises(TypeError, lambda: getattr(x, _op)(y))
 
+                            # finally, test that array op ndarray raises
+                            # XXX: as long as there is __array__, __rop__s still
+                            # return ndarrays
+                            if not _op.startswith("__r"):
+                                with assert_raises(TypeError):
+                                    getattr(x, _op)(y._array)
+
+
     unary_op_dtypes = {
         "__abs__": "numeric",
         "__invert__": "integer_or_boolean",
