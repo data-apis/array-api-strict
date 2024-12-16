@@ -9,7 +9,7 @@ from ._dtypes import (
 from ._array_object import Array
 from ._dtypes import float32, complex64
 from ._flags import requires_api_version, get_array_api_strict_flags
-from ._creation_functions import zeros
+from ._creation_functions import zeros, ones
 from ._manipulation_functions import concat
 
 from typing import TYPE_CHECKING
@@ -31,7 +31,6 @@ def cumulative_sum(
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
-    dt = x.dtype if dtype is None else dtype
     if dtype is not None:
         dtype = dtype._np_dtype
 
@@ -44,8 +43,39 @@ def cumulative_sum(
     if include_initial:
         if axis < 0:
             axis += x.ndim
-        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
+        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
     return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype), device=x.device)
+
+
+@requires_api_version('2024.12')
+def cumulative_prod(
+    x: Array,
+    /,
+    *,
+    axis: Optional[int] = None,
+    dtype: Optional[Dtype] = None,
+    include_initial: bool = False,
+) -> Array:
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in cumulative_prod")
+    if x.ndim == 0:
+        raise ValueError("Only ndim >= 1 arrays are allowed in cumulative_prod")
+
+    if dtype is not None:
+        dtype = dtype._np_dtype
+
+    if axis is None:
+        if x.ndim > 1:
+            raise ValueError("axis must be specified in cumulative_prod for more than one dimension")
+        axis = 0
+
+    # np.cumprod does not support include_initial
+    if include_initial:
+        if axis < 0:
+            axis += x.ndim
+        x = concat([ones(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
+    return Array._new(np.cumprod(x._array, axis=axis, dtype=dtype), device=x.device)
+
 
 def max(
     x: Array,
