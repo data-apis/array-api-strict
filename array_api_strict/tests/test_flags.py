@@ -307,6 +307,7 @@ api_version_2024_12_examples = {
     'reciprocal': lambda: xp.reciprocal(xp.asarray([2.])),
     'take_along_axis': lambda: xp.take_along_axis(xp.zeros((2, 3)),
                                                   xp.zeros((1, 4), dtype=xp.int64)),
+    'count_nonzero': lambda: xp.count_nonzero(xp.arange(3)),
 }
 
 @pytest.mark.parametrize('func_name', api_version_2024_12_examples.keys())

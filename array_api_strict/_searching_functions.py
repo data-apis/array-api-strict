@@ -6,7 +6,7 @@ from ._flags import requires_data_dependent_shapes, requires_api_version
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Literal, Optional, Tuple
+    from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 
@@ -44,6 +44,24 @@ def nonzero(x: Array, /) -> Tuple[Array, ...]:
     if x.ndim == 0:
         raise ValueError("nonzero is not allowed on 0-dimensional arrays")
     return tuple(Array._new(i, device=x.device) for i in np.nonzero(x._array))
+
+
+@requires_api_version('2024.12')
+def count_nonzero(
+    x: Array,
+    /,
+    *,
+    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    keepdims: bool = False,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.count_nonzero <numpy.count_nonzero>`
+
+    See its docstring for more information.
+    """
+    arr = np.count_nonzero(x._array, axis=axis, keepdims=keepdims)
+    return Array._new(np.asarray(arr), device=x.device)
+
 
 @requires_api_version('2023.12')
 def searchsorted(
