@@ -3,6 +3,7 @@ from __future__ import annotations
 from ._dtypes import (
     _real_floating_dtypes,
     _real_numeric_dtypes,
+    _floating_dtypes,
     _numeric_dtypes,
 )
 from ._array_object import Array
@@ -65,8 +66,14 @@ def mean(
     axis: Optional[Union[int, Tuple[int, ...]]] = None,
     keepdims: bool = False,
 ) -> Array:
-    if x.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in mean")
+
+    if get_array_api_strict_flags()['api_version'] > '2023.12':
+        allowed_dtypes = _floating_dtypes
+    else:
+        allowed_dtypes = _real_floating_dtypes
+
+    if x.dtype not in allowed_dtypes:
+        raise TypeError("Only floating-point dtypes are allowed in mean")
     return Array._new(np.mean(x._array, axis=axis, keepdims=keepdims), device=x.device)
 
 

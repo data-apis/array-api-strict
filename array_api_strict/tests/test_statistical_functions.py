@@ -1,3 +1,4 @@
+import cmath
 import pytest
 
 from .._flags import set_array_api_strict_flags
@@ -37,3 +38,22 @@ def test_sum_prod_trace_2023_12(func_name):
     assert func(a_real).dtype == xp.float32
     assert func(a_complex).dtype == xp.complex64
     assert func(a_int).dtype == xp.int64
+
+
+# mean(complex-valued array) is allowed from 2024.12 onwards
+def test_mean_complex():
+    a = xp.asarray([1j, 2j, 3j])
+
+    set_array_api_strict_flags(api_version='2023.12')
+    with pytest.raises(TypeError):
+        xp.mean(a)
+
+    with pytest.warns(UserWarning):
+        set_array_api_strict_flags(api_version='2024.12')
+    m = xp.mean(a)
+    assert cmath.isclose(complex(m), 2j)
+
+    # mean of integer arrays is still not allowed
+    with pytest.raises(TypeError):
+        xp.mean(xp.arange(3))
+
