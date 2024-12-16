@@ -5,7 +5,10 @@ from ._dtypes import (
     _real_numeric_dtypes,
     _floating_dtypes,
     _numeric_dtypes,
+    _integer_dtypes
 )
+from . import _dtypes
+from . import _info
 from ._array_object import Array
 from ._dtypes import float32, complex64
 from ._flags import requires_api_version, get_array_api_strict_flags
@@ -46,6 +49,52 @@ def cumulative_sum(
             axis += x.ndim
         x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
     return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype), device=x.device)
+
+
+@requires_api_version('2024.12')
+def cumulative_prod(
+    x: Array,
+    /,
+    *,
+    axis: Optional[int] = None,
+    dtype: Optional[Dtype] = None,
+    include_initial: bool = False,
+) -> Array:
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in cumulative_prod")
+    if x.ndim == 0:
+        raise ValueError("Only ndim >= 1 arrays are allowed in cumulative_prod")
+
+    # TODO: either all this is done by numpy's cumprod (?), or cumulative_sum should follow the same dance.
+    if dtype is None:
+        if x.dtype in _integer_dtypes:
+            default_int = _info.__array_namespace_info__().default_dtypes()["integral"]
+            if _dtypes._bit_width(x.dtype) < _dtypes._bit_width(default_int):
+                if x.dtype in _dtypes._unsigned_integer_dtypes:
+                    # find the unsigned integer of the same width as `default_int`
+                    dtype = _dtypes._get_unsigned_from_signed(default_int)
+                else:
+                    dtype = default_int
+            else:
+                dtype = x.dtype
+        else:
+            dtype = x.dtype
+    else:
+        if x.dtype != dtype:
+            x = xp.astype(dtype)
+
+    if axis is None:
+        if x.ndim > 1:
+            raise ValueError("axis must be specified in cumulative_prod for more than one dimension")
+        axis = 0
+
+    # np.cumprod does not support include_initial
+    if include_initial:
+        if axis < 0:
+            axis += x.ndim
+        x = concat([ones(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dtype), x], axis=axis)
+    return Array._new(np.cumprod(x._array, axis=axis, dtype=dtype._np_dtype), device=x.device)
+
 
 def max(
     x: Array,

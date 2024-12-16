@@ -305,9 +305,9 @@ from ._sorting_functions import argsort, sort
 
 __all__ += ["argsort", "sort"]
 
-from ._statistical_functions import cumulative_sum, max, mean, min, prod, std, sum, var
+from ._statistical_functions import cumulative_sum, cumulative_prod, max, mean, min, prod, std, sum, var
 
-__all__ += ["cumulative_sum", "max", "mean", "min", "prod", "std", "sum", "var"]
+__all__ += ["cumulative_sum", "cumulative_prod", "max", "mean", "min", "prod", "std", "sum", "var"]
 
 from ._utility_functions import all, any, diff
 
