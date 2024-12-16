@@ -293,9 +293,9 @@ from ._manipulation_functions import (
 
 __all__ += ["concat", "expand_dims", "flip", "moveaxis", "permute_dims", "repeat", "reshape", "roll", "squeeze", "stack", "tile", "unstack"]
 
-from ._searching_functions import argmax, argmin, nonzero, searchsorted, where
+from ._searching_functions import argmax, argmin, nonzero, count_nonzero, searchsorted, where
 
-__all__ += ["argmax", "argmin", "nonzero", "searchsorted", "where"]
+__all__ += ["argmax", "argmin", "nonzero", "count_nonzero", "searchsorted", "where"]
 
 from ._set_functions import unique_all, unique_counts, unique_inverse, unique_values
 
