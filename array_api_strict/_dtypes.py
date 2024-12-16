@@ -127,6 +127,34 @@ _dtype_categories = {
 }
 
 
+def _bit_width(dtype):
+    """The bit width of an integer dtype"""
+    if dtype == int8 or dtype == uint8:
+        return 8
+    elif dtype == int16 or dtype == uint16:
+        return 16
+    elif dtype == int32 or dtype == uint32:
+        return 32
+    elif dtype == int64 or dtype == uint64:
+        return 64
+    else:
+        raise ValueError(f"_bit_width: {dtype = } not understood.")
+
+
+def _get_unsigned_from_signed(dtype):
+    """Return an unsigned integral dtype to match the input dtype."""
+    if dtype == int8:
+        return uint8
+    elif dtype == int16:
+        return uint16
+    elif dtype == int32:
+        return uint32
+    elif dtype == int64:
+        return uint64
+    else:
+        raise ValueError(f"_unsigned_from_signed: {dtype = } not understood.")
+
+
 # Note: the spec defines a restricted type promotion table compared to NumPy.
 # In particular, cross-kind promotions like integer + float or boolean +
 # integer are not allowed, even for functions that accept both kinds.
