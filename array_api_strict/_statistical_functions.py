@@ -31,7 +31,6 @@ def cumulative_sum(
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
-    dt = x.dtype if dtype is None else dtype
     if dtype is not None:
         dtype = dtype._np_dtype
 
@@ -44,7 +43,7 @@ def cumulative_sum(
     if include_initial:
         if axis < 0:
             axis += x.ndim
-        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=dt), x], axis=axis)
+        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
     return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype), device=x.device)
 
 
