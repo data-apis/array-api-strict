@@ -1,3 +1,4 @@
+import sys
 import operator
 from builtins import all as all_
 
@@ -526,6 +527,10 @@ def test_array_properties():
     assert b.mT.shape == (3, 2)
 
 
+@pytest.mark.xfail(sys.version_info.major*100 + sys.version_info.minor < 312,
+                   reason="array conversion relies on buffer protocol, and "
+                          "requires python >= 3.12"
+)
 def test_array_conversion():
     # Check that arrays on the CPU device can be converted to NumPy
     # but arrays on other devices can't. Note this is testing the logic in
@@ -536,25 +541,23 @@ def test_array_conversion():
 
     for device in ("device1", "device2"):
         a = ones((2, 3), device=array_api_strict.Device(device))
-        with pytest.raises(RuntimeError, match="Can not convert array"):
+        with pytest.raises((RuntimeError, ValueError)):
             np.asarray(a)
 
-def test__array__():
-    # __array__ should work for now
+    # __buffer__ should work for now for conversion to numpy
     a = ones((2, 3))
-    np.array(a)
+    na = np.array(a)
+    assert na.shape == (2, 3)
+    assert na.dtype == np.float64
 
-    # Test the _allow_array private global flag for disabling it in the
-    # future.
-    from .. import _array_object
-    original_value = _array_object._allow_array
-    try:
-        _array_object._allow_array = False
-        a = ones((2, 3))
-        with pytest.raises(ValueError, match="Conversion from an array_api_strict array to a NumPy ndarray is not supported"):
-            np.array(a)
-    finally:
-        _array_object._allow_array = original_value
+@pytest.mark.skipif(not sys.version_info.major*100 + sys.version_info.minor < 312,
+                    reason="conversion to numpy errors out unless python >= 3.12"
+)
+def test_array_conversion_2():
+    a = ones((2, 3))
+    with pytest.raises(TypeError):
+        np.array(a)
+
 
 def test_allow_newaxis():
     a = ones(5)
