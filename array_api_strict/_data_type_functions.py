@@ -167,6 +167,9 @@ def isdtype(
     https://data-apis.org/array-api/latest/API_specification/generated/array_api.isdtype.html
     for more details
     """
+    if not isinstance(dtype, _DType):
+       raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
+
     if isinstance(kind, tuple):
         # Disallow nested tuples
         if any(isinstance(k, tuple) for k in kind):

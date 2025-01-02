@@ -31,15 +31,17 @@ def test_can_cast(from_, to, expected):
 def test_isdtype_strictness():
     assert_raises(TypeError, lambda: isdtype(float64, 64))
     assert_raises(ValueError, lambda: isdtype(float64, 'f8'))
-
     assert_raises(TypeError, lambda: isdtype(float64, (('integral',),)))
+    assert_raises(TypeError, lambda: isdtype(float64, None))
+    assert_raises(TypeError, lambda: isdtype(np.float64, float64))
+    assert_raises(TypeError, lambda: isdtype(asarray(1.0), float64))
+
     with assert_raises(TypeError), warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         isdtype(float64, np.object_)
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
 
-    assert_raises(TypeError, lambda: isdtype(float64, None))
     with assert_raises(TypeError), warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         isdtype(float64, np.float64)
