@@ -128,12 +128,12 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
+# Project settings
+.idea
+.ropeproject
 .spyderproject
 .spyproject
-
-# Rope project settings
-.ropeproject
+.vscode
 
 # mkdocs documentation
 /site
