@@ -96,12 +96,60 @@ def test_promoted_scalar_inherits_device():
 
     assert y.device == device1
 
+
+BIG_INT = int(1e30)
+
+def _check_op_array_scalar(dtypes, a, s, func, func_name, BIG_INT=BIG_INT):
+    # Test array op scalar. From the spec, the following combinations
+    # are supported:
+
+    # - Python bool for a bool array dtype,
+    # - a Python int within the bounds of the given dtype for integer array dtypes,
+    # - a Python int or float for real floating-point array dtypes
+    # - a Python int, float, or complex for complex floating-point array dtypes
+
+    if ((dtypes == "all"
+         or dtypes == "numeric" and a.dtype in _numeric_dtypes
+         or dtypes == "real numeric" and a.dtype in _real_numeric_dtypes
+         or dtypes == "integer" and a.dtype in _integer_dtypes
+         or dtypes == "integer or boolean" and a.dtype in _integer_or_boolean_dtypes
+         or dtypes == "boolean" and a.dtype in _boolean_dtypes
+         or dtypes == "floating-point" and a.dtype in _floating_dtypes
+         or dtypes == "real floating-point" and a.dtype in _real_floating_dtypes
+        )
+        # bool is a subtype of int, which is why we avoid
+        # isinstance here.
+        and (a.dtype in _boolean_dtypes and type(s) == bool
+             or a.dtype in _integer_dtypes and type(s) == int
+             or a.dtype in _real_floating_dtypes and type(s) in [float, int]
+             or a.dtype in _complex_floating_dtypes and type(s) in [complex, float, int]
+        )):
+        if a.dtype in _integer_dtypes and s == BIG_INT:
+            with assert_raises(OverflowError):
+                func(s)
+            return False
+
+        else:
+            # Only test for no error
+            with suppress_warnings() as sup:
+                # ignore warnings from pow(BIG_INT)
+                sup.filter(RuntimeWarning,
+                           "invalid value encountered in power")
+                func(s)
+            return True
+
+    else:
+        with assert_raises(TypeError):
+            func(s)
+        return False
+
+
 def test_operators():
     # For every operator, we test that it works for the required type
     # combinations and raises TypeError otherwise
     binary_op_dtypes = {
         "__add__": "numeric",
-        "__and__": "integer_or_boolean",
+        "__and__": "integer or boolean",
         "__eq__": "all",
         "__floordiv__": "real numeric",
         "__ge__": "real numeric",
@@ -112,12 +160,12 @@ def test_operators():
         "__mod__": "real numeric",
         "__mul__": "numeric",
         "__ne__": "all",
-        "__or__": "integer_or_boolean",
+        "__or__": "integer or boolean",
         "__pow__": "numeric",
         "__rshift__": "integer",
         "__sub__": "numeric",
-        "__truediv__": "floating",
-        "__xor__": "integer_or_boolean",
+        "__truediv__": "floating-point",
+        "__xor__": "integer or boolean",
     }
     # Recompute each time because of in-place ops
     def _array_vals():
@@ -128,8 +176,6 @@ def test_operators():
         for d in _floating_dtypes:
             yield asarray(1.0, dtype=d)
 
-
-    BIG_INT = int(1e30)
     for op, dtypes in binary_op_dtypes.items():
         ops = [op]
         if op not in ["__eq__", "__ne__", "__le__", "__ge__", "__lt__", "__gt__"]:
@@ -139,40 +185,7 @@ def test_operators():
         for s in [1, 1.0, 1j, BIG_INT, False]:
             for _op in ops:
                 for a in _array_vals():
-                    # Test array op scalar. From the spec, the following combinations
-                    # are supported:
-
-                    # - Python bool for a bool array dtype,
-                    # - a Python int within the bounds of the given dtype for integer array dtypes,
-                    # - a Python int or float for real floating-point array dtypes
-                    # - a Python int, float, or complex for complex floating-point array dtypes
-
-                    if ((dtypes == "all"
-                         or dtypes == "numeric" and a.dtype in _numeric_dtypes
-                         or dtypes == "real numeric" and a.dtype in _real_numeric_dtypes
-                         or dtypes == "integer" and a.dtype in _integer_dtypes
-                         or dtypes == "integer_or_boolean" and a.dtype in _integer_or_boolean_dtypes
-                         or dtypes == "boolean" and a.dtype in _boolean_dtypes
-                         or dtypes == "floating" and a.dtype in _floating_dtypes
-                        )
-                        # bool is a subtype of int, which is why we avoid
-                        # isinstance here.
-                        and (a.dtype in _boolean_dtypes and type(s) == bool
-                             or a.dtype in _integer_dtypes and type(s) == int
-                             or a.dtype in _real_floating_dtypes and type(s) in [float, int]
-                             or a.dtype in _complex_floating_dtypes and type(s) in [complex, float, int]
-                        )):
-                        if a.dtype in _integer_dtypes and s == BIG_INT:
-                            assert_raises(OverflowError, lambda: getattr(a, _op)(s))
-                        else:
-                            # Only test for no error
-                            with suppress_warnings() as sup:
-                                # ignore warnings from pow(BIG_INT)
-                                sup.filter(RuntimeWarning,
-                                           "invalid value encountered in power")
-                                getattr(a, _op)(s)
-                    else:
-                        assert_raises(TypeError, lambda: getattr(a, _op)(s))
+                    _check_op_array_scalar(dtypes, a, s, getattr(a, _op), _op)
 
                 # Test array op array.
                 for _op in ops:
@@ -203,10 +216,10 @@ def test_operators():
                                 or (dtypes == "real numeric" and x.dtype in _real_numeric_dtypes and y.dtype in _real_numeric_dtypes)
                                 or (dtypes == "numeric" and x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
                                 or dtypes == "integer" and x.dtype in _integer_dtypes and y.dtype in _integer_dtypes
-                                or dtypes == "integer_or_boolean" and (x.dtype in _integer_dtypes and y.dtype in _integer_dtypes
+                                or dtypes == "integer or boolean" and (x.dtype in _integer_dtypes and y.dtype in _integer_dtypes
                                                                        or x.dtype in _boolean_dtypes and y.dtype in _boolean_dtypes)
                                 or dtypes == "boolean" and x.dtype in _boolean_dtypes and y.dtype in _boolean_dtypes
-                                or dtypes == "floating" and x.dtype in _floating_dtypes and y.dtype in _floating_dtypes
+                                or dtypes == "floating-point" and x.dtype in _floating_dtypes and y.dtype in _floating_dtypes
                             ):
                                 getattr(x, _op)(y)
                             else:
@@ -214,7 +227,7 @@ def test_operators():
 
     unary_op_dtypes = {
         "__abs__": "numeric",
-        "__invert__": "integer_or_boolean",
+        "__invert__": "integer or boolean",
         "__neg__": "numeric",
         "__pos__": "numeric",
     }
@@ -223,7 +236,7 @@ def test_operators():
             if (
                 dtypes == "numeric"
                 and a.dtype in _numeric_dtypes
-                or dtypes == "integer_or_boolean"
+                or dtypes == "integer or boolean"
                 and a.dtype in _integer_or_boolean_dtypes
             ):
                 # Only test for no error
