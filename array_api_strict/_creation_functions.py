@@ -226,6 +226,8 @@ def from_dlpack(
     # Going to wait for upstream numpy support
     if device is not _default:
         _check_device(device)
+    else:
+        device = None
     if copy not in [_default, None]:
         raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
 

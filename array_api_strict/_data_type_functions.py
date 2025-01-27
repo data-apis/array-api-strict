@@ -42,6 +42,13 @@ def astype(
 
     if not copy and dtype == x.dtype:
         return x
+
+    if isdtype(x.dtype, 'complex floating') and not isdtype(dtype, 'complex floating'):
+        raise TypeError(
+            f'The Array API standard stipulates that casting {x.dtype} to {dtype} should not be permitted. '
+             'array-api-strict thus prohibits this conversion.'
+        )
+
     return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy), device=device)
 
 
@@ -160,6 +167,9 @@ def isdtype(
     https://data-apis.org/array-api/latest/API_specification/generated/array_api.isdtype.html
     for more details
     """
+    if not isinstance(dtype, _DType):
+       raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
+
     if isinstance(kind, tuple):
         # Disallow nested tuples
         if any(isinstance(k, tuple) for k in kind):

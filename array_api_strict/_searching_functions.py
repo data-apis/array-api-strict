@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from ._array_object import Array
-from ._dtypes import _result_type, _real_numeric_dtypes
+from ._dtypes import _result_type, _real_numeric_dtypes, bool as _bool
 from ._flags import requires_data_dependent_shapes, requires_api_version, get_array_api_strict_flags
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Literal, Optional, Tuple
+    from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 
@@ -44,6 +44,24 @@ def nonzero(x: Array, /) -> Tuple[Array, ...]:
     if x.ndim == 0:
         raise ValueError("nonzero is not allowed on 0-dimensional arrays")
     return tuple(Array._new(i, device=x.device) for i in np.nonzero(x._array))
+
+
+@requires_api_version('2024.12')
+def count_nonzero(
+    x: Array,
+    /,
+    *,
+    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    keepdims: bool = False,
+) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.count_nonzero <numpy.count_nonzero>`
+
+    See its docstring for more information.
+    """
+    arr = np.count_nonzero(x._array, axis=axis, keepdims=keepdims)
+    return Array._new(np.asarray(arr), device=x.device)
+
 
 @requires_api_version('2023.12')
 def searchsorted(
@@ -87,6 +105,9 @@ def where(condition: Array, x1: bool | int | float | Array, x2: bool | int | flo
 
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)
+    
+    if condition.dtype != _bool:
+        raise TypeError("`condition` must be have a boolean data type")
 
     if len({a.device for a in (condition, x1, x2)}) > 1:
         raise ValueError("Inputs to `where` must all use the same device")

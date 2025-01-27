@@ -126,12 +126,6 @@ class Array:
     # These functions are not required by the spec, but are implemented for
     # the sake of usability.
 
-    def __str__(self: Array, /) -> str:
-        """
-        Performs the operation __str__.
-        """
-        return self._array.__str__().replace("array", "Array")
-
     def __repr__(self: Array, /) -> str:
         """
         Performs the operation __repr__.
@@ -148,6 +142,8 @@ class Array:
             prefix = "Array("
             mid = np.array2string(self._array, separator=', ', prefix=prefix, suffix=suffix)
         return prefix + mid + suffix
+
+    __str__ = __repr__
 
     # In the future, _allow_array will be set to False, which will disallow
     # __array__. This means calling `np.func()` on an array_api_strict array
