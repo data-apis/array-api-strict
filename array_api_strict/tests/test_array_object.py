@@ -108,6 +108,14 @@ def _check_op_array_scalar(dtypes, a, s, func, func_name, BIG_INT=BIG_INT):
     # - a Python int or float for real floating-point array dtypes
     # - a Python int, float, or complex for complex floating-point array dtypes
 
+    # an exception: complex scalar <op> floating array
+    scalar_types_for_float = [float, int]
+    if not (func_name.startswith("__i")
+            or (func_name in ["__floordiv__", "__rfloordiv__", "__mod__", "__rmod__"]
+                and type(s) == complex)
+    ):
+        scalar_types_for_float += [complex]
+
     if ((dtypes == "all"
          or dtypes == "numeric" and a.dtype in _numeric_dtypes
          or dtypes == "real numeric" and a.dtype in _real_numeric_dtypes
@@ -121,7 +129,7 @@ def _check_op_array_scalar(dtypes, a, s, func, func_name, BIG_INT=BIG_INT):
         # isinstance here.
         and (a.dtype in _boolean_dtypes and type(s) == bool
              or a.dtype in _integer_dtypes and type(s) == int
-             or a.dtype in _real_floating_dtypes and type(s) in [float, int]
+             or a.dtype in _real_floating_dtypes and type(s) in scalar_types_for_float
              or a.dtype in _complex_floating_dtypes and type(s) in [complex, float, int]
         )):
         if a.dtype in _integer_dtypes and s == BIG_INT:
