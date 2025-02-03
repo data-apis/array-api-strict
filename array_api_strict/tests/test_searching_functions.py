@@ -20,7 +20,11 @@ def test_where_with_scalars():
           ),
           ArrayAPIStrictFlags(api_version=draft_version),
         ):
-        x_where = xp.where(x == 1, 42, 44)
+        x_where = xp.where(x == 1, xp.asarray(42), 44)
 
         expected = xp.asarray([42, 44, 44, 42])
         assert xp.all(x_where == expected)
+
+        # The spec does not allow both x1 and x2 to be scalars
+        with pytest.raises(ValueError, match="One of"):
+            xp.where(x == 1, 42, 44)
