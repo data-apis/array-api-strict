@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools >= 61.0", "setuptools_scm>8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "array_api_strict"
+dynamic = ["version"]
+requires-python = ">= 3.9"
+dependencies = ["numpy"]
+license = {file = "LICENSE"}
+authors = [
+    {name = "Consortium for Python Data API Standards"}
+]
+description = "A strict, minimal implementation of the Python array API standard."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+
+[project-urls]
+Homepage = "https://data-apis.org/array-api-strict/"
+Repository = "https://github.com/data-apis/array-api-strict"
+
+[tool.setuptools_scm]
+version_file = "array_api_strict/_version.py"
+
