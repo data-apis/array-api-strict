@@ -18,7 +18,7 @@ def p(func: Callable, *args, **kwargs):
     [
         p(xp.can_cast, 42, xp.int8),
         p(xp.can_cast, xp.int8, 42),
-        p(xp.result_type, 42),
+        p(xp.result_type, "42"),
     ],
 )
 def test_raises_on_invalid_types(func, args, kwargs):

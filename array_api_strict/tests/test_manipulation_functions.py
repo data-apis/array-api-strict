@@ -11,7 +11,7 @@ from .._manipulation_functions import (
 
 
 def test_concat_errors():
-    assert_raises(TypeError, lambda: concat((1, 1), axis=None))
+    assert_raises((TypeError, ValueError), lambda: concat((1, 1), axis=None))
     assert_raises(TypeError, lambda: concat([asarray([1], dtype=int8),
                                              asarray([1], dtype=float64)]))
 

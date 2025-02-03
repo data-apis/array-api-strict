@@ -197,7 +197,7 @@ def isdtype(
     else:
         raise TypeError(f"'kind' must be a dtype, str, or tuple of dtypes and strs, not {type(kind).__name__}")
 
-def result_type(*arrays_and_dtypes: Union[Array, Dtype]) -> Dtype:
+def result_type(*arrays_and_dtypes: Union[Array, Dtype, int, float, complex, bool]) -> Dtype:
     """
     Array API compatible wrapper for :py:func:`np.result_type <numpy.result_type>`.
 
@@ -208,19 +208,40 @@ def result_type(*arrays_and_dtypes: Union[Array, Dtype]) -> Dtype:
     # too many extra type promotions like int64 + uint64 -> float64, and does
     # value-based casting on scalar arrays.
     A = []
+    scalars = []
     for a in arrays_and_dtypes:
         if isinstance(a, Array):
             a = a.dtype
+        elif isinstance(a, (bool, int, float, complex)):
+            scalars.append(a)
         elif isinstance(a, np.ndarray) or a not in _all_dtypes:
             raise TypeError("result_type() inputs must be array_api arrays or dtypes")
         A.append(a)
 
+    # remove python scalars
+    A = [a for a in A if not isinstance(a, (bool, int, float, complex))]
+
     if len(A) == 0:
         raise ValueError("at least one array or dtype is required")
     elif len(A) == 1:
-        return A[0]
+        result = A[0]
     else:
         t = A[0]
         for t2 in A[1:]:
             t = _result_type(t, t2)
-        return t
+        result = t
+
+    if len(scalars) == 0:
+        return result
+
+    if get_array_api_strict_flags()['api_version'] <= '2023.12':
+        raise TypeError("result_type() inputs must be array_api arrays or dtypes")
+
+    # promote python scalars given the result_type for all arrays/dtypes
+    from ._creation_functions import empty
+    arr = empty(1, dtype=result)
+    for s in scalars:
+        x = arr._promote_scalar(s)
+        result = _result_type(x.dtype, result)
+
+    return result
