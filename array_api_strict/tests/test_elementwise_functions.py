@@ -233,15 +233,25 @@ def test_scalars():
         if nargs(func) != 2:
             continue
 
+        nocomplex = [
+            'atan2', 'copysign', 'floor_divide', 'hypot', 'logaddexp',  'nextafter',
+            'remainder',
+            'greater', 'less', 'greater_equal', 'less_equal', 'maximum', 'minimum',
+        ]
+
         for s in [1, 1.0, 1j, BIG_INT, False]:
             for a in _array_vals():
                 for func1 in [lambda s: func(a, s), lambda s: func(s, a)]:
-                    allowed = _check_op_array_scalar(dtypes, a, s, func1, func_name)
+
+                    if func_name in nocomplex and type(s) == complex:
+                        allowed = False
+                    else:
+                        allowed = _check_op_array_scalar(dtypes, a, s, func1, func_name)
 
                     # only check `func(array, scalar) == `func(array, array)` if
                     # the former is legal under the promotion rules
                     if allowed:
-                        conv_scalar = asarray(s, dtype=a.dtype)
+                        conv_scalar = a._promote_scalar(s)
 
                         with suppress_warnings() as sup:
                             # ignore warnings from pow(BIG_INT)

@@ -126,6 +126,7 @@ _dtype_categories = {
     "floating-point": _floating_dtypes,
 }
 
+_real_to_complex_map = {float32: complex64, float64: complex128}
 
 # Note: the spec defines a restricted type promotion table compared to NumPy.
 # In particular, cross-kind promotions like integer + float or boolean +

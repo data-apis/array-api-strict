@@ -26,10 +26,12 @@ from ._dtypes import (
     _integer_dtypes,
     _integer_or_boolean_dtypes,
     _floating_dtypes,
+    _real_floating_dtypes,
     _complex_floating_dtypes,
     _numeric_dtypes,
     _result_type,
     _dtype_categories,
+    _real_to_complex_map,
 )
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 
@@ -243,6 +245,7 @@ class Array:
         """
         from ._data_type_functions import iinfo
 
+        target_dtype = self.dtype
         # Note: Only Python scalar types that match the array dtype are
         # allowed.
         if isinstance(scalar, bool):
@@ -268,10 +271,13 @@ class Array:
                     "Python float scalars can only be promoted with floating-point arrays."
                 )
         elif isinstance(scalar, complex):
-            if self.dtype not in _complex_floating_dtypes:
+            if self.dtype not in _floating_dtypes:
                 raise TypeError(
-                    "Python complex scalars can only be promoted with complex floating-point arrays."
+                    "Python complex scalars can only be promoted with floating-point arrays."
                 )
+            # 1j * array(floating) is allowed
+            if self.dtype in _real_floating_dtypes:
+                target_dtype = _real_to_complex_map[self.dtype]
         else:
             raise TypeError("'scalar' must be a Python scalar")
 
@@ -282,7 +288,7 @@ class Array:
         # behavior for integers within the bounds of the integer dtype.
         # Outside of those bounds we use the default NumPy behavior (either
         # cast or raise OverflowError).
-        return Array._new(np.array(scalar, dtype=self.dtype._np_dtype), device=self.device)
+        return Array._new(np.array(scalar, dtype=target_dtype._np_dtype), device=self.device)
 
     @staticmethod
     def _normalize_two_args(x1, x2) -> Tuple[Array, Array]:
