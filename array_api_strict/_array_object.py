@@ -66,9 +66,6 @@ ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 _default = object()
 
-# See https://github.com/data-apis/array-api-strict/issues/67 and the comment
-# on __array__ below.
-_allow_array = True
 
 class Array:
     """
@@ -157,26 +154,22 @@ class Array:
     # This was implemented historically for compatibility, and removing it has
     # caused issues for some libraries (see
     # https://github.com/data-apis/array-api-strict/issues/67).
-    def __array__(self, dtype: None | np.dtype[Any] = None, copy: None | bool = None) -> npt.NDArray[Any]:
-        # We have to allow this to be internally enabled as there's no other
-        # easy way to parse a list of Array objects in asarray().
-        if _allow_array:
-            if self._device != CPU_DEVICE:
-                raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
-            # copy keyword is new in 2.0.0; for older versions don't use it
-            # retry without that keyword.
-            if np.__version__[0] < '2':
-                return np.asarray(self._array, dtype=dtype)
-            elif np.__version__.startswith('2.0.0-dev0'):
-                # Handle dev version for which we can't know based on version
-                # number whether or not the copy keyword is supported.
-                try:
-                    return np.asarray(self._array, dtype=dtype, copy=copy)
-                except TypeError:
-                    return np.asarray(self._array, dtype=dtype)
-            else:
-                return np.asarray(self._array, dtype=dtype, copy=copy)
-        raise ValueError("Conversion from an array_api_strict array to a NumPy ndarray is not supported")
+
+    # Instead of `__array__` we now implement the buffer protocol.
+    # Note that it makes array-apis-strict requiring python>=3.12
+    def __buffer__(self, flags):
+        if self._device != CPU_DEVICE:
+            raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
+        return memoryview(self._array)
+    def __release_buffer(self, buffer):
+        # XXX anything to do here?
+        pass
+
+    def __array__(self, *args, **kwds):
+        # a stub for python < 3.12; otherwise numpy silently produces object arrays
+        raise TypeError(
+            "Interoperation with NumPy requires python >= 3.12. Please upgrade."
+        )
 
     # These are various helper functions to make the array behavior match the
     # spec in places where it either deviates from or is more strict than

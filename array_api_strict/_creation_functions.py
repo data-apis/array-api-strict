@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
@@ -16,19 +15,6 @@ from ._flags import get_array_api_strict_flags
 
 import numpy as np
 
-@contextmanager
-def allow_array():
-    """
-    Temporarily enable Array.__array__. This is needed for np.array to parse
-    list of lists of Array objects.
-    """
-    from . import _array_object
-    original_value = _array_object._allow_array
-    try:
-        _array_object._allow_array = True
-        yield
-    finally:
-        _array_object._allow_array = original_value
 
 def _check_valid_dtype(dtype):
     # Note: Only spelling dtypes as the dtype objects is supported.
@@ -112,8 +98,8 @@ def asarray(
         # Give a better error message in this case. NumPy would convert this
         # to an object array. TODO: This won't handle large integers in lists.
         raise OverflowError("Integer out of bounds for array dtypes")
-    with allow_array():
-        res = np.array(obj, dtype=_np_dtype, copy=copy)
+
+    res = np.array(obj, dtype=_np_dtype, copy=copy)
     return Array._new(res, device=device)
 
 
