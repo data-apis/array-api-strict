@@ -153,6 +153,11 @@ def squeeze(x: Array, /, axis: Union[int, Tuple[int, ...]]) -> Array:
 
     See its docstring for more information.
     """
+    if axis is None:
+        raise ValueError(
+            "squeeze(..., axis=None is not supported. See "
+            "https://github.com/data-apis/array-api/pull/100 for a discussion."
+        )
     return Array._new(np.squeeze(x._array, axis=axis), device=x.device)
 
 
