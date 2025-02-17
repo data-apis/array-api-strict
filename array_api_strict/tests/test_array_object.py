@@ -5,7 +5,7 @@ from numpy.testing import assert_raises, suppress_warnings
 import numpy as np
 import pytest
 
-from .. import ones, asarray, result_type, all, equal
+from .. import ones, arange, reshape, asarray, result_type, all, equal
 from .._array_object import Array, CPU_DEVICE, Device
 from .._dtypes import (
     _all_dtypes,
@@ -70,10 +70,24 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[[True, True, True]])
     assert_raises(IndexError, lambda: a[(True, True, True),])
 
-    # Integer array indices are not allowed (except for 0-D)
-    idx = asarray([0, 1])
+    # Integer array indices are not allowed (except for 0-D or 1D)
+    idx = asarray([[0, 1]])  # idx.ndim == 2
     assert_raises(IndexError, lambda: a[idx, 0])
     assert_raises(IndexError, lambda: a[0, idx])
+
+    # Mixing 1D integer array indices with slices, ellipsis or booleans is not allowed
+    idx = asarray([0, 1])
+    assert_raises(IndexError, lambda: a[..., idx])
+    assert_raises(IndexError, lambda: a[:, idx])
+    assert_raises(IndexError, lambda: a[asarray([True, True]), idx])
+
+    # 1D integer array indices must have the same length
+    idx1 = asarray([0, 1])
+    idx2 = asarray([0, 1, 1])
+    assert_raises(IndexError, lambda: a[idx1, idx2])
+
+    # Non-integer array indices are not allowed
+    assert_raises(IndexError, lambda: a[ones(2), 0])
 
     # Array-likes (lists, tuples) are not allowed as indices
     assert_raises(IndexError, lambda: a[[0, 1]])
@@ -90,6 +104,37 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[0])
     assert_raises(IndexError, lambda: a[:])
     assert_raises(IndexError, lambda: a[idx])
+
+
+def test_indexing_arrays():
+    # indexing with 1D integer arrays and mixes of integers and 1D integer are allowed
+
+    # 1D array
+    a = arange(5)
+    idx = asarray([1, 0, 1, 2, -1])
+    a_idx = a[idx]
+
+    a_idx_loop = asarray([a[idx[i]] for i in range(idx.shape[0])])
+    assert all(a_idx == a_idx_loop)
+
+    # setitem with arrays is not allowed      # XXX
+    # with assert_raises(IndexError):
+    #    a[idx] = 42
+
+    # mixed array and integer indexing
+    a = reshape(arange(3*4), (3, 4))
+    idx = asarray([1, 0, 1, 2, -1])
+    a_idx = a[idx, 1]
+
+    a_idx_loop = asarray([a[idx[i], 1] for i in range(idx.shape[0])])
+    assert all(a_idx == a_idx_loop)
+
+
+    # index with two arrays
+    a_idx = a[idx, idx]
+    a_idx_loop = asarray([a[idx[i], idx[i]] for i in range(idx.shape[0])])
+    assert all(a_idx == a_idx_loop)
+
 
 def test_promoted_scalar_inherits_device():
     device1 = Device("device1")

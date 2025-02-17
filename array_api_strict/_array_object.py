@@ -395,6 +395,8 @@ class Array:
         single_axes = []
         n_ellipsis = 0
         key_has_mask = False
+        key_has_index_array = False
+        key_has_slices = False
         for i in _key:
             if i is not None:
                 nonexpanding_key.append(i)
@@ -403,6 +405,8 @@ class Array:
                 if isinstance(i, Array):
                     if i.dtype in _boolean_dtypes:
                         key_has_mask = True
+                    elif i.dtype in _integer_dtypes:
+                        key_has_index_array = True
                     single_axes.append(i)
                 else:
                     # i must not be an array here, to avoid elementwise equals
@@ -410,6 +414,8 @@ class Array:
                         n_ellipsis += 1
                     else:
                         single_axes.append(i)
+                        if isinstance(i, slice):
+                            key_has_slices = True
 
         n_single_axes = len(single_axes)
         if n_ellipsis > 1:
@@ -426,6 +432,12 @@ class Array:
                     "implicitly do, but such flat indexing behaviour is not "
                     "specified in the Array API."
                 )
+
+        if (key_has_index_array and (n_ellipsis > 0 or key_has_slices or key_has_mask)):
+            raise IndexError(
+                "Integer index arrays are only allowed with integer indices; "
+                f"got {key}."
+            )
 
         if n_ellipsis == 0:
             indexed_shape = self.shape
@@ -485,11 +497,11 @@ class Array:
                     if not get_array_api_strict_flags()['boolean_indexing']:
                         raise RuntimeError("The boolean_indexing flag has been disabled for array-api-strict")
 
-                elif i.dtype in _integer_dtypes and i.ndim != 0:
+                elif i.dtype in _integer_dtypes and i.ndim > 1:
                     raise IndexError(
-                        f"Single-axes index {i} is a non-zero-dimensional "
-                        "integer array, but advanced integer indexing is not "
-                        "specified in the Array API."
+                        f"Single-axes index {i} is a multi-dimensional "
+                        "integer array, but advanced integer indexing is only "
+                        "specified in the Array API for 1D index arrays."
                     )
             elif isinstance(i, tuple):
                 raise IndexError(
