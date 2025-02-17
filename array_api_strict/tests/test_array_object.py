@@ -45,35 +45,37 @@ def test_validate_index():
     a = ones((3, 4))
 
     # Out of bounds slices are not allowed
-    assert_raises(IndexError, lambda: a[:4])
-    assert_raises(IndexError, lambda: a[:-4])
-    assert_raises(IndexError, lambda: a[:3:-1])
-    assert_raises(IndexError, lambda: a[:-5:-1])
-    assert_raises(IndexError, lambda: a[4:])
-    assert_raises(IndexError, lambda: a[-4:])
-    assert_raises(IndexError, lambda: a[4::-1])
-    assert_raises(IndexError, lambda: a[-4::-1])
+    assert_raises(IndexError, lambda: a[:4, 0])
+    assert_raises(IndexError, lambda: a[:-4, 0])
+    assert_raises(IndexError, lambda: a[:3:-1])  # XXX raises for a wrong reason
+    assert_raises(IndexError, lambda: a[:-5:-1, 0])
+    assert_raises(IndexError, lambda: a[4:, 0])
+    assert_raises(IndexError, lambda: a[-4:, 0])
+    assert_raises(IndexError, lambda: a[4::-1, 0])
+    assert_raises(IndexError, lambda: a[-4::-1, 0])
 
-    assert_raises(IndexError, lambda: a[...,:5])
-    assert_raises(IndexError, lambda: a[...,:-5])
-    assert_raises(IndexError, lambda: a[...,:5:-1])
-    assert_raises(IndexError, lambda: a[...,:-6:-1])
-    assert_raises(IndexError, lambda: a[...,5:])
-    assert_raises(IndexError, lambda: a[...,-5:])
-    assert_raises(IndexError, lambda: a[...,5::-1])
-    assert_raises(IndexError, lambda: a[...,-5::-1])
+    assert_raises(IndexError, lambda: a[..., :5])
+    assert_raises(IndexError, lambda: a[..., :-5])
+    assert_raises(IndexError, lambda: a[..., :5:-1])
+    assert_raises(IndexError, lambda: a[..., :-6:-1])
+    assert_raises(IndexError, lambda: a[..., 5:])
+    assert_raises(IndexError, lambda: a[..., -5:])
+    assert_raises(IndexError, lambda: a[..., 5::-1])
+    assert_raises(IndexError, lambda: a[..., -5::-1])
 
     # Boolean indices cannot be part of a larger tuple index
-    assert_raises(IndexError, lambda: a[a[:,0]==1,0])
-    assert_raises(IndexError, lambda: a[a[:,0]==1,...])
-    assert_raises(IndexError, lambda: a[..., a[0]==1])
+    assert_raises(IndexError, lambda: a[a[:, 0] == 1, 0])
+    assert_raises(IndexError, lambda: a[a[:, 0] == 1, ...])
+    assert_raises(IndexError, lambda: a[..., a[0] == 1])
     assert_raises(IndexError, lambda: a[[True, True, True]])
     assert_raises(IndexError, lambda: a[(True, True, True),])
 
     # Integer array indices are not allowed (except for 0-D)
-    idx = asarray([[0, 1]])
-    assert_raises(IndexError, lambda: a[idx])
-    assert_raises(IndexError, lambda: a[idx,])
+    idx = asarray([0, 1])
+    assert_raises(IndexError, lambda: a[idx, 0])
+    assert_raises(IndexError, lambda: a[0, idx])
+
+    # Array-likes (lists, tuples) are not allowed as indices
     assert_raises(IndexError, lambda: a[[0, 1]])
     assert_raises(IndexError, lambda: a[(0, 1), (0, 1)])
     assert_raises(IndexError, lambda: a[[0, 1]])
@@ -87,6 +89,7 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[0,])
     assert_raises(IndexError, lambda: a[0])
     assert_raises(IndexError, lambda: a[:])
+    assert_raises(IndexError, lambda: a[idx])
 
 def test_promoted_scalar_inherits_device():
     device1 = Device("device1")
