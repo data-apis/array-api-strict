@@ -498,14 +498,9 @@ class Array:
                             "Array API when the array is the sole index."
                         )
                     if not get_array_api_strict_flags()['boolean_indexing']:
-                        raise RuntimeError("The boolean_indexing flag has been disabled for array-api-strict")
-
-                elif i.dtype in _integer_dtypes and i.ndim > 1:
-                    raise IndexError(
-                        f"Single-axes index {i} is a multi-dimensional "
-                        "integer array, but advanced integer indexing is only "
-                        "specified in the Array API for 1D index arrays."
-                    )
+                        raise RuntimeError(
+                            "The boolean_indexing flag has been disabled for array-api-strict"
+                        )
             elif isinstance(i, tuple):
                 raise IndexError(
                     f"Single-axes index {i} is a tuple, but nested tuple "

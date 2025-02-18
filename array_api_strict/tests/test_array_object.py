@@ -70,11 +70,6 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[[True, True, True]])
     assert_raises(IndexError, lambda: a[(True, True, True),])
 
-    # Integer array indices are not allowed (except for 0-D or 1D)
-    idx = asarray([[0, 1]])  # idx.ndim == 2
-    assert_raises(IndexError, lambda: a[idx, 0])
-    assert_raises(IndexError, lambda: a[0, idx])
-
     # Mixing 1D integer array indices with slices, ellipsis or booleans is not allowed
     idx = asarray([0, 1])
     assert_raises(IndexError, lambda: a[..., idx])
@@ -137,6 +132,10 @@ def test_indexing_arrays():
     # setitem with arrays is not allowed
     with assert_raises(IndexError):
         a[idx, idx] = 42
+
+    # smoke test indexing with ndim > 1 arrays
+    idx = idx[..., None]
+    a[idx, idx]
 
 
 def test_promoted_scalar_inherits_device():
