@@ -327,9 +327,12 @@ from ._flags import (
 
 __all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_array_api_strict_flags', 'ArrayAPIStrictFlags']
 
-from . import _version
-__version__ = _version.get_versions()['version']
-del _version
+try:
+    from . import _version
+    __version__ = _version.__version__
+    del _version
+except ImportError:
+    __version__ = "unknown"
 
 
 # Extensions can be enabled or disabled dynamically. In order to make
