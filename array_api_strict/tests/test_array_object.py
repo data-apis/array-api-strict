@@ -117,9 +117,9 @@ def test_indexing_arrays():
     a_idx_loop = asarray([a[idx[i]] for i in range(idx.shape[0])])
     assert all(a_idx == a_idx_loop)
 
-    # setitem with arrays is not allowed      # XXX
-    # with assert_raises(IndexError):
-    #    a[idx] = 42
+    # setitem with arrays is not allowed
+    with assert_raises(IndexError):
+        a[idx] = 42
 
     # mixed array and integer indexing
     a = reshape(arange(3*4), (3, 4))
@@ -129,11 +129,14 @@ def test_indexing_arrays():
     a_idx_loop = asarray([a[idx[i], 1] for i in range(idx.shape[0])])
     assert all(a_idx == a_idx_loop)
 
-
     # index with two arrays
     a_idx = a[idx, idx]
     a_idx_loop = asarray([a[idx[i], idx[i]] for i in range(idx.shape[0])])
     assert all(a_idx == a_idx_loop)
+
+    # setitem with arrays is not allowed
+    with assert_raises(IndexError):
+        a[idx, idx] = 42
 
 
 def test_promoted_scalar_inherits_device():

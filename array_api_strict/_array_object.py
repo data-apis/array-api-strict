@@ -327,7 +327,7 @@ class Array:
 
     # Note: A large fraction of allowed indices are disallowed here (see the
     # docstring below)
-    def _validate_index(self, key):
+    def _validate_index(self, key, op="getitem"):
         """
         Validate an index according to the array API.
 
@@ -390,6 +390,9 @@ class Array:
                     "zero-dimensional integer arrays and boolean arrays "
                     "are specified in the Array API."
                 )
+            if op == "setitem":
+                if isinstance(i, Array) and i.dtype in _integer_dtypes:
+                    raise IndexError("Fancy indexing __setitem__ is not supported.")
 
         nonexpanding_key = []
         single_axes = []
@@ -914,7 +917,7 @@ class Array:
         """
         # Note: Only indices required by the spec are allowed. See the
         # docstring of _validate_index
-        self._validate_index(key)
+        self._validate_index(key, op="setitem")
         if isinstance(key, Array):
             # Indexing self._array with array_api_strict arrays can be erroneous
             key = key._array
