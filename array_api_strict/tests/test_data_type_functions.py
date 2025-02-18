@@ -6,9 +6,9 @@ from numpy.testing import assert_raises
 import numpy as np
 
 from .._creation_functions import asarray
-from .._data_type_functions import astype, can_cast, isdtype
+from .._data_type_functions import astype, can_cast, isdtype, result_type
 from .._dtypes import (
-    bool, int8, int16, uint8, float64,
+    bool, int8, int16, uint8, float64, int64
 )
 from .._flags import set_array_api_strict_flags
 
@@ -70,3 +70,22 @@ def astype_device(api_version):
     else:
         pytest.raises(TypeError, lambda: astype(a, int8, device=None))
         pytest.raises(TypeError, lambda: astype(a, int8, device=a.device))
+
+
+@pytest.mark.parametrize("api_version", ['2023.12', '2024.12'])
+def test_result_type_py_scalars(api_version):
+    if api_version <= '2023.12':
+        set_array_api_strict_flags(api_version=api_version)
+
+        with pytest.raises(TypeError):
+            result_type(int16, 3)
+    else:
+        with pytest.warns(UserWarning):
+            set_array_api_strict_flags(api_version=api_version)
+
+            assert result_type(int8, 3) == int8
+            assert result_type(uint8, 3) == uint8
+            assert result_type(float64, 3) == float64
+
+            with pytest.raises(TypeError):
+                result_type(int64, True)
