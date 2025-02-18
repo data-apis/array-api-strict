@@ -378,8 +378,8 @@ def conj(x: Array, /) -> Array:
 
     See its docstring for more information.
     """
-    if x.dtype not in _complex_floating_dtypes:
-        raise TypeError("Only complex floating-point dtypes are allowed in conj")
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in conj")
     return Array._new(np.conj(x._array), device=x.device)
 
 
@@ -568,8 +568,8 @@ def real(x: Array, /) -> Array:
 
     See its docstring for more information.
     """
-    if x.dtype not in _complex_floating_dtypes:
-        raise TypeError("Only complex floating-point dtypes are allowed in real")
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in real")
     return Array._new(np.real(x._array), device=x.device)
 
 
