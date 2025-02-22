@@ -327,7 +327,7 @@ class Array:
 
     # Note: A large fraction of allowed indices are disallowed here (see the
     # docstring below)
-    def _validate_index(self, key):
+    def _validate_index(self, key, op="getitem"):
         """
         Validate an index according to the array API.
 
@@ -390,11 +390,16 @@ class Array:
                     "zero-dimensional integer arrays and boolean arrays "
                     "are specified in the Array API."
                 )
+            if op == "setitem":
+                if isinstance(i, Array) and i.dtype in _integer_dtypes:
+                    raise IndexError("Fancy indexing __setitem__ is not supported.")
 
         nonexpanding_key = []
         single_axes = []
         n_ellipsis = 0
         key_has_mask = False
+        key_has_index_array = False
+        key_has_slices = False
         for i in _key:
             if i is not None:
                 nonexpanding_key.append(i)
@@ -403,6 +408,8 @@ class Array:
                 if isinstance(i, Array):
                     if i.dtype in _boolean_dtypes:
                         key_has_mask = True
+                    elif i.dtype in _integer_dtypes:
+                        key_has_index_array = True
                     single_axes.append(i)
                 else:
                     # i must not be an array here, to avoid elementwise equals
@@ -410,6 +417,8 @@ class Array:
                         n_ellipsis += 1
                     else:
                         single_axes.append(i)
+                        if isinstance(i, slice):
+                            key_has_slices = True
 
         n_single_axes = len(single_axes)
         if n_ellipsis > 1:
@@ -426,6 +435,12 @@ class Array:
                     "implicitly do, but such flat indexing behaviour is not "
                     "specified in the Array API."
                 )
+
+        if (key_has_index_array and (n_ellipsis > 0 or key_has_slices or key_has_mask)):
+            raise IndexError(
+                "Integer index arrays are only allowed with integer indices; "
+                f"got {key}."
+            )
 
         if n_ellipsis == 0:
             indexed_shape = self.shape
@@ -483,14 +498,9 @@ class Array:
                             "Array API when the array is the sole index."
                         )
                     if not get_array_api_strict_flags()['boolean_indexing']:
-                        raise RuntimeError("The boolean_indexing flag has been disabled for array-api-strict")
-
-                elif i.dtype in _integer_dtypes and i.ndim != 0:
-                    raise IndexError(
-                        f"Single-axes index {i} is a non-zero-dimensional "
-                        "integer array, but advanced integer indexing is not "
-                        "specified in the Array API."
-                    )
+                        raise RuntimeError(
+                            "The boolean_indexing flag has been disabled for array-api-strict"
+                        )
             elif isinstance(i, tuple):
                 raise IndexError(
                     f"Single-axes index {i} is a tuple, but nested tuple "
@@ -902,7 +912,7 @@ class Array:
         """
         # Note: Only indices required by the spec are allowed. See the
         # docstring of _validate_index
-        self._validate_index(key)
+        self._validate_index(key, op="setitem")
         if isinstance(key, Array):
             # Indexing self._array with array_api_strict arrays can be erroneous
             key = key._array
