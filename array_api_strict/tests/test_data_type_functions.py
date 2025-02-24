@@ -80,12 +80,11 @@ def test_result_type_py_scalars(api_version):
         with pytest.raises(TypeError):
             result_type(int16, 3)
     else:
-        with pytest.warns(UserWarning):
-            set_array_api_strict_flags(api_version=api_version)
+        set_array_api_strict_flags(api_version=api_version)
 
-            assert result_type(int8, 3) == int8
-            assert result_type(uint8, 3) == uint8
-            assert result_type(float64, 3) == float64
+        assert result_type(int8, 3) == int8
+        assert result_type(uint8, 3) == uint8
+        assert result_type(float64, 3) == float64
 
-            with pytest.raises(TypeError):
-                result_type(int64, True)
+        with pytest.raises(TypeError):
+            result_type(int64, True)

@@ -22,11 +22,12 @@ supported_versions = (
     "2021.12",
     "2022.12",
     "2023.12",
+    "2024.12"
 )
 
-draft_version = "2024.12"
+draft_version = "2025.12"
 
-API_VERSION = default_version = "2023.12"
+API_VERSION = default_version = "2024.12"
 
 BOOLEAN_INDEXING = True
 

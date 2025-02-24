@@ -1,5 +1,73 @@
 # Changelog
 
+## 2.3 (2025-XX-XX)
+
+### Major Changes
+
+- The default version of the array API standard is now 2024.12. Previous versions can
+  still be enabled via the [flags API](array-api-strict-flags).
+
+  Note that this support is still relatively untested. Please [report any
+  issues](https://github.com/data-apis/array-api-strict/issues) you find.
+
+- Binary elementwise functions now accept python scalars: the only requirement is that
+  at least one of the arguments must be an array; the other argument may be either
+  a python scalar or an array. Python scalars are handled in accordance with the
+  type promotion rules, as specified by the standard.
+  This change unifies the behavior of binary functions and their matching operators,
+  (where available), such as `multiply(x1, x2)` and `__mul__(self, other)`.
+  
+  `where` accepts arrays or scalars as its 2nd and 3rd arguments, `x1` and `x2`.
+  The first argument, `condition`, must be an array.
+
+  `result_type` accepts arrays and scalars and computes the result dtype according
+  to the promotion rules.
+
+- Ergonomics of working with complex values has been improved:
+
+  - binary operators accept complex scalars and real arrays and preserve the floating point
+    precision: `1j*f32_array` returns a `complex64` array
+  - `mean` accepts complex floating-point arrays.
+  - `real` and `conj` accept numeric arguments, including real floating point data.
+    Note that `imag` still requires its input to be a complex array.
+
+- The following functions, new in the 2024.12 standard revision, are implemented:
+
+  - `count_nonzero`
+  - `cumulative_prod`
+
+- `fftfreq` and `rfftfreq` functions accept a new `dtype` argument to control the
+  the data type of their output.
+
+
+### Minor Changes
+
+- `vecdot` now conjugates the first argument, in accordance with the standard.
+
+- `astype` now raises a `TypeError` instead of casting a complex floating-point
+  array to a real-valued or an integral data type.
+
+- `where` requires that its first argument, `condition` has a boolean data dtype,
+  and raises a `TypeError` otherwise.
+
+- `isdtype` raises a `TypeError` is its argument is not a dtype object.
+
+- arrays created with `from_dlpack` now correctly set their `device` attribute.
+
+- the build system now uses `pyproject.toml`, not `setup.py`.
+
+### Contributors
+
+The following users contributed to this release:
+
+Aaron Meurer
+Clément Robert
+Guido Imperiale
+Evgeni Burovski
+Lucas Colley
+Tim Head
+
+
 ## 2.2 (2024-11-11)
 
 ### Major Changes
