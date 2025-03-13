@@ -1,3 +1,4 @@
+import sys
 import warnings
 
 from numpy.testing import assert_raises
@@ -97,7 +98,12 @@ def test_asarray_copy():
     a[0] = 0
     assert all(b[0] == 0)
 
-def test_asarray_list_of_lists():
+
+@pytest.mark.xfail(sys.version_info.major*100 + sys.version_info.minor < 312,
+                   reason="array conversion relies on buffer protocol, and "
+                          "requires python >= 3.12"
+)
+def test_asarray_list_of_arrays():
     a = asarray(1, dtype=int16)
     b = asarray([1], dtype=int16)
     res = asarray([a, a])
