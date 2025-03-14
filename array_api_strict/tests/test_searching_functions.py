@@ -35,3 +35,10 @@ def test_where_mixed_dtypes():
     c = x > 1.5
     res = xp.where(c, False, c)
     assert all(res == xp.asarray([False, False]))
+
+
+def test_where_f32():
+    # https://github.com/data-apis/array-api-strict/issues/131#issuecomment-2723016294
+    res = xp.where(xp.asarray([True, False]), 1., xp.asarray([2, 2], dtype=xp.float32))
+    assert res.dtype == xp.float32
+
