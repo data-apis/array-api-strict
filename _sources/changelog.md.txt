@@ -1,6 +1,13 @@
 # Changelog
 
-## 2.3 (2025-XX-XX)
+## 2.3.1 (2025-03-20)
+
+This is a bugfix release with no new features compared to 2.3. This release fixes an
+issue with `where` for scalar arguments, found in downstream testing of the 2024.12
+support.
+
+
+## 2.3 (2025-02-27)
 
 ### Major Changes
 
