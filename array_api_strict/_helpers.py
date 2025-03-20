@@ -31,7 +31,7 @@ def _maybe_normalize_py_scalars(x1, x2, dtype_category, func_name):
         x2 = x1._promote_scalar(x2)
     else:
         if x1.dtype not in _allowed_dtypes or x2.dtype not in _allowed_dtypes:
-            raise TypeError(f"Only {dtype_category} dtypes are allowed {func_name}. "
+            raise TypeError(f"Only {dtype_category} dtypes are allowed in {func_name}(...). "
                             f"Got {x1.dtype} and {x2.dtype}.")
     return x1, x2
 
