@@ -17,9 +17,9 @@ from __future__ import annotations
 import functools
 import os
 import warnings
-from collections.abc import Callable, Collection
+from collections.abc import Callable
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Collection, TypeVar
 
 import array_api_strict
 
@@ -28,8 +28,7 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     P = ParamSpec("P")
-else:
-    P = object  # Sphinx hack
+
 T = TypeVar("T")
 
 

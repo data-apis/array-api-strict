@@ -47,6 +47,7 @@ try:
 except ImportError:
     EllipsisType = type(Ellipsis)
 
+
 class Device:
     _device: str
     __slots__ = ("_device", "__weakref__")
@@ -91,6 +92,7 @@ class Array:
     functions, such as asarray().
 
     """
+
     _array: npt.NDArray[Any]
     _dtype: DType
     _device: Device

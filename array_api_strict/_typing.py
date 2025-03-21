@@ -35,7 +35,11 @@ class SupportsDLPack(Protocol):
 
 Capabilities = TypedDict(
     "Capabilities",
-    {"boolean indexing": bool, "data-dependent shapes": bool, "max dimensions": int},
+    {
+        "boolean indexing": bool,
+        "data-dependent shapes": bool,
+        "max dimensions": int,
+    },
 )
 
 DefaultDataTypes = TypedDict(

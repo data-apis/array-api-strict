@@ -11,6 +11,7 @@ import numpy.typing as npt
 
 py_bool = bool
 
+
 class DType:
     _np_dtype: np.dtype[Any]
     __slots__ = ("_np_dtype", "__weakref__")

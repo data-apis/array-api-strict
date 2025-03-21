@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     # Circular import
     from ._array_object import Array, Device
 
+
 class _Default(Enum):
     DEFAULT = 0
 
@@ -140,7 +141,7 @@ def arange(
     _check_device(device)
 
     return Array._new(
-        np.arange(start, stop, step, dtype=_np_dtype(dtype)), 
+        np.arange(start, stop, step, dtype=_np_dtype(dtype)),
         device=device,
     )
 
@@ -201,7 +202,9 @@ def eye(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=_np_dtype(dtype)), device=device)
+    return Array._new(
+        np.eye(n_rows, M=n_cols, k=k, dtype=_np_dtype(dtype)), device=device
+    )
 
 
 def from_dlpack(

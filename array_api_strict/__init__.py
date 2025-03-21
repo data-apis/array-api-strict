@@ -15,6 +15,7 @@ support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
 """
+
 from types import ModuleType
 
 __all__ = []
@@ -123,7 +124,7 @@ __all__ += [
     "bool",
 ]
 
-from ._elementwise_functions import (  # type: ignore[attr-defined]
+from ._elementwise_functions import (
     abs,
     acos,
     acosh,

@@ -320,12 +320,8 @@ def slogdet(x: Array, /) -> SlogdetResult:
 def _solve(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     try:
         from numpy.linalg._linalg import (  # type: ignore[attr-defined]
-            _assert_stacked_2d,
-            _assert_stacked_square,
-            _commonType,
-            _makearray,
-            _raise_linalgerror_singular,
-            isComplexType,
+        _makearray, _assert_stacked_2d, _assert_stacked_square,
+        _commonType, isComplexType, _raise_linalgerror_singular
         )
     except ImportError:
         from numpy.linalg.linalg import (  # type: ignore[attr-defined]
@@ -412,7 +408,8 @@ def trace(x: Array, /, *, offset: int = 0, dtype: DType | None = None) -> Array:
 
     # Note: trace always operates on the last two axes, whereas np.trace
     # operates on the first two axes by default
-    return Array._new(np.asarray(np.trace(x._array, offset=offset, axis1=-2, axis2=-1, dtype=np_dtype)), device=x.device)
+    res = np.trace(x._array, offset=offset, axis1=-2, axis2=-1, dtype=np_dtype)
+    return Array._new(np.asarray(res), device=x.device)
 
 # Note: the name here is different from norm(). The array API norm is split
 # into matrix_norm and vector_norm().

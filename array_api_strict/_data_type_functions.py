@@ -21,7 +21,6 @@ from ._dtypes import (
 from ._flags import get_array_api_strict_flags
 
 
-# _default is used to emulate the asarray(device) argument not existing in 2022.12
 # Note: astype is a function, not an array method as in NumPy.
 def astype(
     x: Array,
@@ -29,6 +28,7 @@ def astype(
     /,
     *,
     copy: bool = True,
+    # _default is used to emulate the device argument not existing in 2022.12
     device: Device | _Default | None = _default,
 ) -> Array:
     if device is not _default:
@@ -164,7 +164,7 @@ def isdtype(dtype: DType, kind: DType | str | tuple[DType | str, ...]) -> bool:
     for more details
     """
     if not isinstance(dtype, DType):
-       raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
+        raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
 
     if isinstance(kind, tuple):
         # Disallow nested tuples

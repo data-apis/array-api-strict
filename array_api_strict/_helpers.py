@@ -1,5 +1,5 @@
-"""Private helper routines.
-"""
+"""Private helper routines."""
+
 from __future__ import annotations
 
 from ._array_object import Array
@@ -11,11 +11,10 @@ _py_scalars = (bool, int, float, complex)
 
 def _maybe_normalize_py_scalars(
     x1: Array | complex,
-    x2: Array | complex, 
+    x2: Array | complex,
     dtype_category: str,
     func_name: str,
 ) -> tuple[Array, Array]:
-
     flags = get_array_api_strict_flags()
     if flags["api_version"] < "2024.12":
         # scalars will fail at the call site
