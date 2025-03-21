@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import warnings
 from typing import Any
 
@@ -8,8 +9,6 @@ import numpy.typing as npt
 
 # Note: we wrap the NumPy dtype objects in a bare class, so that none of the
 # additional methods and behaviors of NumPy dtype objects are exposed.
-
-py_bool = bool
 
 
 class DType:
@@ -22,7 +21,7 @@ class DType:
     def __repr__(self) -> str:
         return f"array_api_strict.{self._np_dtype.name}"
 
-    def __eq__(self, other: object) -> py_bool:
+    def __eq__(self, other: object) -> builtins.bool:
         # See https://github.com/numpy/numpy/pull/25370/files#r1423259515.
         # Avoid the user error of array_api_strict.float32 == numpy.float32,
         # which gives False. Making == error is probably too egregious, so

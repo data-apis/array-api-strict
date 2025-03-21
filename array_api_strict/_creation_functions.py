@@ -16,11 +16,11 @@ if TYPE_CHECKING:
     from ._array_object import Array, Device
 
 
-class _Default(Enum):
-    DEFAULT = 0
+class Undef(Enum):
+    UNDEF = 0
 
 
-_default = _Default.DEFAULT
+_undef = Undef.UNDEF
 
 
 @contextmanager
@@ -211,23 +211,23 @@ def from_dlpack(
     x: SupportsDLPack,
     /,
     *,
-    device: Device | _Default | None = _default,
-    copy: bool | _Default | None = _default,
+    device: Device | Undef | None = _undef,
+    copy: bool | Undef | None = _undef,
 ) -> Array:
     from ._array_object import Array
 
     if get_array_api_strict_flags()['api_version'] < '2023.12':
-        if device is not _default:
+        if device is not _undef:
             raise ValueError("The device argument to from_dlpack requires at least version 2023.12 of the array API")
-        if copy is not _default:
+        if copy is not _undef:
             raise ValueError("The copy argument to from_dlpack requires at least version 2023.12 of the array API")
 
     # Going to wait for upstream numpy support
-    if device is not _default:
+    if device is not _undef:
         _check_device(device)
     else:
         device = None
-    if copy not in [_default, None]:
+    if copy not in [_undef, None]:
         raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
 
     return Array._new(np.from_dlpack(x), device=device)

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ._array_object import Array, Device
-from ._creation_functions import _check_device, _default, _Default
+from ._creation_functions import _check_device, _undef, Undef
 from ._dtypes import (
     DType,
     _all_dtypes,
@@ -29,9 +29,9 @@ def astype(
     *,
     copy: bool = True,
     # _default is used to emulate the device argument not existing in 2022.12
-    device: Device | _Default | None = _default,
+    device: Device | Undef | None = _undef,
 ) -> Array:
-    if device is not _default:
+    if device is not _undef:
         if get_array_api_strict_flags()['api_version'] >= '2023.12':
             _check_device(device)
         else:

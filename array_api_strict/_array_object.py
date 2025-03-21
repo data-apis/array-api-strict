@@ -24,7 +24,7 @@ from typing import Any, Literal, SupportsIndex
 import numpy as np
 import numpy.typing as npt
 
-from ._creation_functions import _default, _Default, asarray
+from ._creation_functions import _undef, Undef, asarray
 from ._dtypes import (
     DType,
     _all_dtypes,
@@ -101,7 +101,7 @@ class Array:
     # Use a custom constructor instead of __init__, as manually initializing
     # this class is not supported API.
     @classmethod
-    def _new(cls, x: np.ndarray | np.generic, /, device: Device | None) -> Array:
+    def _new(cls, x: npt.NDArray[Any], /, device: Device | None) -> Array:
         """
         This is a private method for initializing the array API Array
         object.
@@ -611,37 +611,37 @@ class Array:
         /,
         *,
         stream: Any = None,
-        max_version: tuple[int, int] | None | _Default = _default,
-        dl_device: tuple[IntEnum, int] | None | _Default = _default,
-        copy: bool | None | _Default = _default,
+        max_version: tuple[int, int] | None | Undef = _undef,
+        dl_device: tuple[IntEnum, int] | None | Undef = _undef,
+        copy: bool | None | Undef = _undef,
     ) -> PyCapsule:
         """
         Performs the operation __dlpack__.
         """
         if get_array_api_strict_flags()['api_version'] < '2023.12':
-            if max_version is not _default:
+            if max_version is not _undef:
                 raise ValueError("The max_version argument to __dlpack__ requires at least version 2023.12 of the array API")
-            if dl_device is not _default:
+            if dl_device is not _undef:
                 raise ValueError("The device argument to __dlpack__ requires at least version 2023.12 of the array API")
-            if copy is not _default:
+            if copy is not _undef:
                 raise ValueError("The copy argument to __dlpack__ requires at least version 2023.12 of the array API")
 
         if np.lib.NumpyVersion(np.__version__) < '2.1.0':
-            if max_version not in [_default, None]:
+            if max_version not in [_undef, None]:
                 raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
-            if dl_device not in [_default, None]:
+            if dl_device not in [_undef, None]:
                 raise NotImplementedError("The device argument to __dlpack__ is not yet implemented")
-            if copy not in [_default, None]:
+            if copy not in [_undef, None]:
                 raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
             return self._array.__dlpack__(stream=stream)
         else:
             kwargs = {'stream': stream}
-            if max_version is not _default:
+            if max_version is not _undef:
                 kwargs['max_version'] = max_version
-            if dl_device is not _default:
+            if dl_device is not _undef:
                 kwargs['dl_device'] = dl_device
-            if copy is not _default:
+            if copy is not _undef:
                 kwargs['copy'] = copy
             return self._array.__dlpack__(**kwargs)
 
@@ -678,7 +678,7 @@ class Array:
         res = self._array.__float__()
         return res
 
-    def __floordiv__(self, other: Array | complex, /) -> Array:
+    def __floordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __floordiv__.
         """
@@ -690,7 +690,7 @@ class Array:
         res = self._array.__floordiv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ge__(self, other: Array | complex, /) -> Array:
+    def __ge__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __ge__.
         """
@@ -725,7 +725,7 @@ class Array:
         res = self._array.__getitem__(np_key)
         return self._new(res, device=self.device)
 
-    def __gt__(self, other: Array | complex, /) -> Array:
+    def __gt__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __gt__.
         """
@@ -780,7 +780,7 @@ class Array:
         # implemented, which implies iteration on 1-D arrays.
         return (Array._new(i, device=self.device) for i in self._array)
 
-    def __le__(self, other: Array | complex, /) -> Array:
+    def __le__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __le__.
         """
@@ -804,7 +804,7 @@ class Array:
         res = self._array.__lshift__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __lt__(self, other: Array | complex, /) -> Array:
+    def __lt__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __lt__.
         """
