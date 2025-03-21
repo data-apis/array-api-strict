@@ -829,7 +829,7 @@ class Array:
         res = self._array.__matmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __mod__(self, other: Array | complex, /) -> Array:
+    def __mod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __mod__.
         """
