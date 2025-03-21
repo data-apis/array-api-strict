@@ -1023,7 +1023,7 @@ class Array:
         res = self._array.__rand__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ifloordiv__(self, other: Array | complex, /) -> Array:
+    def __ifloordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __ifloordiv__.
         """
@@ -1034,7 +1034,7 @@ class Array:
         self._array.__ifloordiv__(other._array)
         return self
 
-    def __rfloordiv__(self, other: Array | complex, /) -> Array:
+    def __rfloordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __rfloordiv__.
         """
@@ -1105,7 +1105,7 @@ class Array:
         self._array.__imod__(other._array)
         return self
 
-    def __rmod__(self, other: Array | complex, /) -> Array:
+    def __rmod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __rmod__.
         """

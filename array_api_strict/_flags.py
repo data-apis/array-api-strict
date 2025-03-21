@@ -348,6 +348,7 @@ class ArrayAPIStrictFlags:
         exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
         traceback: TracebackType | None,
+        /,
     ) -> None:
         set_array_api_strict_flags(**self.old_flags)
 

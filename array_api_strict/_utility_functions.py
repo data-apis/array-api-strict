@@ -56,7 +56,7 @@ def diff(
     # currently specified.
 
     # NumPy does not support prepend=None or append=None
-    kwargs: dict[str, Any] = dict(axis=axis, n=n)
+    kwargs: dict[str, int | npt.NDArray[Any]] = {"axis": axis, "n", n}
     if prepend is not None:
         if prepend.device != x.device:
             raise ValueError(f"Arrays from two different devices ({prepend.device} and {x.device}) can not be combined.")

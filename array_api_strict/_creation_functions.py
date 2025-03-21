@@ -24,7 +24,7 @@ _undef = Undef.UNDEF
 
 
 @contextmanager
-def allow_array() -> Generator[None, None, None]:
+def allow_array() -> Generator[None]:
     """
     Temporarily enable Array.__array__. This is needed for np.array to parse
     list of lists of Array objects.
