@@ -1,31 +1,29 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Union, Optional, Literal
-    from ._typing import Device, Dtype as DType
-    from collections.abc import Sequence
-
-from ._dtypes import (
-    _floating_dtypes,
-    _real_floating_dtypes,
-    _complex_floating_dtypes,
-    float32,
-    complex64,
-)
-from ._array_object import Array, ALL_DEVICES
-from ._data_type_functions import astype
-from ._flags import requires_extension
+from collections.abc import Sequence
+from typing import Literal
 
 import numpy as np
+
+from ._array_object import ALL_DEVICES, Array, Device
+from ._data_type_functions import astype
+from ._dtypes import (
+    DType,
+    _complex_floating_dtypes,
+    _floating_dtypes,
+    _real_floating_dtypes,
+    complex64,
+    float32,
+)
+from ._flags import requires_extension
+
 
 @requires_extension('fft')
 def fft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -48,7 +46,7 @@ def ifft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -71,8 +69,8 @@ def fftn(
     x: Array,
     /,
     *,
-    s: Sequence[int] = None,
-    axes: Sequence[int] = None,
+    s: Sequence[int] | None = None,
+    axes: Sequence[int] | None = None,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
     """
@@ -94,8 +92,8 @@ def ifftn(
     x: Array,
     /,
     *,
-    s: Sequence[int] = None,
-    axes: Sequence[int] = None,
+    s: Sequence[int] | None = None,
+    axes: Sequence[int] | None = None,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
     """
@@ -117,7 +115,7 @@ def rfft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -140,7 +138,7 @@ def irfft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -163,8 +161,8 @@ def rfftn(
     x: Array,
     /,
     *,
-    s: Sequence[int] = None,
-    axes: Sequence[int] = None,
+    s: Sequence[int] | None = None,
+    axes: Sequence[int] | None = None,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
     """
@@ -186,8 +184,8 @@ def irfftn(
     x: Array,
     /,
     *,
-    s: Sequence[int] = None,
-    axes: Sequence[int] = None,
+    s: Sequence[int] | None = None,
+    axes: Sequence[int] | None = None,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
     """
@@ -209,7 +207,7 @@ def hfft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -232,7 +230,7 @@ def ihfft(
     x: Array,
     /,
     *,
-    n: Optional[int] = None,
+    n: int | None = None,
     axis: int = -1,
     norm: Literal["backward", "ortho", "forward"] = "backward",
 ) -> Array:
@@ -256,8 +254,8 @@ def fftfreq(
     /,
     *,
     d: float = 1.0,
-    dtype: Optional[DType] = None,
-    device: Optional[Device] = None
+    dtype: DType | None = None,
+    device: Device | None = None
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.fftfreq <numpy.fft.fftfreq>`.
@@ -280,8 +278,8 @@ def rfftfreq(
     /,
     *,
     d: float = 1.0,
-    dtype: Optional[DType] = None,
-    device: Optional[Device] = None
+    dtype: DType | None = None,
+    device: Device | None = None
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.rfftfreq <numpy.fft.rfftfreq>`.
@@ -299,7 +297,7 @@ def rfftfreq(
     return Array._new(np_result, device=device)
 
 @requires_extension('fft')
-def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
+def fftshift(x: Array, /, *, axes: int | Sequence[int] | None = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.fftshift <numpy.fft.fftshift>`.
 
@@ -310,7 +308,7 @@ def fftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
     return Array._new(np.fft.fftshift(x._array, axes=axes), device=x.device)
 
 @requires_extension('fft')
-def ifftshift(x: Array, /, *, axes: Union[int, Sequence[int]] = None) -> Array:
+def ifftshift(x: Array, /, *, axes: int | Sequence[int] | None = None) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.fft.ifftshift <numpy.fft.ifftshift>`.
 

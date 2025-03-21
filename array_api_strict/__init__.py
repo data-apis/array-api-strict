@@ -15,6 +15,7 @@ support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
 """
+from types import ModuleType
 
 __all__ = []
 
@@ -122,7 +123,7 @@ __all__ += [
     "bool",
 ]
 
-from ._elementwise_functions import (
+from ._elementwise_functions import (  # type: ignore[attr-defined]
     abs,
     acos,
     acosh,
@@ -325,12 +326,16 @@ from ._flags import (
     ArrayAPIStrictFlags,
 )
 
-__all__ += ['set_array_api_strict_flags', 'get_array_api_strict_flags', 'reset_array_api_strict_flags', 'ArrayAPIStrictFlags']
+__all__ += [
+    'set_array_api_strict_flags',
+    'get_array_api_strict_flags',
+    'reset_array_api_strict_flags',
+    'ArrayAPIStrictFlags',
+    '__version__',
+]
 
 try:
-    from . import _version
-    __version__ = _version.__version__
-    del _version
+    from ._version import __version__  # type: ignore[import-not-found,unused-ignore]
 except ImportError:
     __version__ = "unknown"
 
@@ -340,7 +345,7 @@ except ImportError:
 # use __getattr__. Note that linalg and fft are dynamically added and removed
 # from __all__ in set_array_api_strict_flags.
 
-def __getattr__(name):
+def __getattr__(name: str) -> ModuleType:
     if name in ['linalg', 'fft']:
         if name in get_array_api_strict_flags()['enabled_extensions']:
             if name == 'linalg':

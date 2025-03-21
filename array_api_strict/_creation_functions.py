@@ -1,23 +1,29 @@
 from __future__ import annotations
 
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
-
-if TYPE_CHECKING:
-    from ._typing import (
-        Array,
-        Device,
-        Dtype,
-        NestedSequence,
-        SupportsBufferProtocol,
-    )
-from ._dtypes import _DType, _all_dtypes
-from ._flags import get_array_api_strict_flags
+from enum import Enum
+from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
 
+from ._dtypes import DType, _all_dtypes, _np_dtype
+from ._flags import get_array_api_strict_flags
+from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
+
+if TYPE_CHECKING:
+    # Circular import
+    from ._array_object import Array, Device
+
+class _Default(Enum):
+    DEFAULT = 0
+
+
+_default = _Default.DEFAULT
+
+
 @contextmanager
-def allow_array():
+def allow_array() -> Generator[None, None, None]:
     """
     Temporarily enable Array.__array__. This is needed for np.array to parse
     list of lists of Array objects.
@@ -30,22 +36,25 @@ def allow_array():
     finally:
         _array_object._allow_array = original_value
 
-def _check_valid_dtype(dtype):
+
+def _check_valid_dtype(dtype: DType | None) -> None:
     # Note: Only spelling dtypes as the dtype objects is supported.
     if dtype not in (None,) + _all_dtypes:
         raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
 
-def _supports_buffer_protocol(obj):
+
+def _supports_buffer_protocol(obj: object) -> bool:
     try:
-        memoryview(obj)
+        memoryview(obj)  # type: ignore[arg-type]
     except TypeError:
         return False
     return True
 
-def _check_device(device):
+
+def _check_device(device: Device | None) -> None:
     # _array_object imports in this file are inside the functions to avoid
     # circular imports
-    from ._array_object import Device, ALL_DEVICES
+    from ._array_object import ALL_DEVICES, Device
 
     if device is not None and not isinstance(device, Device):
         raise ValueError(f"Unsupported device {device!r}")
@@ -53,20 +62,14 @@ def _check_device(device):
     if device is not None and device not in ALL_DEVICES:
         raise ValueError(f"Unsupported device {device!r}")
 
+
 def asarray(
-    obj: Union[
-        Array,
-        bool,
-        int,
-        float,
-        NestedSequence[bool | int | float],
-        SupportsBufferProtocol,
-    ],
+    obj: Array | complex | NestedSequence[complex] | SupportsBufferProtocol,
     /,
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
-    copy: Optional[bool] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
+    copy: bool | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.asarray <numpy.asarray>`.
@@ -118,13 +121,13 @@ def asarray(
 
 
 def arange(
-    start: Union[int, float],
+    start: float,
     /,
-    stop: Optional[Union[int, float]] = None,
-    step: Union[int, float] = 1,
+    stop: float | None = None,
+    step: float = 1,
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.arange <numpy.arange>`.
@@ -136,16 +139,17 @@ def arange(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.arange(start, stop=stop, step=step, dtype=dtype), device=device)
+    return Array._new(
+        np.arange(start, stop, step, dtype=_np_dtype(dtype)), 
+        device=device,
+    )
 
 
 def empty(
-    shape: Union[int, Tuple[int, ...]],
+    shape: int | tuple[int, ...],
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.empty <numpy.empty>`.
@@ -157,13 +161,11 @@ def empty(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.empty(shape, dtype=dtype), device=device)
+    return Array._new(np.empty(shape, dtype=_np_dtype(dtype)), device=device)
 
 
 def empty_like(
-    x: Array, /, *, dtype: Optional[Dtype] = None, device: Optional[Device] = None
+    x: Array, /, *, dtype: DType | None = None, device: Device | None = None
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.empty_like <numpy.empty_like>`.
@@ -177,19 +179,17 @@ def empty_like(
     if device is None:
         device = x.device
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.empty_like(x._array, dtype=dtype), device=device)
+    return Array._new(np.empty_like(x._array, dtype=_np_dtype(dtype)), device=device)
 
 
 def eye(
     n_rows: int,
-    n_cols: Optional[int] = None,
+    n_cols: int | None = None,
     /,
     *,
     k: int = 0,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.eye <numpy.eye>`.
@@ -201,19 +201,15 @@ def eye(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=dtype), device=device)
+    return Array._new(np.eye(n_rows, M=n_cols, k=k, dtype=_np_dtype(dtype)), device=device)
 
-
-_default = object()
 
 def from_dlpack(
-    x: object,
+    x: SupportsDLPack,
     /,
     *,
-    device: Optional[Device] = _default,
-    copy: Optional[bool] = _default,
+    device: Device | _Default | None = _default,
+    copy: bool | _Default | None = _default,
 ) -> Array:
     from ._array_object import Array
 
@@ -235,11 +231,11 @@ def from_dlpack(
 
 
 def full(
-    shape: Union[int, Tuple[int, ...]],
-    fill_value: Union[int, float],
+    shape: int | tuple[int, ...],
+    fill_value: complex,
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.full <numpy.full>`.
@@ -253,10 +249,8 @@ def full(
 
     if isinstance(fill_value, Array) and fill_value.ndim == 0:
         fill_value = fill_value._array
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    res = np.full(shape, fill_value, dtype=dtype)
-    if _DType(res.dtype) not in _all_dtypes:
+    res = np.full(shape, fill_value, dtype=_np_dtype(dtype))
+    if DType(res.dtype) not in _all_dtypes:
         # This will happen if the fill value is not something that NumPy
         # coerces to one of the acceptable dtypes.
         raise TypeError("Invalid input to full")
@@ -266,10 +260,10 @@ def full(
 def full_like(
     x: Array,
     /,
-    fill_value: Union[int, float],
+    fill_value: complex,
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.full_like <numpy.full_like>`.
@@ -283,10 +277,8 @@ def full_like(
     if device is None:
         device = x.device
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    res = np.full_like(x._array, fill_value, dtype=dtype)
-    if _DType(res.dtype) not in _all_dtypes:
+    res = np.full_like(x._array, fill_value, dtype=_np_dtype(dtype))
+    if DType(res.dtype) not in _all_dtypes:
         # This will happen if the fill value is not something that NumPy
         # coerces to one of the acceptable dtypes.
         raise TypeError("Invalid input to full_like")
@@ -294,13 +286,13 @@ def full_like(
 
 
 def linspace(
-    start: Union[int, float],
-    stop: Union[int, float],
+    start: complex,
+    stop: complex,
     /,
     num: int,
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
     endpoint: bool = True,
 ) -> Array:
     """
@@ -313,12 +305,14 @@ def linspace(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.linspace(start, stop, num, dtype=dtype, endpoint=endpoint), device=device)
+    return Array._new(
+        np.linspace(start, stop, num, dtype=_np_dtype(dtype), endpoint=endpoint),
+        device=device,
+    )
 
 
-def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
+# Note: indexing was 'str' in <=2024.12
+def meshgrid(*arrays: Array, indexing: str = "xy") -> list[Array]:
     """
     Array API compatible wrapper for :py:func:`np.meshgrid <numpy.meshgrid>`.
 
@@ -341,17 +335,19 @@ def meshgrid(*arrays: Array, indexing: str = "xy") -> List[Array]:
     else:
         device = None
 
+    np_indexing = cast(Literal["xy", "ij"], indexing)
+
     return [
         Array._new(array, device=device)
-        for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
+        for array in np.meshgrid(*[a._array for a in arrays], indexing=np_indexing)
     ]
 
 
 def ones(
-    shape: Union[int, Tuple[int, ...]],
+    shape: int | tuple[int, ...],
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.ones <numpy.ones>`.
@@ -363,13 +359,11 @@ def ones(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.ones(shape, dtype=dtype), device=device)
+    return Array._new(np.ones(shape, dtype=_np_dtype(dtype)), device=device)
 
 
 def ones_like(
-    x: Array, /, *, dtype: Optional[Dtype] = None, device: Optional[Device] = None
+    x: Array, /, *, dtype: DType | None = None, device: Device | None = None
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.ones_like <numpy.ones_like>`.
@@ -383,9 +377,7 @@ def ones_like(
     if device is None:
         device = x.device
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.ones_like(x._array, dtype=dtype), device=device)
+    return Array._new(np.ones_like(x._array, dtype=_np_dtype(dtype)), device=device)
 
 
 def tril(x: Array, /, *, k: int = 0) -> Array:
@@ -417,10 +409,10 @@ def triu(x: Array, /, *, k: int = 0) -> Array:
 
 
 def zeros(
-    shape: Union[int, Tuple[int, ...]],
+    shape: int | tuple[int, ...],
     *,
-    dtype: Optional[Dtype] = None,
-    device: Optional[Device] = None,
+    dtype: DType | None = None,
+    device: Device | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.zeros <numpy.zeros>`.
@@ -432,13 +424,11 @@ def zeros(
     _check_valid_dtype(dtype)
     _check_device(device)
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.zeros(shape, dtype=dtype), device=device)
+    return Array._new(np.zeros(shape, dtype=_np_dtype(dtype)), device=device)
 
 
 def zeros_like(
-    x: Array, /, *, dtype: Optional[Dtype] = None, device: Optional[Device] = None
+    x: Array, /, *, dtype: DType | None = None, device: Device | None = None
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.zeros_like <numpy.zeros_like>`.
@@ -452,6 +442,4 @@ def zeros_like(
     if device is None:
         device = x.device
 
-    if dtype is not None:
-        dtype = dtype._np_dtype
-    return Array._new(np.zeros_like(x._array, dtype=dtype), device=device)
+    return Array._new(np.zeros_like(x._array, dtype=_np_dtype(dtype)), device=device)
