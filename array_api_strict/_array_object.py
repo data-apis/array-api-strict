@@ -18,7 +18,7 @@ from __future__ import annotations
 import operator
 from collections.abc import Iterator
 from enum import IntEnum
-from types import EllipsisType, ModuleType
+from types import ModuleType
 from typing import Any, Literal, SupportsIndex
 
 import numpy as np
@@ -42,6 +42,10 @@ from ._dtypes import (
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
+try:
+    from types import EllipsisType  # Python >=3.10
+except ImportError:
+    EllipsisType = type(Ellipsis)
 
 class Device:
     _device: str
@@ -345,7 +349,7 @@ class Array:
             | tuple[int | slice | EllipsisType | None, ...]
             | Array
         ),
-        op: Literal["getitem", "setitem"],
+        op: Literal["getitem", "setitem"] = "getitem",
     ) -> None:
         """
         Validate an index according to the array API.

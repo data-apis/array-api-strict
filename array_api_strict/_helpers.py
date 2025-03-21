@@ -1,5 +1,6 @@
 """Private helper routines.
 """
+from __future__ import annotations
 
 from ._array_object import Array
 from ._dtypes import _dtype_categories
