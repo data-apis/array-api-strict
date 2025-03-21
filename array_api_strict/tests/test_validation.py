@@ -1,11 +1,9 @@
-from typing import Callable
-
 import pytest
 
 import array_api_strict as xp
 
 
-def p(func: Callable, *args, **kwargs):
+def p(func, *args, **kwargs):
     f_sig = ", ".join(
         [str(a) for a in args] + [f"{k}={v}" for k, v in kwargs.items()]
     )

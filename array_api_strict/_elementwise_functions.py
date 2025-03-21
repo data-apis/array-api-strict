@@ -1,51 +1,50 @@
 from __future__ import annotations
 
-from ._dtypes import (
-    _boolean_dtypes,
-    _floating_dtypes,
-    _real_floating_dtypes,
-    _complex_floating_dtypes,
-    _integer_dtypes,
-    _integer_or_boolean_dtypes,
-    _real_numeric_dtypes,
-    _numeric_dtypes,
-    _result_type,
-    _dtype_categories,
-)
+import numpy as np
+
 from ._array_object import Array
-from ._flags import requires_api_version
 from ._creation_functions import asarray
 from ._data_type_functions import broadcast_to, iinfo
+from ._dtypes import (
+    _boolean_dtypes,
+    _complex_floating_dtypes,
+    _dtype_categories,
+    _floating_dtypes,
+    _integer_dtypes,
+    _integer_or_boolean_dtypes,
+    _numeric_dtypes,
+    _real_floating_dtypes,
+    _real_numeric_dtypes,
+    _result_type,
+)
+from ._flags import requires_api_version
 from ._helpers import _maybe_normalize_py_scalars
-
-from typing import Optional, Union
-
-import numpy as np
 
 
 def _binary_ufunc_proto(x1, x2, dtype_category, func_name, np_func):
     """Base implementation of a binary function, `func_name`, defined for
-       dtypes from `dtype_category`
+    dtypes from `dtype_category`
     """
     x1, x2 = _maybe_normalize_py_scalars(x1, x2, dtype_category, func_name)
 
     if x1.device != x2.device:
-        raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
+        raise ValueError(
+            f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined."
+        )
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np_func(x1._array, x2._array), device=x1.device)
 
 
-_binary_docstring_template=\
-"""
+_binary_docstring_template = """
 Array API compatible wrapper for :py:func:`np.%s <numpy.%s>`.
 
 See its docstring for more information.
 """
 
 
-def create_binary_func(func_name, dtype_category, np_func):
+def _create_binary_func(func_name, dtype_category, np_func):
     def inner(x1, x2, /) -> Array:
         return _binary_ufunc_proto(x1, x2, dtype_category, func_name, np_func)
     return inner
@@ -75,7 +74,7 @@ _binary_funcs = {
     "bitwise_xor": "integer or boolean",
     "_bitwise_left_shift": "integer",  # leading underscore deliberate
     "_bitwise_right_shift": "integer",
-    # XXX: copysign: real fp or numeric? 
+    # XXX: copysign: real fp or numeric?
     "copysign": "real floating-point",
     "divide": "floating-point",
     "equal": "all",
@@ -105,7 +104,7 @@ _numpy_renames = {
     "atan2": "arctan2",
     "_bitwise_left_shift": "left_shift",
     "_bitwise_right_shift": "right_shift",
-    "pow": "power"
+    "pow": "power",
 }
 
 
@@ -117,7 +116,7 @@ for func_name, dtype_category in _binary_funcs.items():
     numpy_name = _numpy_renames.get(func_name, func_name)
     np_func = getattr(np, numpy_name)
 
-    func = create_binary_func(func_name, dtype_category, np_func)
+    func = _create_binary_func(func_name, dtype_category, np_func)
     func.__name__ = func_name
 
     func.__doc__ = _binary_docstring_template % (numpy_name, numpy_name)
@@ -153,7 +152,7 @@ if _bitwise_right_shift.__doc__: # noqa: F821
 
 
 # clean up to not pollute the namespace
-del func, create_binary_func
+del func, _create_binary_func
 
 
 def abs(x: Array, /) -> Array:
@@ -271,8 +270,8 @@ def ceil(x: Array, /) -> Array:
 def clip(
     x: Array,
     /,
-    min: Optional[Union[int, float, Array]] = None,
-    max: Optional[Union[int, float, Array]] = None,
+    min: Array | complex | None = None,
+    max: Array | complex | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.clip <numpy.clip>`.
@@ -351,6 +350,7 @@ def clip(
 
     def _isscalar(a):
         return isinstance(a, (int, float, type(None)))
+
     min_shape = () if _isscalar(min) else min.shape
     max_shape = () if _isscalar(max) else max.shape
 
@@ -583,6 +583,7 @@ def reciprocal(x: Array, /) -> Array:
     if x.dtype not in _floating_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in reciprocal")
     return Array._new(np.reciprocal(x._array), device=x.device)
+
 
 def round(x: Array, /) -> Array:
     """
