@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 from ._array_object import Array
 from ._dtypes import _numeric_dtypes
@@ -56,7 +57,7 @@ def diff(
     # currently specified.
 
     # NumPy does not support prepend=None or append=None
-    kwargs: dict[str, int | npt.NDArray[Any]] = {"axis": axis, "n", n}
+    kwargs: dict[str, int | npt.NDArray[Any]] = {"axis": axis, "n": n}
     if prepend is not None:
         if prepend.device != x.device:
             raise ValueError(f"Arrays from two different devices ({prepend.device} and {x.device}) can not be combined.")
