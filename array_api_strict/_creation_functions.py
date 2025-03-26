@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
     # Circular import
     from ._array_object import Array, Device
+
 
 class Undef(Enum):
     UNDEF = 0
@@ -316,8 +317,7 @@ def linspace(
     )
 
 
-# Note: indexing was 'str' in <=2024.12
-def meshgrid(*arrays: Array, indexing: str = "xy") -> list[Array]:
+def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> list[Array]:
     """
     Array API compatible wrapper for :py:func:`np.meshgrid <numpy.meshgrid>`.
 
@@ -340,11 +340,9 @@ def meshgrid(*arrays: Array, indexing: str = "xy") -> list[Array]:
     else:
         device = None
 
-    np_indexing = cast(Literal["xy", "ij"], indexing)
-
     return [
         Array._new(array, device=device)
-        for array in np.meshgrid(*[a._array for a in arrays], indexing=np_indexing)
+        for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
     ]
 
 

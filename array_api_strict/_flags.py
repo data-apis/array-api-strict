@@ -37,7 +37,7 @@ supported_versions = (
     "2021.12",
     "2022.12",
     "2023.12",
-    "2024.12"
+    "2024.12",
 )
 
 draft_version = "2025.12"
@@ -389,6 +389,7 @@ def set_flags_from_environment() -> None:
 set_flags_from_environment()
 
 # Decorators
+
 
 def requires_api_version(version: str) -> Callable[[_CallableT], _CallableT]:
     def decorator(func: Callable[P, T]) -> Callable[P, T]:

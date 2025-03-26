@@ -20,7 +20,7 @@ import sys
 from collections.abc import Iterator
 from enum import IntEnum
 from types import ModuleType
-from typing import Any, Final, Literal, SupportsIndex
+from typing import TYPE_CHECKING, Any, Final, Literal, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
@@ -213,7 +213,7 @@ class Array:
 
         if self.dtype not in _dtype_categories[dtype_category]:
             raise TypeError(f"Only {dtype_category} dtypes are allowed in {op}")
-        if isinstance(other, (int, complex, float, bool)):
+        if isinstance(other, (bool, int, float, complex)):
             other = self._promote_scalar(other)
         elif isinstance(other, Array):
             if other.dtype not in _dtype_categories[dtype_category]:
@@ -243,7 +243,7 @@ class Array:
 
     def _check_device(self, other: Array | complex) -> None:
         """Check that other is on a device compatible with the current array"""
-        if isinstance(other, (int, complex, float, bool)):
+        if isinstance(other, (bool, int, float, complex)):
             return
         elif isinstance(other, Array):
             if self.device != other.device:
@@ -1098,7 +1098,7 @@ class Array:
         res = self._array.__rmatmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imod__(self, other: Array | complex, /) -> Array:
+    def __imod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __imod__.
         """
