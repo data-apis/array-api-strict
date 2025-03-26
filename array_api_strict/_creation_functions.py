@@ -68,7 +68,13 @@ def _check_device(device: Device | None) -> None:
 
 
 def asarray(
-    obj: Array | complex | NestedSequence[complex] | SupportsBufferProtocol,
+    obj: Array
+    | bool
+    | int
+    | float
+    | complex
+    | NestedSequence[bool | int | float | complex]
+    | SupportsBufferProtocol,
     /,
     *,
     dtype: DType | None = None,
@@ -125,10 +131,10 @@ def asarray(
 
 
 def arange(
-    start: float,
+    start: int | float,
     /,
-    stop: float | None = None,
-    step: float = 1,
+    stop: int | float | None = None,
+    step: int | float = 1,
     *,
     dtype: DType | None = None,
     device: Device | None = None,
@@ -238,7 +244,7 @@ def from_dlpack(
 
 def full(
     shape: int | tuple[int, ...],
-    fill_value: complex,
+    fill_value: bool | int | float | complex,
     *,
     dtype: DType | None = None,
     device: Device | None = None,
@@ -266,7 +272,7 @@ def full(
 def full_like(
     x: Array,
     /,
-    fill_value: complex,
+    fill_value: bool | int | float | complex,
     *,
     dtype: DType | None = None,
     device: Device | None = None,
@@ -292,8 +298,8 @@ def full_like(
 
 
 def linspace(
-    start: complex,
-    stop: complex,
+    start: int | float | complex,
+    stop: int | float | complex,
     /,
     num: int,
     *,

@@ -194,7 +194,9 @@ def isdtype(dtype: DType, kind: DType | str | tuple[DType | str, ...]) -> bool:
         raise TypeError(f"'kind' must be a dtype, str, or tuple of dtypes and strs, not {type(kind).__name__}")
 
 
-def result_type(*arrays_and_dtypes: Array | DType | complex) -> DType:
+def result_type(
+    *arrays_and_dtypes: DType | Array | bool | int | float | complex,
+) -> DType:
     """
     Array API compatible wrapper for :py:func:`np.result_type <numpy.result_type>`.
 

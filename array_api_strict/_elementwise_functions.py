@@ -270,8 +270,8 @@ def ceil(x: Array, /) -> Array:
 def clip(
     x: Array,
     /,
-    min: Array | float | None = None,
-    max: Array | float | None = None,
+    min: Array | int | float | None = None,
+    max: Array | int | float | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.clip <numpy.clip>`.

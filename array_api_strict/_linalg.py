@@ -417,7 +417,7 @@ def vector_norm(
     *,
     axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
-    ord: float = 2,
+    ord: int | float = 2,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.linalg.norm <numpy.linalg.norm>`.
