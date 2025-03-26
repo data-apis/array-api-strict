@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ._array_object import Array, Device
-from ._creation_functions import _check_device, _undef, Undef
+from ._creation_functions import Undef, _check_device, _undef
 from ._dtypes import (
     DType,
     _all_dtypes,

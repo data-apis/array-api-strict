@@ -40,6 +40,8 @@ show_error_codes = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true
+strict_bytes = true
+local_partial_types = true
 
 [[tool.mypy.overrides]]
 module = ["*.tests.*"]

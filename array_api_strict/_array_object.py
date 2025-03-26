@@ -16,15 +16,16 @@ of ndarray.
 from __future__ import annotations
 
 import operator
+import sys
 from collections.abc import Iterator
 from enum import IntEnum
 from types import ModuleType
-from typing import Any, Literal, SupportsIndex
+from typing import Any, Final, Literal, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
 
-from ._creation_functions import _undef, Undef, asarray
+from ._creation_functions import Undef, _undef, asarray
 from ._dtypes import (
     DType,
     _all_dtypes,
@@ -42,14 +43,16 @@ from ._dtypes import (
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
-try:
-    from types import EllipsisType  # Python >=3.10
-except ImportError:
+if sys.version_info >= (3, 10):
+    from types import EllipsisType
+elif TYPE_CHECKING:
+    from typing_extensions import EllipsisType
+else:
     EllipsisType = type(Ellipsis)
 
 
 class Device:
-    _device: str
+    _device: Final[str]
     __slots__ = ("_device", "__weakref__")
 
     def __init__(self, device: str = "CPU_DEVICE"):
@@ -101,7 +104,7 @@ class Array:
     # Use a custom constructor instead of __init__, as manually initializing
     # this class is not supported API.
     @classmethod
-    def _new(cls, x: npt.NDArray[Any], /, device: Device | None) -> Array:
+    def _new(cls, x: npt.NDArray[Any] | np.generic, /, device: Device | None) -> Array:
         """
         This is a private method for initializing the array API Array
         object.

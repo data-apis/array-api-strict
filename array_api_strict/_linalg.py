@@ -9,13 +9,7 @@ import numpy.linalg
 
 from ._array_object import Array
 from ._data_type_functions import finfo
-from ._dtypes import (
-    DType,
-    _floating_dtypes,
-    _numeric_dtypes,
-    complex64,
-    complex128,
-)
+from ._dtypes import DType, _floating_dtypes, _numeric_dtypes, complex64, complex128
 from ._elementwise_functions import conj
 from ._flags import get_array_api_strict_flags, requires_extension
 from ._manipulation_functions import reshape

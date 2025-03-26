@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import builtins
 import warnings
-from typing import Any
+from typing import Any, Final
 
 import numpy as np
 import numpy.typing as npt
@@ -12,7 +12,7 @@ import numpy.typing as npt
 
 
 class DType:
-    _np_dtype: np.dtype[Any]
+    _np_dtype: Final[np.dtype[Any]]
     __slots__ = ("_np_dtype", "__weakref__")
 
     def __init__(self, np_dtype: npt.DTypeLike):

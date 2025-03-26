@@ -12,9 +12,11 @@ from ._flags import get_array_api_strict_flags
 from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
 
 if TYPE_CHECKING:
+    # TODO import from typing (requires Python >=3.13)
+    from typing_extensions import TypeIs
+
     # Circular import
     from ._array_object import Array, Device
-
 
 class Undef(Enum):
     UNDEF = 0
@@ -44,7 +46,7 @@ def _check_valid_dtype(dtype: DType | None) -> None:
         raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
 
 
-def _supports_buffer_protocol(obj: object) -> bool:
+def _supports_buffer_protocol(obj: object) -> TypeIs[SupportsBufferProtocol]:
     try:
         memoryview(obj)  # type: ignore[arg-type]
     except TypeError:

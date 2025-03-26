@@ -52,22 +52,18 @@ DefaultDataTypes = TypedDict(
     },
 )
 
-DataTypes = TypedDict(
-    "DataTypes",
-    {
-        "bool": DType,
-        "float32": DType,
-        "float64": DType,
-        "complex64": DType,
-        "complex128": DType,
-        "int8": DType,
-        "int16": DType,
-        "int32": DType,
-        "int64": DType,
-        "uint8": DType,
-        "uint16": DType,
-        "uint32": DType,
-        "uint64": DType,
-    },
-    total=False,
-)
+
+class DataTypes(TypedDict, total=False):
+    bool: DType
+    float32: DType
+    float64: DType
+    complex64: DType
+    complex128: DType
+    int8: DType
+    int16: DType
+    int32: DType
+    int64: DType
+    uint8: DType
+    uint16: DType
+    uint32: DType
+    uint64: DType

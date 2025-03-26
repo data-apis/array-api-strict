@@ -19,7 +19,7 @@ import os
 import warnings
 from collections.abc import Callable
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Collection, TypeVar
+from typing import TYPE_CHECKING, Any, Collection, TypeVar, cast
 
 import array_api_strict
 
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
 
 T = TypeVar("T")
+_CallableT = TypeVar("_CallableT", bound=Callable[..., object])
 
 
 supported_versions = (
@@ -389,8 +390,7 @@ set_flags_from_environment()
 
 # Decorators
 
-
-def requires_api_version(version: str) -> Callable[[Callable], Callable]:
+def requires_api_version(version: str) -> Callable[[_CallableT], _CallableT]:
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -403,7 +403,7 @@ def requires_api_version(version: str) -> Callable[[Callable], Callable]:
 
         return wrapper
 
-    return decorator
+    return cast(Callable[[_CallableT], _CallableT], decorator)
 
 
 def requires_data_dependent_shapes(func: Callable[P, T]) -> Callable[P, T]:
@@ -415,7 +415,7 @@ def requires_data_dependent_shapes(func: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def requires_extension(extension: str) -> Callable[[Callable], Callable]:
+def requires_extension(extension: str) -> Callable[[_CallableT], _CallableT]:
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -426,5 +426,7 @@ def requires_extension(extension: str) -> Callable[[Callable], Callable]:
                     raise RuntimeError(f"The linalg extension has been disabled for array-api-strict. However, {func.__name__} is also present in the main array_api_strict namespace and may be used from there.")
                 raise RuntimeError(f"The function {func.__name__} requires the {extension} extension, but it has been disabled for array-api-strict")
             return func(*args, **kwargs)
+
         return wrapper
-    return decorator
+
+    return cast(Callable[[_CallableT], _CallableT], decorator)
