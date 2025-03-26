@@ -57,7 +57,7 @@ _annotations = {
     "real numeric": "int | float | Array",
     "numeric": "int | float | complex | Array",
     "integer": "int | Array",
-    "integer or boolean": "int | bool | Array",
+    "integer or boolean": "bool | int | Array",
     "boolean": "bool | Array",
     "real floating-point": "float | Array",
     "complex floating-point": "complex | Array",
