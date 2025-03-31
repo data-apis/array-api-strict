@@ -1,21 +1,20 @@
 from __future__ import annotations
 
-from ._array_object import Array
-from ._flags import requires_api_version
-from ._dtypes import _numeric_dtypes
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
+
+from ._array_object import Array
+from ._dtypes import _numeric_dtypes
+from ._flags import requires_api_version
 
 
 def all(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
     """
@@ -30,7 +29,7 @@ def any(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
     """
@@ -40,6 +39,7 @@ def any(
     """
     return Array._new(np.asarray(np.any(x._array, axis=axis, keepdims=keepdims)), device=x.device)
 
+
 @requires_api_version('2024.12')
 def diff(
     x: Array,
@@ -47,8 +47,8 @@ def diff(
     *,
     axis: int = -1,
     n: int = 1,
-    prepend: Optional[Array] = None,
-    append: Optional[Array] = None,
+    prepend: Array | None = None,
+    append: Array | None = None,
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in diff")
@@ -57,7 +57,7 @@ def diff(
     # currently specified.
 
     # NumPy does not support prepend=None or append=None
-    kwargs = dict(axis=axis, n=n)
+    kwargs: dict[str, int | npt.NDArray[Any]] = {"axis": axis, "n": n}
     if prepend is not None:
         if prepend.device != x.device:
             raise ValueError(f"Arrays from two different devices ({prepend.device} and {x.device}) can not be combined.")

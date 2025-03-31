@@ -31,3 +31,18 @@ Repository = "https://github.com/data-apis/array-api-strict"
 [tool.setuptools_scm]
 version_file = "array_api_strict/_version.py"
 
+[tool.mypy]
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_bytes = true
+local_partial_types = true
+
+[[tool.mypy.overrides]]
+module = ["*.tests.*"]
+disallow_untyped_defs = false

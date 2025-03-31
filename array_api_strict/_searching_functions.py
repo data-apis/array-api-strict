@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from ._array_object import Array
-from ._dtypes import _result_type, _real_numeric_dtypes, bool as _bool
-from ._flags import requires_data_dependent_shapes, requires_api_version, get_array_api_strict_flags
-from ._helpers import _maybe_normalize_py_scalars
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Literal, Optional, Tuple, Union
+from typing import Literal
 
 import numpy as np
 
+from ._array_object import Array
+from ._dtypes import _real_numeric_dtypes, _result_type
+from ._dtypes import bool as _bool
+from ._flags import requires_api_version, requires_data_dependent_shapes
+from ._helpers import _maybe_normalize_py_scalars
 
-def argmax(x: Array, /, *, axis: Optional[int] = None, keepdims: bool = False) -> Array:
+
+def argmax(x: Array, /, *, axis: int | None = None, keepdims: bool = False) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.argmax <numpy.argmax>`.
 
@@ -23,7 +22,7 @@ def argmax(x: Array, /, *, axis: Optional[int] = None, keepdims: bool = False) -
     return Array._new(np.asarray(np.argmax(x._array, axis=axis, keepdims=keepdims)), device=x.device)
 
 
-def argmin(x: Array, /, *, axis: Optional[int] = None, keepdims: bool = False) -> Array:
+def argmin(x: Array, /, *, axis: int | None = None, keepdims: bool = False) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.argmin <numpy.argmin>`.
 
@@ -35,7 +34,7 @@ def argmin(x: Array, /, *, axis: Optional[int] = None, keepdims: bool = False) -
 
 
 @requires_data_dependent_shapes
-def nonzero(x: Array, /) -> Tuple[Array, ...]:
+def nonzero(x: Array, /) -> tuple[Array, ...]:
     """
     Array API compatible wrapper for :py:func:`np.nonzero <numpy.nonzero>`.
 
@@ -52,7 +51,7 @@ def count_nonzero(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
     """
@@ -71,7 +70,7 @@ def searchsorted(
     /,
     *,
     side: Literal["left", "right"] = "left",
-    sorter: Optional[Array] = None,
+    sorter: Array | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.searchsorted <numpy.searchsorted>`.
@@ -84,25 +83,29 @@ def searchsorted(
     if x1.device != x2.device:
         raise ValueError(f"Arrays from two different devices ({x1.device} and {x2.device}) can not be combined.")
 
-    sorter = sorter._array if sorter is not None else None
+    np_sorter = sorter._array if sorter is not None else None
     # TODO: The sort order of nans and signed zeros is implementation
     # dependent. Should we error/warn if they are present?
 
     # x1 must be 1-D, but NumPy already requires this.
-    return Array._new(np.searchsorted(x1._array, x2._array, side=side, sorter=sorter), device=x1.device)
+    return Array._new(
+        np.searchsorted(x1._array, x2._array, side=side, sorter=np_sorter), 
+        device=x1.device,
+    )
+
 
 def where(
     condition: Array,
-    x1: bool | int | float | complex | Array,
-    x2: bool | int | float | complex | Array, /
+    x1: Array | bool | int | float | complex,
+    x2: Array | bool | int | float | complex,
+    /,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.where <numpy.where>`.
 
     See its docstring for more information.
     """
-    if get_array_api_strict_flags()['api_version'] > '2023.12':
-        x1, x2 = _maybe_normalize_py_scalars(x1, x2, "all", "where")
+    x1, x2 = _maybe_normalize_py_scalars(x1, x2, "all", "where")
 
     # Call result type here just to raise on disallowed type combinations
     _result_type(x1.dtype, x2.dtype)

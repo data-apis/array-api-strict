@@ -7,16 +7,15 @@ linalg extension is disabled in the flags.
 
 from __future__ import annotations
 
-from ._dtypes import _numeric_dtypes
+from collections.abc import Sequence
+
+import numpy as np
+import numpy.linalg
+
 from ._array_object import Array
+from ._dtypes import _numeric_dtypes
 from ._flags import get_array_api_strict_flags
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ._typing import Sequence, Tuple, Union
-
-import numpy.linalg
-import numpy as np
 
 # Note: matmul is the numpy top-level namespace but not in np.linalg
 def matmul(x1: Array, x2: Array, /) -> Array:
@@ -38,7 +37,13 @@ def matmul(x1: Array, x2: Array, /) -> Array:
 # Note: tensordot is the numpy top-level namespace but not in np.linalg
 
 # Note: axes must be a tuple, unlike np.tensordot where it can be an array or array-like.
-def tensordot(x1: Array, x2: Array, /, *, axes: Union[int, Tuple[Sequence[int], Sequence[int]]] = 2) -> Array:
+def tensordot(
+    x1: Array,
+    x2: Array,
+    /,
+    *,
+    axes: int | tuple[Sequence[int], Sequence[int]] = 2,
+) -> Array:
     # Note: the restriction to numeric dtypes only is different from
     # np.tensordot.
     if x1.dtype not in _numeric_dtypes or x2.dtype not in _numeric_dtypes:

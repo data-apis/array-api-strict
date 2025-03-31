@@ -1,38 +1,36 @@
 from __future__ import annotations
 
-from ._dtypes import (
-    _real_floating_dtypes,
-    _real_numeric_dtypes,
-    _floating_dtypes,
-    _numeric_dtypes,
-)
-from ._array_object import Array
-from ._dtypes import float32, complex64
-from ._flags import requires_api_version, get_array_api_strict_flags
-from ._creation_functions import zeros, ones
-from ._manipulation_functions import concat
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Optional, Tuple, Union
-    from ._typing import Dtype
+from typing import Any
 
 import numpy as np
+
+from ._array_object import Array
+from ._creation_functions import ones, zeros
+from ._dtypes import (
+    DType,
+    _floating_dtypes,
+    _np_dtype,
+    _numeric_dtypes,
+    _real_floating_dtypes,
+    _real_numeric_dtypes,
+    complex64,
+    float32,
+)
+from ._flags import get_array_api_strict_flags, requires_api_version
+from ._manipulation_functions import concat
+
 
 @requires_api_version('2023.12')
 def cumulative_sum(
     x: Array,
     /,
     *,
-    axis: Optional[int] = None,
-    dtype: Optional[Dtype] = None,
+    axis: int | None = None,
+    dtype: DType | None = None,
     include_initial: bool = False,
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in cumulative_sum")
-    if dtype is not None:
-        dtype = dtype._np_dtype
 
     # TODO: The standard is not clear about what should happen when x.ndim == 0.
     if axis is None:
@@ -44,7 +42,7 @@ def cumulative_sum(
         if axis < 0:
             axis += x.ndim
         x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
-    return Array._new(np.cumsum(x._array, axis=axis, dtype=dtype), device=x.device)
+    return Array._new(np.cumsum(x._array, axis=axis, dtype=_np_dtype(dtype)), device=x.device)
 
 
 @requires_api_version('2024.12')
@@ -52,17 +50,14 @@ def cumulative_prod(
     x: Array,
     /,
     *,
-    axis: Optional[int] = None,
-    dtype: Optional[Dtype] = None,
+    axis: int | None = None,
+    dtype: DType | None = None,
     include_initial: bool = False,
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in cumulative_prod")
     if x.ndim == 0:
         raise ValueError("Only ndim >= 1 arrays are allowed in cumulative_prod")
-
-    if dtype is not None:
-        dtype = dtype._np_dtype
 
     if axis is None:
         if x.ndim > 1:
@@ -74,14 +69,14 @@ def cumulative_prod(
         if axis < 0:
             axis += x.ndim
         x = concat([ones(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
-    return Array._new(np.cumprod(x._array, axis=axis, dtype=dtype), device=x.device)
+    return Array._new(np.cumprod(x._array, axis=axis, dtype=_np_dtype(dtype)), device=x.device)
 
 
 def max(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
     if x.dtype not in _real_numeric_dtypes:
@@ -93,14 +88,15 @@ def mean(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
 
-    if get_array_api_strict_flags()['api_version'] > '2023.12':
-        allowed_dtypes = _floating_dtypes
-    else:
-        allowed_dtypes = _real_floating_dtypes
+    allowed_dtypes = (
+        _floating_dtypes
+        if get_array_api_strict_flags()['api_version'] > '2023.12'
+        else _real_floating_dtypes
+    )
 
     if x.dtype not in allowed_dtypes:
         raise TypeError("Only floating-point dtypes are allowed in mean")
@@ -111,7 +107,7 @@ def min(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
+    axis: int | tuple[int, ...] | None = None,
     keepdims: bool = False,
 ) -> Array:
     if x.dtype not in _real_numeric_dtypes:
@@ -119,37 +115,43 @@ def min(
     return Array._new(np.min(x._array, axis=axis, keepdims=keepdims), device=x.device)
 
 
+def _np_dtype_sumprod(x: Array, dtype: DType | None) -> np.dtype[Any] | None:
+    """In versions prior to 2023.12, sum() and prod() upcast for all
+    dtypes when dtype=None. For 2023.12, the behavior is the same as in
+    NumPy (only upcast for integral dtypes).
+    """
+    if dtype is None and get_array_api_strict_flags()['api_version'] < '2023.12':
+        if x.dtype == float32:
+            return np.float64  # type: ignore[return-value]
+        elif x.dtype == complex64:
+            return np.complex128  # type: ignore[return-value]
+    return _np_dtype(dtype)
+
+
 def prod(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
-    dtype: Optional[Dtype] = None,
+    axis: int | tuple[int, ...] | None = None,
+    dtype: DType | None = None,
     keepdims: bool = False,
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in prod")
 
-    if dtype is None:
-        # Note: In versions prior to 2023.12, sum() and prod() upcast for all
-        # dtypes when dtype=None. For 2023.12, the behavior is the same as in
-        # NumPy (only upcast for integral dtypes).
-        if get_array_api_strict_flags()['api_version'] < '2023.12':
-            if x.dtype == float32:
-                dtype = np.float64
-            elif x.dtype == complex64:
-                dtype = np.complex128
-    else:
-        dtype = dtype._np_dtype
-    return Array._new(np.prod(x._array, dtype=dtype, axis=axis, keepdims=keepdims), device=x.device)
+    np_dtype = _np_dtype_sumprod(x, dtype)
+    return Array._new(
+        np.prod(x._array, dtype=np_dtype, axis=axis, keepdims=keepdims),
+        device=x.device,
+    )
 
 
 def std(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
-    correction: Union[int, float] = 0.0,
+    axis: int | tuple[int, ...] | None = None,
+    correction: int | float = 0.0,
     keepdims: bool = False,
 ) -> Array:
     # Note: the keyword argument correction is different here
@@ -162,33 +164,26 @@ def sum(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
-    dtype: Optional[Dtype] = None,
+    axis: int | tuple[int, ...] | None = None,
+    dtype: DType | None = None,
     keepdims: bool = False,
 ) -> Array:
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in sum")
 
-    if dtype is None:
-        # Note: In versions prior to 2023.12, sum() and prod() upcast for all
-        # dtypes when dtype=None. For 2023.12, the behavior is the same as in
-        # NumPy (only upcast for integral dtypes).
-        if get_array_api_strict_flags()['api_version'] < '2023.12':
-            if x.dtype == float32:
-                dtype = np.float64
-            elif x.dtype == complex64:
-                dtype = np.complex128
-    else:
-        dtype = dtype._np_dtype
-    return Array._new(np.sum(x._array, axis=axis, dtype=dtype, keepdims=keepdims), device=x.device)
+    np_dtype = _np_dtype_sumprod(x, dtype)
+    return Array._new(
+        np.sum(x._array, axis=axis, dtype=np_dtype, keepdims=keepdims),
+        device=x.device,
+    )
 
 
 def var(
     x: Array,
     /,
     *,
-    axis: Optional[Union[int, Tuple[int, ...]]] = None,
-    correction: Union[int, float] = 0.0,
+    axis: int | tuple[int, ...] | None = None,
+    correction: int | float = 0.0,
     keepdims: bool = False,
 ) -> Array:
     # Note: the keyword argument correction is different here
