@@ -351,8 +351,8 @@ class Array:
             int
             | slice
             | EllipsisType
-            | tuple[int | slice | EllipsisType | None, ...]
             | Array
+            | tuple[int | slice | EllipsisType | Array | None, ...]
         ),
         op: Literal["getitem", "setitem"] = "getitem",
     ) -> None:
@@ -711,8 +711,9 @@ class Array:
             int
             | slice
             | EllipsisType
-            | tuple[int | slice | EllipsisType | None, ...]
             | Array
+            | None
+            | tuple[int | slice | EllipsisType | Array | None, ...]
         ),
         /,
     ) -> Array:
@@ -926,8 +927,14 @@ class Array:
 
     def __setitem__(
         self,
-        key: (  # Almost same as __getitem__ key but doesn't accept None
-            int | slice | EllipsisType | tuple[int | slice | EllipsisType, ...] | Array
+        # Almost same as __getitem__ key but doesn't accept None
+        # or integer arrays
+        key: (
+            int
+            | slice
+            | EllipsisType
+            | Array
+            | tuple[int | slice | EllipsisType, ...]
         ),
         value: Array | complex,
         /,
