@@ -698,8 +698,13 @@ class Array:
         # docstring of _validate_index
         self._validate_index(key)
         if isinstance(key, Array):
+            key = (key,)
+        if isinstance(key, tuple):
             # Indexing self._array with array_api_strict arrays can be erroneous
-            key = key._array
+            # e.g., when using non-default device
+            key = tuple(
+                subkey._array if isinstance(subkey, Array) else subkey for subkey in key
+            )
         res = self._array.__getitem__(key)
         return self._new(res, device=self.device)
 
