@@ -191,7 +191,7 @@ class Array:
     # NumPy behavior
 
     def _check_allowed_dtypes(
-        self, other: Array | bool | int | float | complex, dtype_category: str, op: str
+        self, other: Array | complex, dtype_category: str, op: str
     ) -> Array:
         """
         Helper function for operators to only allow specific input dtypes
@@ -233,7 +233,7 @@ class Array:
 
         return other
 
-    def _check_device(self, other: Array | bool | int | float | complex) -> None:
+    def _check_device(self, other: Array | complex) -> None:
         """Check that other is on a device compatible with the current array"""
         if isinstance(other, (bool, int, float, complex)):
             return
@@ -244,7 +244,7 @@ class Array:
             raise TypeError(f"Expected Array | python scalar; got {type(other)}")
 
     # Helper function to match the type promotion rules in the spec
-    def _promote_scalar(self, scalar: bool | int | float | complex) -> Array:
+    def _promote_scalar(self, scalar: complex) -> Array:
         """
         Returns a promoted version of a Python scalar appropriate for use with
         operations on self.
@@ -538,7 +538,7 @@ class Array:
         res = self._array.__abs__()
         return self.__class__._new(res, device=self.device)
 
-    def __add__(self, other: Array | int | float | complex, /) -> Array:
+    def __add__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __add__.
         """
@@ -550,7 +550,7 @@ class Array:
         res = self._array.__add__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __and__(self, other: Array | bool | int, /) -> Array:
+    def __and__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __and__.
         """
@@ -647,7 +647,7 @@ class Array:
         # Note: device support is required for this
         return self._array.__dlpack_device__()
 
-    def __eq__(self, other: Array | bool | int | float | complex, /) -> Array:  # type: ignore[override]
+    def __eq__(self, other: Array | complex, /) -> Array:  # type: ignore[override]
         """
         Performs the operation __eq__.
         """
@@ -673,7 +673,7 @@ class Array:
         res = self._array.__float__()
         return res
 
-    def __floordiv__(self, other: Array | int | float, /) -> Array:
+    def __floordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __floordiv__.
         """
@@ -685,7 +685,7 @@ class Array:
         res = self._array.__floordiv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ge__(self, other: Array | int | float, /) -> Array:
+    def __ge__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __ge__.
         """
@@ -737,7 +737,7 @@ class Array:
         res = self._array.__getitem__(np_key)
         return self._new(res, device=self.device)
 
-    def __gt__(self, other: Array | int | float, /) -> Array:
+    def __gt__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __gt__.
         """
@@ -792,7 +792,7 @@ class Array:
         # implemented, which implies iteration on 1-D arrays.
         return (Array._new(i, device=self.device) for i in self._array)
 
-    def __le__(self, other: Array | int | float, /) -> Array:
+    def __le__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __le__.
         """
@@ -816,7 +816,7 @@ class Array:
         res = self._array.__lshift__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __lt__(self, other: Array | int | float, /) -> Array:
+    def __lt__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __lt__.
         """
@@ -841,7 +841,7 @@ class Array:
         res = self._array.__matmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __mod__(self, other: Array | int | float, /) -> Array:
+    def __mod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __mod__.
         """
@@ -853,7 +853,7 @@ class Array:
         res = self._array.__mod__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __mul__(self, other: Array | int | float | complex, /) -> Array:
+    def __mul__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __mul__.
         """
@@ -865,7 +865,7 @@ class Array:
         res = self._array.__mul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ne__(self, other: Array | bool | int | float | complex, /) -> Array:  # type: ignore[override]
+    def __ne__(self, other: Array | complex, /) -> Array:  # type: ignore[override]
         """
         Performs the operation __ne__.
         """
@@ -886,7 +886,7 @@ class Array:
         res = self._array.__neg__()
         return self.__class__._new(res, device=self.device)
 
-    def __or__(self, other: Array | bool | int, /) -> Array:
+    def __or__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __or__.
         """
@@ -907,7 +907,7 @@ class Array:
         res = self._array.__pos__()
         return self.__class__._new(res, device=self.device)
 
-    def __pow__(self, other: Array | int | float | complex, /) -> Array:
+    def __pow__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __pow__.
         """
@@ -944,7 +944,7 @@ class Array:
             | Array
             | tuple[int | slice | EllipsisType, ...]
         ),
-        value: Array | bool | int | float | complex,
+        value: Array | complex,
         /,
     ) -> None:
         """
@@ -957,7 +957,7 @@ class Array:
         np_key = key._array if isinstance(key, Array) else key
         self._array.__setitem__(np_key, asarray(value)._array)
 
-    def __sub__(self, other: Array | int | float | complex, /) -> Array:
+    def __sub__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __sub__.
         """
@@ -971,7 +971,7 @@ class Array:
 
     # PEP 484 requires int to be a subtype of float, but __truediv__ should
     # not accept int.
-    def __truediv__(self, other: Array | int | float | complex, /) -> Array:
+    def __truediv__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __truediv__.
         """
@@ -983,7 +983,7 @@ class Array:
         res = self._array.__truediv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __xor__(self, other: Array | bool | int, /) -> Array:
+    def __xor__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __xor__.
         """
@@ -995,7 +995,7 @@ class Array:
         res = self._array.__xor__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __iadd__(self, other: Array | int | float | complex, /) -> Array:
+    def __iadd__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __iadd__.
         """
@@ -1006,7 +1006,7 @@ class Array:
         self._array.__iadd__(other._array)
         return self
 
-    def __radd__(self, other: Array | int | float | complex, /) -> Array:
+    def __radd__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __radd__.
         """
@@ -1018,7 +1018,7 @@ class Array:
         res = self._array.__radd__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __iand__(self, other: Array | bool | int, /) -> Array:
+    def __iand__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __iand__.
         """
@@ -1029,7 +1029,7 @@ class Array:
         self._array.__iand__(other._array)
         return self
 
-    def __rand__(self, other: Array | bool | int, /) -> Array:
+    def __rand__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __rand__.
         """
@@ -1041,7 +1041,7 @@ class Array:
         res = self._array.__rand__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ifloordiv__(self, other: Array | int | float, /) -> Array:
+    def __ifloordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __ifloordiv__.
         """
@@ -1052,7 +1052,7 @@ class Array:
         self._array.__ifloordiv__(other._array)
         return self
 
-    def __rfloordiv__(self, other: Array | int | float, /) -> Array:
+    def __rfloordiv__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __rfloordiv__.
         """
@@ -1113,7 +1113,7 @@ class Array:
         res = self._array.__rmatmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imod__(self, other: Array | int | float, /) -> Array:
+    def __imod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __imod__.
         """
@@ -1123,7 +1123,7 @@ class Array:
         self._array.__imod__(other._array)
         return self
 
-    def __rmod__(self, other: Array | int | float, /) -> Array:
+    def __rmod__(self, other: Array | float, /) -> Array:
         """
         Performs the operation __rmod__.
         """
@@ -1135,7 +1135,7 @@ class Array:
         res = self._array.__rmod__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imul__(self, other: Array | int | float | complex, /) -> Array:
+    def __imul__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __imul__.
         """
@@ -1145,7 +1145,7 @@ class Array:
         self._array.__imul__(other._array)
         return self
 
-    def __rmul__(self, other: Array | int | float | complex, /) -> Array:
+    def __rmul__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __rmul__.
         """
@@ -1157,7 +1157,7 @@ class Array:
         res = self._array.__rmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ior__(self, other: Array | bool | int, /) -> Array:
+    def __ior__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __ior__.
         """
@@ -1167,7 +1167,7 @@ class Array:
         self._array.__ior__(other._array)
         return self
 
-    def __ror__(self, other: Array | bool | int, /) -> Array:
+    def __ror__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __ror__.
         """
@@ -1179,7 +1179,7 @@ class Array:
         res = self._array.__ror__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ipow__(self, other: Array | int | float | complex, /) -> Array:
+    def __ipow__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __ipow__.
         """
@@ -1189,7 +1189,7 @@ class Array:
         self._array.__ipow__(other._array)
         return self
 
-    def __rpow__(self, other: Array | int | float | complex, /) -> Array:
+    def __rpow__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __rpow__.
         """
@@ -1224,7 +1224,7 @@ class Array:
         res = self._array.__rrshift__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __isub__(self, other: Array | int | float | complex, /) -> Array:
+    def __isub__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __isub__.
         """
@@ -1234,7 +1234,7 @@ class Array:
         self._array.__isub__(other._array)
         return self
 
-    def __rsub__(self, other: Array | int | float | complex, /) -> Array:
+    def __rsub__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __rsub__.
         """
@@ -1246,7 +1246,7 @@ class Array:
         res = self._array.__rsub__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __itruediv__(self, other: Array | int | float | complex, /) -> Array:
+    def __itruediv__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __itruediv__.
         """
@@ -1256,7 +1256,7 @@ class Array:
         self._array.__itruediv__(other._array)
         return self
 
-    def __rtruediv__(self, other: Array | int | float | complex, /) -> Array:
+    def __rtruediv__(self, other: Array | complex, /) -> Array:
         """
         Performs the operation __rtruediv__.
         """
@@ -1268,7 +1268,7 @@ class Array:
         res = self._array.__rtruediv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ixor__(self, other: Array | bool | int, /) -> Array:
+    def __ixor__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __ixor__.
         """
@@ -1278,7 +1278,7 @@ class Array:
         self._array.__ixor__(other._array)
         return self
 
-    def __rxor__(self, other: Array | bool | int, /) -> Array:
+    def __rxor__(self, other: Array | int, /) -> Array:
         """
         Performs the operation __rxor__.
         """

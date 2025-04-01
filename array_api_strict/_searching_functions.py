@@ -92,12 +92,7 @@ def searchsorted(
     )
 
 
-def where(
-    condition: Array,
-    x1: Array | bool | int | float | complex,
-    x2: Array | bool | int | float | complex,
-    /,
-) -> Array:
+def where(condition: Array, x1: Array | complex, x2: Array | complex, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.where <numpy.where>`.
 
