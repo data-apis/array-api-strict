@@ -4,9 +4,6 @@ them here with wrappers in linalg so that the wrappers can be disabled if the
 linalg extension is disabled in the flags.
 
 """
-
-from __future__ import annotations
-
 from collections.abc import Sequence
 
 import numpy as np

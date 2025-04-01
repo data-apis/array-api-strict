@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "array_api_strict"
 dynamic = ["version"]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 dependencies = ["numpy"]
 license = {file = "LICENSE"}
 authors = [
@@ -15,7 +15,6 @@ description = "A strict, minimal implementation of the Python array API standard
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -24,7 +23,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-[project-urls]
+[project.urls]
 Homepage = "https://data-apis.org/array-api-strict/"
 Repository = "https://github.com/data-apis/array-api-strict"
 

@@ -16,11 +16,10 @@ of ndarray.
 from __future__ import annotations
 
 import operator
-import sys
 from collections.abc import Iterator
 from enum import IntEnum
-from types import ModuleType
-from typing import TYPE_CHECKING, Any, Final, Literal, SupportsIndex
+from types import EllipsisType, ModuleType
+from typing import Any, Final, Literal, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
@@ -42,13 +41,6 @@ from ._dtypes import (
 )
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
-
-if sys.version_info >= (3, 10):
-    from types import EllipsisType
-elif TYPE_CHECKING:
-    from typing_extensions import EllipsisType
-else:
-    EllipsisType = type(Ellipsis)
 
 
 class Device:
