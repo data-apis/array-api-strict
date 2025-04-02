@@ -35,7 +35,7 @@ Such cross-library comparison is not supported by the standard.""",
                 stacklevel=2,
             )
         if not isinstance(other, DType):
-            return NotImplemented
+            return False
         return self._np_dtype == other._np_dtype
 
     def __hash__(self) -> int:

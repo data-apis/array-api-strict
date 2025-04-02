@@ -100,7 +100,9 @@ def can_cast(from_: DType | Array, to: DType, /) -> bool:
 
 # These are internal objects for the return types of finfo and iinfo, since
 # the NumPy versions contain extra data that isn't part of the spec.
-@dataclass
+# There should be no expectation for them to be comparable, hashable, or writeable.
+
+@dataclass(frozen=True, eq=False)
 class finfo_object:
     bits: int
     # Note: The types of the float data here are float, whereas in NumPy they
@@ -111,13 +113,17 @@ class finfo_object:
     smallest_normal: float
     dtype: DType
 
+    __hash__ = NotImplemented
 
-@dataclass
+
+@dataclass(frozen=True, eq=False)
 class iinfo_object:
     bits: int
     max: int
     min: int
     dtype: DType
+
+    __hash__ = NotImplemented
 
 
 def finfo(type: DType | Array, /) -> finfo_object:
@@ -126,7 +132,13 @@ def finfo(type: DType | Array, /) -> finfo_object:
 
     See its docstring for more information.
     """
-    np_type = type._array if isinstance(type, Array) else type._np_dtype
+    if isinstance(type, Array):
+        np_type = type._dtype._np_dtype
+    elif isinstance(type, DType):
+        np_type = type._np_dtype
+    else:
+        raise TypeError(f"'type' must be a dtype or array, not {type!r}")
+
     fi = np.finfo(np_type)
     # Note: The types of the float data here are float, whereas in NumPy they
     # are scalars of the corresponding float dtype.
@@ -146,7 +158,13 @@ def iinfo(type: DType | Array, /) -> iinfo_object:
 
     See its docstring for more information.
     """
-    np_type = type._array if isinstance(type, Array) else type._np_dtype
+    if isinstance(type, Array):
+        np_type = type._dtype._np_dtype
+    elif isinstance(type, DType):
+        np_type = type._np_dtype
+    else:
+        raise TypeError(f"'type' must be a dtype or array, not {type!r}")
+
     ii = np.iinfo(np_type)
     return iinfo_object(ii.bits, ii.max, ii.min, DType(ii.dtype))
 
