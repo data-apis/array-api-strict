@@ -102,7 +102,7 @@ def test_validate_index():
 
 
 @pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
-def test_indexing_arrays():
+def test_indexing_arrays(device):
     # indexing with 1D integer arrays and mixes of integers and 1D integer are allowed
     device = None if device is None else Device(device)
 

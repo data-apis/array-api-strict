@@ -733,7 +733,7 @@ class Array:
             np_key = tuple(
                 subkey._array if isinstance(subkey, Array) else subkey for subkey in key
             )
-        res = self._array.__getitem__(key)
+        res = self._array.__getitem__(np_key)
         return self._new(res, device=self.device)
 
     def __gt__(self, other: Array | int | float, /) -> Array:
