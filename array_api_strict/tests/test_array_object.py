@@ -101,10 +101,10 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[idx])
 
 
-# @pytest.mark.parametrize("device", ["CPU_DEVICE", "device1", "device2"])
-def test_indexing_arrays(device='device1'):
+@pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
+def test_indexing_arrays():
     # indexing with 1D integer arrays and mixes of integers and 1D integer are allowed
-    device = Device(device)
+    device = None if device is None else Device(device)
 
     # 1D array
     a = arange(5)
