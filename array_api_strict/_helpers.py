@@ -1,18 +1,24 @@
-"""Private helper routines.
-"""
+"""Private helper routines."""
 
-from ._flags import get_array_api_strict_flags
+from __future__ import annotations
+
+from ._array_object import Array
 from ._dtypes import _dtype_categories
+from ._flags import get_array_api_strict_flags
 
 _py_scalars = (bool, int, float, complex)
 
 
-def _maybe_normalize_py_scalars(x1, x2, dtype_category, func_name):
-
+def _maybe_normalize_py_scalars(
+    x1: Array | bool | int | float | complex,
+    x2: Array | bool | int | float | complex,
+    dtype_category: str,
+    func_name: str,
+) -> tuple[Array, Array]:
     flags = get_array_api_strict_flags()
     if flags["api_version"] < "2024.12":
         # scalars will fail at the call site
-        return x1, x2
+        return x1, x2  # type: ignore[return-value]
 
     _allowed_dtypes = _dtype_categories[dtype_category]
 
@@ -34,4 +40,3 @@ def _maybe_normalize_py_scalars(x1, x2, dtype_category, func_name):
             raise TypeError(f"Only {dtype_category} dtypes are allowed in {func_name}(...). "
                             f"Got {x1.dtype} and {x2.dtype}.")
     return x1, x2
-

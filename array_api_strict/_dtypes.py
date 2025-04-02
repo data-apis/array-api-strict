@@ -1,19 +1,27 @@
+from __future__ import annotations
+
+import builtins
 import warnings
+from typing import Any, Final
 
 import numpy as np
+import numpy.typing as npt
 
 # Note: we wrap the NumPy dtype objects in a bare class, so that none of the
 # additional methods and behaviors of NumPy dtype objects are exposed.
 
-class _DType:
-    def __init__(self, np_dtype):
-        np_dtype = np.dtype(np_dtype)
-        self._np_dtype = np_dtype
 
-    def __repr__(self):
+class DType:
+    _np_dtype: Final[np.dtype[Any]]
+    __slots__ = ("_np_dtype", "__weakref__")
+
+    def __init__(self, np_dtype: npt.DTypeLike):
+        self._np_dtype = np.dtype(np_dtype)
+
+    def __repr__(self) -> str:
         return f"array_api_strict.{self._np_dtype.name}"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> builtins.bool:
         # See https://github.com/numpy/numpy/pull/25370/files#r1423259515.
         # Avoid the user error of array_api_strict.float32 == numpy.float32,
         # which gives False. Making == error is probably too egregious, so
@@ -26,12 +34,13 @@ class _DType:
 a NumPy native dtype object, but you probably don't want to do this. \
 array_api_strict dtype objects compare unequal to their NumPy equivalents. \
 Such cross-library comparison is not supported by the standard.""",
-            stacklevel=2)
-        if not isinstance(other, _DType):
+                stacklevel=2,
+            )
+        if not isinstance(other, DType):
             return NotImplemented
         return self._np_dtype == other._np_dtype
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         # Note: this is not strictly required
         # (https://github.com/data-apis/array-api/issues/582), but makes the
         # dtype objects much easier to work with here and elsewhere if they
@@ -39,20 +48,24 @@ Such cross-library comparison is not supported by the standard.""",
         return hash(self._np_dtype)
 
 
-int8 = _DType("int8")
-int16 = _DType("int16")
-int32 = _DType("int32")
-int64 = _DType("int64")
-uint8 = _DType("uint8")
-uint16 = _DType("uint16")
-uint32 = _DType("uint32")
-uint64 = _DType("uint64")
-float32 = _DType("float32")
-float64 = _DType("float64")
-complex64 = _DType("complex64")
-complex128 = _DType("complex128")
+def _np_dtype(dtype: DType | None) -> np.dtype[Any] | None:
+    return dtype._np_dtype if dtype is not None else None
+
+
+int8 = DType("int8")
+int16 = DType("int16")
+int32 = DType("int32")
+int64 = DType("int64")
+uint8 = DType("uint8")
+uint16 = DType("uint16")
+uint32 = DType("uint32")
+uint64 = DType("uint64")
+float32 = DType("float32")
+float64 = DType("float64")
+complex64 = DType("complex64")
+complex128 = DType("complex128")
 # Note: This name is changed
-bool = _DType("bool")
+bool = DType("bool")
 
 _all_dtypes = (
     int8,
@@ -212,7 +225,7 @@ _promotion_table = {
 }
 
 
-def _result_type(type1, type2):
+def _result_type(type1: DType, type2: DType) -> DType:
     if (type1, type2) in _promotion_table:
         return _promotion_table[type1, type2]
     raise TypeError(f"{type1} and {type2} cannot be type promoted together")

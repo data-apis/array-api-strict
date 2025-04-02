@@ -12,17 +12,32 @@ library will only support one particular configuration of these flags.
 
 """
 
+from __future__ import annotations
+
 import functools
 import os
 import warnings
+from collections.abc import Callable
+from types import TracebackType
+from typing import TYPE_CHECKING, Any, Collection, TypeVar, cast
 
 import array_api_strict
+
+if TYPE_CHECKING:
+    # TODO import from typing (requires Python >= 3.10)
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec("P")
+
+T = TypeVar("T")
+_CallableT = TypeVar("_CallableT", bound=Callable[..., object])
+
 
 supported_versions = (
     "2021.12",
     "2022.12",
     "2023.12",
-    "2024.12"
+    "2024.12",
 )
 
 draft_version = "2025.12"
@@ -43,19 +58,23 @@ extension_versions = {
     "fft": "2022.12",
 }
 
-ENABLED_EXTENSIONS = default_extensions = (
+default_extensions: tuple[str, ...] = (
     "linalg",
     "fft",
 )
+ENABLED_EXTENSIONS = default_extensions
+
+
 # Public functions
+
 
 def set_array_api_strict_flags(
     *,
-    api_version=None,
-    boolean_indexing=None,
-    data_dependent_shapes=None,
-    enabled_extensions=None,
-):
+    api_version: str | None = None,
+    boolean_indexing: bool | None = None,
+    data_dependent_shapes: bool | None = None,
+    enabled_extensions: Collection[str] | None = None,
+) -> None:
     """
     Set the array-api-strict flags to the specified values.
 
@@ -178,7 +197,8 @@ if set_array_api_strict_flags.__doc__ is not None:
         draft_version=draft_version,
     )
 
-def get_array_api_strict_flags():
+
+def get_array_api_strict_flags() -> dict[str, Any]:
     """
     Get the current array-api-strict flags.
 
@@ -228,7 +248,7 @@ def get_array_api_strict_flags():
     }
 
 
-def reset_array_api_strict_flags():
+def reset_array_api_strict_flags() -> None:
     """
     Reset the array-api-strict flags to their default values.
 
@@ -300,8 +320,19 @@ class ArrayAPIStrictFlags:
     reset_array_api_strict_flags: Reset the flags to their default values.
 
     """
-    def __init__(self, *, api_version=None, boolean_indexing=None,
-                 data_dependent_shapes=None, enabled_extensions=None):
+
+    kwargs: dict[str, Any]
+    old_flags: dict[str, Any]
+    __slots__ = ("kwargs", "old_flags")
+
+    def __init__(
+        self,
+        *,
+        api_version: str | None = None,
+        boolean_indexing: bool | None = None,
+        data_dependent_shapes: bool | None = None,
+        enabled_extensions: Collection[str] | None = None,
+    ):
         self.kwargs = {
             "api_version": api_version,
             "boolean_indexing": boolean_indexing,
@@ -310,11 +341,18 @@ class ArrayAPIStrictFlags:
         }
         self.old_flags = get_array_api_strict_flags()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         set_array_api_strict_flags(**self.kwargs)
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+        /,
+    ) -> None:
         set_array_api_strict_flags(**self.old_flags)
+
 
 # Private functions
 
@@ -325,8 +363,9 @@ ENVIRONMENT_VARIABLES = [
     "ARRAY_API_STRICT_ENABLED_EXTENSIONS",
 ]
 
-def set_flags_from_environment():
-    kwargs = {}
+
+def set_flags_from_environment() -> None:
+    kwargs: dict[str, Any] = {}
     if "ARRAY_API_STRICT_API_VERSION" in os.environ:
         kwargs["api_version"] = os.environ["ARRAY_API_STRICT_API_VERSION"]
 
@@ -346,35 +385,41 @@ def set_flags_from_environment():
     # linalg and fft to __all__
     set_array_api_strict_flags(**kwargs)
 
+
 set_flags_from_environment()
 
 # Decorators
 
-def requires_api_version(version):
-    def decorator(func):
+
+def requires_api_version(version: str) -> Callable[[_CallableT], _CallableT]:
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             if version > API_VERSION:
                 raise RuntimeError(
                     f"The function {func.__name__} requires API version {version} or later, "
                     f"but the current API version for array-api-strict is {API_VERSION}"
                 )
             return func(*args, **kwargs)
-        return wrapper
-    return decorator
 
-def requires_data_dependent_shapes(func):
+        return wrapper
+
+    return cast(Callable[[_CallableT], _CallableT], decorator)
+
+
+def requires_data_dependent_shapes(func: Callable[P, T]) -> Callable[P, T]:
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if not DATA_DEPENDENT_SHAPES:
             raise RuntimeError(f"The function {func.__name__} requires data-dependent shapes, but the data_dependent_shapes flag has been disabled for array-api-strict")
         return func(*args, **kwargs)
     return wrapper
 
-def requires_extension(extension):
-    def decorator(func):
+
+def requires_extension(extension: str) -> Callable[[_CallableT], _CallableT]:
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             if extension not in ENABLED_EXTENSIONS:
                 if extension == 'linalg' \
                    and func.__name__ in ['matmul', 'tensordot',
@@ -382,5 +427,7 @@ def requires_extension(extension):
                     raise RuntimeError(f"The linalg extension has been disabled for array-api-strict. However, {func.__name__} is also present in the main array_api_strict namespace and may be used from there.")
                 raise RuntimeError(f"The function {func.__name__} requires the {extension} extension, but it has been disabled for array-api-strict")
             return func(*args, **kwargs)
+
         return wrapper
-    return decorator
+
+    return cast(Callable[[_CallableT], _CallableT], decorator)

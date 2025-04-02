@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from ._array_object import Array
-from ._dtypes import _real_numeric_dtypes
+from typing import Literal
 
 import numpy as np
+
+from ._array_object import Array
+from ._dtypes import _real_numeric_dtypes
 
 
 # Note: the descending keyword argument is new in this function
@@ -18,7 +20,7 @@ def argsort(
     if x.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in argsort")
     # Note: this keyword argument is different, and the default is different.
-    kind = "stable" if stable else "quicksort"
+    kind: Literal["stable", "quicksort"] = "stable" if stable else "quicksort"
     if not descending:
         res = np.argsort(x._array, axis=axis, kind=kind)
     else:
@@ -35,6 +37,7 @@ def argsort(
         res = max_i - res
     return Array._new(res, device=x.device)
 
+
 # Note: the descending keyword argument is new in this function
 def sort(
     x: Array, /, *, axis: int = -1, descending: bool = False, stable: bool = True
@@ -47,8 +50,7 @@ def sort(
     if x.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in sort")
     # Note: this keyword argument is different, and the default is different.
-    kind = "stable" if stable else "quicksort"
-    res = np.sort(x._array, axis=axis, kind=kind)
+    res = np.sort(x._array, axis=axis, kind="stable" if stable else "quicksort")
     if descending:
         res = np.flip(res, axis=axis)
     return Array._new(res, device=x.device)

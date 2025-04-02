@@ -1,38 +1,37 @@
 from __future__ import annotations
 
-from ._array_object import Array
-from ._creation_functions import _check_device
-from ._dtypes import (
-    _DType,
-    _all_dtypes,
-    _boolean_dtypes,
-    _signed_integer_dtypes,
-    _unsigned_integer_dtypes,
-    _integer_dtypes,
-    _real_floating_dtypes,
-    _complex_floating_dtypes,
-    _numeric_dtypes,
-    _result_type,
-)
-from ._flags import get_array_api_strict_flags
-
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import List, Tuple, Union, Optional
-    from ._typing import Dtype, Device
 
 import numpy as np
 
-# Use to emulate the asarray(device) argument not existing in 2022.12
-_default = object()
+from ._array_object import Array, Device
+from ._creation_functions import Undef, _check_device, _undef
+from ._dtypes import (
+    DType,
+    _all_dtypes,
+    _boolean_dtypes,
+    _complex_floating_dtypes,
+    _integer_dtypes,
+    _numeric_dtypes,
+    _real_floating_dtypes,
+    _result_type,
+    _signed_integer_dtypes,
+    _unsigned_integer_dtypes,
+)
+from ._flags import get_array_api_strict_flags
+
 
 # Note: astype is a function, not an array method as in NumPy.
 def astype(
-    x: Array, dtype: Dtype, /, *, copy: bool = True, device: Optional[Device] = _default
+    x: Array,
+    dtype: DType,
+    /,
+    *,
+    copy: bool = True,
+    # _default is used to emulate the device argument not existing in 2022.12
+    device: Device | Undef | None = _undef,
 ) -> Array:
-    if device is not _default:
+    if device is not _undef:
         if get_array_api_strict_flags()['api_version'] >= '2023.12':
             _check_device(device)
         else:
@@ -52,7 +51,7 @@ def astype(
     return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy), device=device)
 
 
-def broadcast_arrays(*arrays: Array) -> List[Array]:
+def broadcast_arrays(*arrays: Array) -> list[Array]:
     """
     Array API compatible wrapper for :py:func:`np.broadcast_arrays <numpy.broadcast_arrays>`.
 
@@ -65,7 +64,7 @@ def broadcast_arrays(*arrays: Array) -> List[Array]:
     ]
 
 
-def broadcast_to(x: Array, /, shape: Tuple[int, ...]) -> Array:
+def broadcast_to(x: Array, /, shape: tuple[int, ...]) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.broadcast_to <numpy.broadcast_to>`.
 
@@ -76,7 +75,7 @@ def broadcast_to(x: Array, /, shape: Tuple[int, ...]) -> Array:
     return Array._new(np.broadcast_to(x._array, shape), device=x.device)
 
 
-def can_cast(from_: Union[Dtype, Array], to: Dtype, /) -> bool:
+def can_cast(from_: DType | Array, to: DType, /) -> bool:
     """
     Array API compatible wrapper for :py:func:`np.can_cast <numpy.can_cast>`.
 
@@ -112,7 +111,7 @@ class finfo_object:
     max: float
     min: float
     smallest_normal: float
-    dtype: Dtype
+    dtype: DType
 
 
 @dataclass
@@ -120,18 +119,17 @@ class iinfo_object:
     bits: int
     max: int
     min: int
-    dtype: Dtype
+    dtype: DType
 
 
-def finfo(type: Union[Dtype, Array], /) -> finfo_object:
+def finfo(type: DType | Array, /) -> finfo_object:
     """
     Array API compatible wrapper for :py:func:`np.finfo <numpy.finfo>`.
 
     See its docstring for more information.
     """
-    if isinstance(type, _DType):
-        type = type._np_dtype
-    fi = np.finfo(type)
+    np_type = type._array if isinstance(type, Array) else type._np_dtype
+    fi = np.finfo(np_type)
     # Note: The types of the float data here are float, whereas in NumPy they
     # are scalars of the corresponding float dtype.
     return finfo_object(
@@ -140,35 +138,33 @@ def finfo(type: Union[Dtype, Array], /) -> finfo_object:
         float(fi.max),
         float(fi.min),
         float(fi.smallest_normal),
-        fi.dtype,
+        DType(fi.dtype),
     )
 
 
-def iinfo(type: Union[Dtype, Array], /) -> iinfo_object:
+def iinfo(type: DType | Array, /) -> iinfo_object:
     """
     Array API compatible wrapper for :py:func:`np.iinfo <numpy.iinfo>`.
 
     See its docstring for more information.
     """
-    if isinstance(type, _DType):
-        type = type._np_dtype
-    ii = np.iinfo(type)
-    return iinfo_object(ii.bits, ii.max, ii.min, ii.dtype)
+    np_type = type._array if isinstance(type, Array) else type._np_dtype
+    ii = np.iinfo(np_type)
+    return iinfo_object(ii.bits, ii.max, ii.min, DType(ii.dtype))
 
 
 # Note: isdtype is a new function from the 2022.12 array API specification.
-def isdtype(
-    dtype: Dtype, kind: Union[Dtype, str, Tuple[Union[Dtype, str], ...]]
-) -> bool:
+def isdtype(dtype: DType, kind: DType | str | tuple[DType | str, ...]) -> bool:
     """
-    Returns a boolean indicating whether a provided dtype is of a specified data type ``kind``.
+    Returns a boolean indicating whether a provided dtype is of a specified
+    data type ``kind``.
 
     See
     https://data-apis.org/array-api/latest/API_specification/generated/array_api.isdtype.html
     for more details
     """
-    if not isinstance(dtype, _DType):
-       raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
+    if not isinstance(dtype, DType):
+        raise TypeError(f"'dtype' must be a dtype, not a {type(dtype)!r}")
 
     if isinstance(kind, tuple):
         # Disallow nested tuples
@@ -197,7 +193,10 @@ def isdtype(
     else:
         raise TypeError(f"'kind' must be a dtype, str, or tuple of dtypes and strs, not {type(kind).__name__}")
 
-def result_type(*arrays_and_dtypes: Union[Array, Dtype, int, float, complex, bool]) -> Dtype:
+
+def result_type(
+    *arrays_and_dtypes: DType | Array | bool | int | float | complex,
+) -> DType:
     """
     Array API compatible wrapper for :py:func:`np.result_type <numpy.result_type>`.
 
@@ -219,15 +218,15 @@ def result_type(*arrays_and_dtypes: Union[Array, Dtype, int, float, complex, boo
         A.append(a)
 
     # remove python scalars
-    A = [a for a in A if not isinstance(a, (bool, int, float, complex))]
+    B = [a for a in A if not isinstance(a, (bool, int, float, complex))]
 
-    if len(A) == 0:
+    if len(B) == 0:
         raise ValueError("at least one array or dtype is required")
-    elif len(A) == 1:
-        result = A[0]
+    elif len(B) == 1:
+        result = B[0]
     else:
-        t = A[0]
-        for t2 in A[1:]:
+        t = B[0]
+        for t2 in B[1:]:
             t = _result_type(t, t2)
         result = t
 
