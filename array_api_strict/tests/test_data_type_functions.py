@@ -1,15 +1,12 @@
 import warnings
 
-import pytest
-
-from numpy.testing import assert_raises
 import numpy as np
+import pytest
+from numpy.testing import assert_raises
 
 from .._creation_functions import asarray
-from .._data_type_functions import astype, can_cast, isdtype, result_type
-from .._dtypes import (
-    bool, int8, int16, uint8, float64, int64
-)
+from .._data_type_functions import astype, can_cast, finfo, iinfo, isdtype, result_type
+from .._dtypes import bool, float64, int8, int16, int64, uint8
 from .._flags import set_array_api_strict_flags
 
 
@@ -88,3 +85,40 @@ def test_result_type_py_scalars(api_version):
 
         with pytest.raises(TypeError):
             result_type(int64, True)
+
+
+def test_finfo_iinfo_dtypelike():
+    """np.finfo() and np.iinfo() accept any DTypeLike.
+    Array API only accepts Array | DType.
+    """
+    match = "must be a dtype or array"
+    with pytest.raises(TypeError, match=match):
+        finfo("float64")
+    with pytest.raises(TypeError, match=match):
+        finfo(float)
+    with pytest.raises(TypeError, match=match):
+        iinfo("int8")
+    with pytest.raises(TypeError, match=match):
+        iinfo(int)
+
+
+def test_finfo_iinfo_wrap_output():
+    """Test that the finfo(...).dtype and iinfo(...).dtype
+    are array-api-strict.DType objects; not numpy.dtype.
+    """
+    # Note: array_api_strict.DType objects are not singletons
+    assert finfo(float64).dtype == float64
+    assert iinfo(int8).dtype == int8
+
+
+@pytest.mark.parametrize("func,arg", [(finfo, float64), (iinfo, int8)])
+def test_finfo_iinfo_output_assumptions(func, arg):
+    """There should be no expectation for the output of finfo()/iinfo()
+    to be comparable, hashable, or writeable.
+    """
+    obj = func(arg)
+    assert obj != func(arg)  # Defaut behaviour for custom classes
+    with pytest.raises(TypeError):
+        hash(obj)
+    with pytest.raises(Exception, match="cannot assign"):
+        obj.min = 0
