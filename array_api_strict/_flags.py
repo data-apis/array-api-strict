@@ -11,24 +11,16 @@ None of these functions are part of the standard itself. A typical array API
 library will only support one particular configuration of these flags.
 
 """
-
-from __future__ import annotations
-
 import functools
 import os
 import warnings
 from collections.abc import Callable
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Collection, TypeVar, cast
+from typing import Any, Collection, ParamSpec, TypeVar, cast
 
 import array_api_strict
 
-if TYPE_CHECKING:
-    # TODO import from typing (requires Python >= 3.10)
-    from typing_extensions import ParamSpec
-
-    P = ParamSpec("P")
-
+P = ParamSpec("P")
 T = TypeVar("T")
 _CallableT = TypeVar("_CallableT", bound=Callable[..., object])
 

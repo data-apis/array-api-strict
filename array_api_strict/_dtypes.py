@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import builtins
 import warnings
 from typing import Any, Final
