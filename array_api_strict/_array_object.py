@@ -727,7 +727,14 @@ class Array:
         if isinstance(key, Array):
             key = (key,)
         np_key = key
+        devices = {self.device}
         if isinstance(key, tuple):
+            devices.update([subkey.device for subkey in key])
+            if len(devices) > 1:
+                raise ValueError(
+                    "Array indexing is only allowed when array to be indexed and all "
+                    "indexing arrays are on the same device."
+                )
             # Indexing self._array with array_api_strict arrays can be erroneous
             # e.g., when using non-default device
             np_key = tuple(
