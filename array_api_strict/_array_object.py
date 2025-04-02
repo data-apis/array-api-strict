@@ -233,15 +233,15 @@ class Array:
 
         return other
 
-    def _check_device(self, other: Array | bool | int | float | complex) -> None:
-        """Check that other is on a device compatible with the current array"""
-        if isinstance(other, (bool, int, float, complex)):
-            return
-        elif isinstance(other, Array):
+    def _check_type_device(self, other: Array | bool | int | float | complex) -> None:
+        """Check that other is either a Python scalar or an array on a device
+        compatible with the current array.
+        """
+        if isinstance(other, Array):
             if self.device != other.device:
                 raise ValueError(f"Arrays from two different devices ({self.device} and {other.device}) can not be combined.")
-        else:
-            raise TypeError(f"Expected Array | python scalar; got {type(other)}")
+        elif not isinstance(other, bool | int | float | complex):
+            raise TypeError(f"Expected Array or Python scalar; got {type(other)}")
 
     # Helper function to match the type promotion rules in the spec
     def _promote_scalar(self, scalar: bool | int | float | complex) -> Array:
@@ -542,7 +542,7 @@ class Array:
         """
         Performs the operation __add__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__add__")
         if other is NotImplemented:
             return other
@@ -554,7 +554,7 @@ class Array:
         """
         Performs the operation __and__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__and__")
         if other is NotImplemented:
             return other
@@ -651,7 +651,7 @@ class Array:
         """
         Performs the operation __eq__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         # Even though "all" dtypes are allowed, we still require them to be
         # promotable with each other.
         other = self._check_allowed_dtypes(other, "all", "__eq__")
@@ -677,7 +677,7 @@ class Array:
         """
         Performs the operation __floordiv__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__floordiv__")
         if other is NotImplemented:
             return other
@@ -689,7 +689,7 @@ class Array:
         """
         Performs the operation __ge__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__ge__")
         if other is NotImplemented:
             return other
@@ -741,7 +741,7 @@ class Array:
         """
         Performs the operation __gt__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__gt__")
         if other is NotImplemented:
             return other
@@ -796,7 +796,7 @@ class Array:
         """
         Performs the operation __le__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__le__")
         if other is NotImplemented:
             return other
@@ -808,7 +808,7 @@ class Array:
         """
         Performs the operation __lshift__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__lshift__")
         if other is NotImplemented:
             return other
@@ -820,7 +820,7 @@ class Array:
         """
         Performs the operation __lt__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__lt__")
         if other is NotImplemented:
             return other
@@ -832,7 +832,7 @@ class Array:
         """
         Performs the operation __matmul__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         # matmul is not defined for scalars, but without this, we may get
         # the wrong error message from asarray.
         other = self._check_allowed_dtypes(other, "numeric", "__matmul__")
@@ -845,7 +845,7 @@ class Array:
         """
         Performs the operation __mod__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__mod__")
         if other is NotImplemented:
             return other
@@ -857,7 +857,7 @@ class Array:
         """
         Performs the operation __mul__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__mul__")
         if other is NotImplemented:
             return other
@@ -869,7 +869,7 @@ class Array:
         """
         Performs the operation __ne__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "all", "__ne__")
         if other is NotImplemented:
             return other
@@ -890,7 +890,7 @@ class Array:
         """
         Performs the operation __or__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__or__")
         if other is NotImplemented:
             return other
@@ -913,7 +913,7 @@ class Array:
         """
         from ._elementwise_functions import pow  # type: ignore[attr-defined]
 
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__pow__")
         if other is NotImplemented:
             return other
@@ -925,7 +925,7 @@ class Array:
         """
         Performs the operation __rshift__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__rshift__")
         if other is NotImplemented:
             return other
@@ -961,7 +961,7 @@ class Array:
         """
         Performs the operation __sub__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__sub__")
         if other is NotImplemented:
             return other
@@ -975,7 +975,7 @@ class Array:
         """
         Performs the operation __truediv__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "floating-point", "__truediv__")
         if other is NotImplemented:
             return other
@@ -987,7 +987,7 @@ class Array:
         """
         Performs the operation __xor__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__xor__")
         if other is NotImplemented:
             return other
@@ -999,7 +999,7 @@ class Array:
         """
         Performs the operation __iadd__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__iadd__")
         if other is NotImplemented:
             return other
@@ -1010,7 +1010,7 @@ class Array:
         """
         Performs the operation __radd__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "numeric", "__radd__")
         if other is NotImplemented:
             return other
@@ -1022,7 +1022,7 @@ class Array:
         """
         Performs the operation __iand__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__iand__")
         if other is NotImplemented:
             return other
@@ -1033,7 +1033,7 @@ class Array:
         """
         Performs the operation __rand__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__rand__")
         if other is NotImplemented:
             return other
@@ -1045,7 +1045,7 @@ class Array:
         """
         Performs the operation __ifloordiv__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__ifloordiv__")
         if other is NotImplemented:
             return other
@@ -1056,7 +1056,7 @@ class Array:
         """
         Performs the operation __rfloordiv__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "real numeric", "__rfloordiv__")
         if other is NotImplemented:
             return other
@@ -1068,7 +1068,7 @@ class Array:
         """
         Performs the operation __ilshift__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__ilshift__")
         if other is NotImplemented:
             return other
@@ -1079,7 +1079,7 @@ class Array:
         """
         Performs the operation __rlshift__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer", "__rlshift__")
         if other is NotImplemented:
             return other
@@ -1096,7 +1096,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__imatmul__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         res = self._array.__imatmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
@@ -1109,7 +1109,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rmatmul__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         res = self._array.__rmatmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
@@ -1130,7 +1130,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "real numeric", "__rmod__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rmod__(other._array)
         return self.__class__._new(res, device=self.device)
@@ -1152,7 +1152,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rmul__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rmul__(other._array)
         return self.__class__._new(res, device=self.device)
@@ -1171,7 +1171,7 @@ class Array:
         """
         Performs the operation __ror__.
         """
-        self._check_device(other)
+        self._check_type_device(other)
         other = self._check_allowed_dtypes(other, "integer or boolean", "__ror__")
         if other is NotImplemented:
             return other
@@ -1219,7 +1219,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "integer", "__rrshift__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rrshift__(other._array)
         return self.__class__._new(res, device=self.device)
@@ -1241,7 +1241,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "numeric", "__rsub__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rsub__(other._array)
         return self.__class__._new(res, device=self.device)
@@ -1263,7 +1263,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "floating-point", "__rtruediv__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rtruediv__(other._array)
         return self.__class__._new(res, device=self.device)
@@ -1285,7 +1285,7 @@ class Array:
         other = self._check_allowed_dtypes(other, "integer or boolean", "__rxor__")
         if other is NotImplemented:
             return other
-        self._check_device(other)
+        self._check_type_device(other)
         self, other = self._normalize_two_args(self, other)
         res = self._array.__rxor__(other._array)
         return self.__class__._new(res, device=self.device)
