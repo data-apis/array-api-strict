@@ -729,7 +729,9 @@ class Array:
         np_key = key
         devices = {self.device}
         if isinstance(key, tuple):
-            devices.update([subkey.device for subkey in key])
+            devices.update(
+                [subkey.device for subkey in key if hasattr(subkey, "device")]
+            )
             if len(devices) > 1:
                 raise ValueError(
                     "Array indexing is only allowed when array to be indexed and all "
