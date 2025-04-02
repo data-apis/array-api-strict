@@ -716,8 +716,24 @@ class Array:
         # Note: Only indices required by the spec are allowed. See the
         # docstring of _validate_index
         self._validate_index(key, op="getitem")
-        # Indexing self._array with array_api_strict arrays can be erroneous
-        np_key = key._array if isinstance(key, Array) else key
+        if isinstance(key, Array):
+            key = (key,)
+        np_key = key
+        devices = {self.device}
+        if isinstance(key, tuple):
+            devices.update(
+                [subkey.device for subkey in key if hasattr(subkey, "device")]
+            )
+            if len(devices) > 1:
+                raise ValueError(
+                    "Array indexing is only allowed when array to be indexed and all "
+                    "indexing arrays are on the same device."
+                )
+            # Indexing self._array with array_api_strict arrays can be erroneous
+            # e.g., when using non-default device
+            np_key = tuple(
+                subkey._array if isinstance(subkey, Array) else subkey for subkey in key
+            )
         res = self._array.__getitem__(np_key)
         return self._new(res, device=self.device)
 
