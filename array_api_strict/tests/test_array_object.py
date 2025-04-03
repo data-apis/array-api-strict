@@ -102,6 +102,31 @@ def test_validate_index():
 
 
 @pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
+@pytest.mark.parametrize(
+    "integer_index",
+    [
+        1,
+        np.bool(1),
+        np.int8(0),
+        np.uint8(0),
+        np.int16(0),
+        np.uint16(0),
+        np.int32(0),
+        np.uint32(0),
+        np.int64(0),
+        np.uint64(0),
+        2,
+    ],
+)
+def test_indexing_ints(integer_index, device):
+    # Ensure indexing with different integer types works on all Devices.
+    device = None if device is None else Device(device)
+
+    a = arange(5, device=device)
+    a[integer_index]
+
+
+@pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
 def test_indexing_arrays(device):
     # indexing with 1D integer arrays and mixes of integers and 1D integer are allowed
     device = None if device is None else Device(device)
