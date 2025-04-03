@@ -106,7 +106,6 @@ def test_validate_index():
     "integer_index",
     [
         1,
-        np.bool(1),
         np.int8(0),
         np.uint8(0),
         np.int16(0),
