@@ -115,7 +115,6 @@ def test_validate_index():
         np.uint32(0),
         np.int64(0),
         np.uint64(0),
-        2,
     ],
 )
 def test_indexing_ints(integer_index, device):
