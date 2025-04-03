@@ -100,12 +100,18 @@ def test_validate_index():
     assert_raises(IndexError, lambda: a[:])
     assert_raises(IndexError, lambda: a[idx])
 
+class DummyIndex:
+    def __init__(self, x):
+        self.x = x
+    def __index__(self):
+        return self.x
+
 
 @pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
 @pytest.mark.parametrize(
     "integer_index",
     [
-        1,
+        0,
         np.int8(0),
         np.uint8(0),
         np.int16(0),
@@ -114,6 +120,7 @@ def test_validate_index():
         np.uint32(0),
         np.int64(0),
         np.uint64(0),
+        DummyIndex(0),
     ],
 )
 def test_indexing_ints(integer_index, device):
@@ -121,7 +128,7 @@ def test_indexing_ints(integer_index, device):
     device = None if device is None else Device(device)
 
     a = arange(5, device=device)
-    a[integer_index]
+    assert a[(integer_index,)] == a[integer_index] == a[0]
 
 
 @pytest.mark.parametrize("device", [None, "CPU_DEVICE", "device1", "device2"])
