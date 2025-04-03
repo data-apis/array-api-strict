@@ -722,7 +722,7 @@ class Array:
         devices = {self.device}
         if isinstance(key, tuple):
             devices.update(
-                [subkey.device for subkey in key if hasattr(subkey, "device")]
+                [subkey.device for subkey in key if isinstance(subkey, Array)]
             )
             if len(devices) > 1:
                 raise ValueError(
