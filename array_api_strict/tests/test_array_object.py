@@ -482,12 +482,12 @@ def test_array_conversion():
     # __array__, which is only used in asarray when converting lists of
     # arrays.
     a = ones((2, 3))
-    asarray([a])
+    np.asarray(a)
 
     for device in ("device1", "device2"):
         a = ones((2, 3), device=array_api_strict.Device(device))
         with pytest.raises(RuntimeError, match="Can not convert array"):
-            asarray([a])
+            np.asarray(a)
 
 def test__array__():
     # __array__ should work for now

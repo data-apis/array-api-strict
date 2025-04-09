@@ -121,6 +121,10 @@ def asarray(
 
     if isinstance(obj, Array):
         return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype), device=device)
+    elif isinstance(obj, list | tuple):
+        if any(isinstance(x, Array) for x in obj):
+            raise TypeError("Nested Arrays are not allowed. Use `stack` instead.")
+
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
         # Give a better error message in this case. NumPy would convert this
         # to an object array. TODO: This won't handle large integers in lists.

@@ -22,7 +22,7 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import int16, float32, float64
+from .._dtypes import float32, float64
 from .._array_object import Array, CPU_DEVICE, Device
 from .._flags import set_array_api_strict_flags
 
@@ -97,18 +97,20 @@ def test_asarray_copy():
     a[0] = 0
     assert all(b[0] == 0)
 
-def test_asarray_list_of_lists():
-    a = asarray(1, dtype=int16)
-    b = asarray([1], dtype=int16)
-    res = asarray([a, a])
-    assert res.shape == (2,)
-    assert res.dtype == int16
-    assert all(res == asarray([1, 1]))
 
-    res = asarray([b, b])
-    assert res.shape == (2, 1)
-    assert res.dtype == int16
-    assert all(res == asarray([[1], [1]]))
+def test_asarray_list_of_lists():
+    lst = [[1, 2, 3], [4, 5, 6]]
+    res = asarray(lst)
+    assert res.shape == (2, 3)
+
+
+def test_asarray_nested_arrays():
+    # do not allow arrays in nested sequences
+    with pytest.raises(TypeError):
+        asarray([[1, 2, 3], asarray([4, 5, 6])])
+
+    with pytest.raises(TypeError):
+        asarray([1, asarray(1)])
 
 
 def test_asarray_device_inference():
