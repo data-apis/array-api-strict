@@ -240,7 +240,8 @@ class Array:
         if isinstance(other, Array):
             if self.device != other.device:
                 raise ValueError(f"Arrays from two different devices ({self.device} and {other.device}) can not be combined.")
-        elif not isinstance(other, bool | int | float | complex):
+        # Disallow subclasses of Python scalars, such as np.float64 and np.complex128
+        elif type(other) not in (bool, int, float, complex):
             raise TypeError(f"Expected Array or Python scalar; got {type(other)}")
 
     # Helper function to match the type promotion rules in the spec

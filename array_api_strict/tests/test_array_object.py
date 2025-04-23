@@ -411,72 +411,47 @@ def test_operators():
                     x.__imatmul__(y)
 
 
-@pytest.mark.parametrize(
-    "op",
-    [
-        op for op, dtypes in binary_op_dtypes.items()
-        if dtypes not in ("real numeric", "floating-point")
-    ],
-)
-def test_binary_operators_vs_numpy_int(op):
-    """np.int64 is not a subclass of int and must be disallowed"""
-    a = asarray(1)
-    i64 = np.int64(1)
-    with pytest.raises(TypeError, match="Expected Array or Python scalar"):
-        getattr(a, op)(i64)
-
-
-@pytest.mark.parametrize(
-    "op",
-    [
-        op for op, dtypes in binary_op_dtypes.items() 
-        if dtypes not in ("integer", "integer or boolean")
-    ],
-)
-def test_binary_operators_vs_numpy_float(op):
+@pytest.mark.parametrize("op,dtypes", binary_op_dtypes.items())
+def test_binary_operators_vs_numpy_generics(op, dtypes):
+    """Test that np.bool_, np.int64, np.float32, np.float64, np.complex64, np.complex128
+    are disallowed in binary operators.
+    np.float64 and np.complex128 are subclasses of float and complex, so they need
+    special treatment in order to be rejected.
     """
-    np.float64 is a subclass of float and must be allowed.
-    np.float32 is not and must be rejected.
-    """
-    a = asarray(1.)
-    f64 = np.float64(1.)
-    f32 = np.float32(1.)
-    func = getattr(a, op)
-    for op in binary_op_dtypes:
-        assert isinstance(func(f64), Array)
-        with pytest.raises(TypeError, match="Expected Array or Python scalar"):
-            func(f32)
+    match = "Expected Array or Python scalar"
 
+    if dtypes not in ("numeric", "integer", "real numeric", "floating-point"):
+        a = asarray(True)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.bool_(True))
 
-@pytest.mark.parametrize(
-    "op",
-    [
-        op for op, dtypes in binary_op_dtypes.items()
-        if dtypes not in ("integer", "integer or boolean", "real numeric")
-    ],
-)
-def test_binary_operators_vs_numpy_complex(op):
-    """
-    np.complex128 is a subclass of complex and must be allowed.
-    np.complex64 is not and must be rejected.
-    """
-    a = asarray(1.)
-    c64 = np.complex64(1.)
-    c128 = np.complex128(1.)
-    func = getattr(a, op)
-    for op in binary_op_dtypes:
-        assert isinstance(func(c128), Array)
-        with pytest.raises(TypeError, match="Expected Array or Python scalar"):
-            func(c64)
+    if dtypes != "floating-point":
+        a = asarray(1)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.int64(1))
+
+    if dtypes not in ("integer", "integer or boolean"):
+        a = asarray(1.,)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.float32(1.))
+        with pytest.raises(TypeError, match=match):
+            func(np.float64(1.))
+
+    if dtypes not in ("integer", "integer or boolean", "real numeric"):
+        a = asarray(1.,)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.complex64(1.))
+        with pytest.raises(TypeError, match=match):
+            func(np.complex128(1.))
 
 
 @pytest.mark.parametrize("op,dtypes", binary_op_dtypes.items())
 def test_binary_operators_device_mismatch(op, dtypes):
-    if dtypes in ("real numeric", "floating-point"):
-        dtype = float64
-    else:
-        dtype = int64
-    
+    dtype = float64 if dtypes == "floating-point" else int64
     a = asarray(1, dtype=dtype, device=CPU_DEVICE)
     b = asarray(1, dtype=dtype, device=Device("device1"))
     with pytest.raises(ValueError, match="different devices"):
