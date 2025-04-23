@@ -1,16 +1,22 @@
 from inspect import signature, getmodule
 
-from pytest import raises as assert_raises
+import numpy as np
+import pytest
 from numpy.testing import suppress_warnings
 
 
 from .. import asarray, _elementwise_functions
+from .._array_object import ALL_DEVICES, CPU_DEVICE, Device
+from .._data_type_functions import isdtype
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._dtypes import (
     _dtype_categories,
     _boolean_dtypes,
     _floating_dtypes,
     _integer_dtypes,
+    bool as xp_bool,
+    complex128,
+    float64,
     int8,
     int16,
     int32,
@@ -104,6 +110,13 @@ elementwise_function_input_types = {
 }
 
 
+elementwise_binary_function_names = [
+    func_name
+    for func_name in elementwise_function_input_types
+    if nargs(getattr(_elementwise_functions, func_name)) == 2
+]
+
+
 def test_nargs():
     # Explicitly check number of arguments for a few functions
     assert nargs(array_api_strict.logaddexp) == 2
@@ -126,33 +139,83 @@ def test_missing_functions():
     assert set(mod_funcs) == set(elementwise_function_input_types)
 
 
-def test_function_device_persists():
-    # Test that the device of the input and output array are the same
+@pytest.mark.parametrize("device", ALL_DEVICES)
+@pytest.mark.parametrize("func_name,types", elementwise_function_input_types.items())
+def test_elementwise_function_device_persists(func_name, types, device):
+    """Test that the device of the input and output array are the same"""
     def _array_vals(dtypes):
-        for d in dtypes:
-            yield asarray(1., dtype=d)
+        for dtype in dtypes:
+            yield asarray(1., dtype=dtype, device=device)
 
-    # Use the latest version of the standard so all functions are included
-    set_array_api_strict_flags(api_version="2024.12")
+    dtypes = _dtype_categories[types]
+    func = getattr(_elementwise_functions, func_name)
 
-    for func_name, types in elementwise_function_input_types.items():
-        dtypes = _dtype_categories[types]
-        func = getattr(_elementwise_functions, func_name)
+    for x in _array_vals(dtypes):
+        if nargs(func) == 2:
+            # This way we don't have to deal with incompatible
+            # types of the two arguments.
+            r = func(x, x)
+            assert r.device == x.device
 
-        for x in _array_vals(dtypes):
+        else:
+            # `atanh` needs a slightly different input value from
+            # everyone else
+            if func_name == "atanh":
+                x -= 0.1
+            r = func(x)
+            assert r.device == x.device
+
+
+@pytest.mark.parametrize("func_name", elementwise_binary_function_names)
+def test_elementwise_function_device_mismatch(func_name):
+    func = getattr(_elementwise_functions, func_name)
+    dtypes = elementwise_function_input_types[func_name]
+    if dtypes in ("floating-point", "real floating-point"):
+        dtype = float64
+    elif dtypes == "boolean":
+        dtype = xp_bool
+    else:
+        dtype = int64
+
+    a = asarray(1, dtype=dtype, device=CPU_DEVICE)
+    b = asarray(1, dtype=dtype, device=Device("device1"))
+    _ = func(a, a)
+    with pytest.raises(ValueError, match="different devices"):
+        func(a, b)
+
+
+@pytest.mark.parametrize("func_name", elementwise_function_input_types)
+def test_elementwise_function_vs_numpy_generics(func_name):
+    """
+    Test that NumPy generics are explicitly disallowed.
+
+    This must notably includes np.float64 and np.complex128, which are
+    subclasses of float and complex respectively.
+    """
+    func = getattr(_elementwise_functions, func_name)
+    dtypes = elementwise_function_input_types[func_name]
+    xp_dtypes = _dtype_categories[dtypes]
+    np_dtypes = [dtype._np_dtype for dtype in xp_dtypes]
+
+    match = (
+        "You are comparing a array_api_strict dtype against a NumPy "
+        "native dtype object"
+    )
+
+    value = 0.5 if func_name == "atanh" else 1
+    for xp_dtype in xp_dtypes:
+        for np_dtype in np_dtypes:
+            a = asarray(value, dtype=xp_dtype, device=CPU_DEVICE)
+            b = np.asarray(value, dtype=np_dtype)[()]
+
             if nargs(func) == 2:
-                # This way we don't have to deal with incompatible
-                # types of the two arguments.
-                r = func(x, x)
-                assert r.device == x.device
-
+                _ = func(a, a)
+                with pytest.raises(TypeError, match="neither Array nor Python scalars"):
+                    func(a, b)
             else:
-                # `atanh` needs a slightly different input value from
-                # everyone else
-                if func_name == "atanh":
-                    x -= 0.1
-                r = func(x)
-                assert r.device == x.device
+                _ = func(a)
+                with pytest.raises(TypeError, match="allowed"):
+                    func(b)
 
 
 def test_function_types():
@@ -167,9 +230,6 @@ def test_function_types():
             yield asarray(False, dtype=d)
         for d in _floating_dtypes:
             yield asarray(1.0, dtype=d)
-
-    # Use the latest version of the standard so all functions are included
-    set_array_api_strict_flags(api_version="2024.12")
 
     for x in _array_vals():
         for func_name, types in elementwise_function_input_types.items():
@@ -187,23 +247,23 @@ def test_function_types():
                          or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
                          or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
                          ):
-                        assert_raises(TypeError, func, x, y)
+                        with pytest.raises(TypeError):
+                            func(x, y)
                     if x.dtype not in dtypes or y.dtype not in dtypes:
-                        assert_raises(TypeError, func, x, y)
+                        with pytest.raises(TypeError):
+                            func(x, y)
             else:
                 if x.dtype not in dtypes:
-                    assert_raises(TypeError, func, x)
+                    with pytest.raises(TypeError):
+                        func(x)
 
 
 def test_bitwise_shift_error():
     # bitwise shift functions should raise when the second argument is negative
-    assert_raises(
-        ValueError, lambda: bitwise_left_shift(asarray([1, 1]), asarray([1, -1]))
-    )
-    assert_raises(
-        ValueError, lambda: bitwise_right_shift(asarray([1, 1]), asarray([1, -1]))
-    )
-
+    with pytest.raises(ValueError):
+        bitwise_left_shift(asarray([1, 1]), asarray([1, -1]))
+    with pytest.raises(ValueError):
+        bitwise_right_shift(asarray([1, 1]), asarray([1, -1]))
 
 
 def test_scalars():
@@ -211,9 +271,6 @@ def test_scalars():
     #
     # Also check that binary functions accept (array, scalar) and (scalar, array)
     # arguments, and reject (scalar, scalar) arguments.
-
-    # Use the latest version of the standard so that scalars are actually allowed
-    set_array_api_strict_flags(api_version="2024.12")
 
     def _array_vals():
         for d in _integer_dtypes:
@@ -256,7 +313,5 @@ def test_scalars():
                             assert func(s, a) == func(conv_scalar, a)
                             assert func(a, s) == func(a, conv_scalar)
 
-                        with assert_raises(TypeError):
+                        with pytest.raises(TypeError):
                             func(s, s)
-
-
