@@ -230,22 +230,6 @@ tanh = _create_unary_func("tanh", "floating-point")
 trunc = _identity_if_integer(_create_unary_func("trunc", "real numeric"))
 
 
-def sign(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.sign <numpy.sign>`.
-
-    See its docstring for more information.
-    """
-    if not isinstance(x, Array):
-        raise TypeError(f"Only Array objects are allowed; got {type(x)}")
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in sign")
-    # Special treatment to work around non-compliant NumPy 1.x behaviour
-    if x.dtype in _complex_floating_dtypes:
-        return x/abs(x)
-    return Array._new(np.sign(x._array), device=x.device)
-
-
 # Note: min and max argument names are different and not optional in numpy.
 @requires_api_version('2023.12')
 def clip(
@@ -349,3 +333,19 @@ def clip(
         ib = (out > b) | np.isnan(b)
         out[ib] = b[ib]
     return Array._new(out, device=device)
+
+
+def sign(x: Array, /) -> Array:
+    """
+    Array API compatible wrapper for :py:func:`np.sign <numpy.sign>`.
+
+    See its docstring for more information.
+    """
+    if not isinstance(x, Array):
+        raise TypeError(f"Only Array objects are allowed; got {type(x)}")
+    if x.dtype not in _numeric_dtypes:
+        raise TypeError("Only numeric dtypes are allowed in sign")
+    # Special treatment to work around non-compliant NumPy 1.x behaviour
+    if x.dtype in _complex_floating_dtypes:
+        return x/abs(x)
+    return Array._new(np.sign(x._array), device=x.device)
