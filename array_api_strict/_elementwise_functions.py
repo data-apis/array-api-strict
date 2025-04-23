@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from functools import wraps
 from types import NoneType
 
@@ -153,7 +154,11 @@ if _bitwise_right_shift.__doc__: # noqa: F821
 del func, _create_binary_func
 
 
-def _create_unary_func(func_name, dtype_category, np_func_name=None):
+def _create_unary_func(
+    func_name: str, 
+    dtype_category: str,
+    np_func_name: str | None = None,
+) -> Callable[[Array], Array]:
     allowed_dtypes = _dtype_categories[dtype_category]
     np_func_name = np_func_name or func_name
     np_func = getattr(np, np_func_name)
@@ -173,7 +178,7 @@ def _create_unary_func(func_name, dtype_category, np_func_name=None):
     return func
 
 
-def _identity_if_integer(func):
+def _identity_if_integer(func: Callable[[Array], Array]) -> Callable[[Array], Array]:
     """Hack around NumPy 1.x behaviour for ceil, floor, and trunc
     vs. integer inputs
     """
