@@ -7,7 +7,6 @@ from numpy.testing import suppress_warnings
 
 from .. import asarray, _elementwise_functions
 from .._array_object import ALL_DEVICES, CPU_DEVICE, Device
-from .._data_type_functions import isdtype
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._dtypes import (
     _dtype_categories,
@@ -15,7 +14,6 @@ from .._dtypes import (
     _floating_dtypes,
     _integer_dtypes,
     bool as xp_bool,
-    complex128,
     float64,
     int8,
     int16,
@@ -23,8 +21,6 @@ from .._dtypes import (
     int64,
     uint64,
 )
-from .._flags import set_array_api_strict_flags
-
 from .test_array_object import _check_op_array_scalar, BIG_INT
 
 import array_api_strict
@@ -196,11 +192,6 @@ def test_elementwise_function_vs_numpy_generics(func_name):
     dtypes = elementwise_function_input_types[func_name]
     xp_dtypes = _dtype_categories[dtypes]
     np_dtypes = [dtype._np_dtype for dtype in xp_dtypes]
-
-    match = (
-        "You are comparing a array_api_strict dtype against a NumPy "
-        "native dtype object"
-    )
 
     value = 0.5 if func_name == "atanh" else 1
     for xp_dtype in xp_dtypes:

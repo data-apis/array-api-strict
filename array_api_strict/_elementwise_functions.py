@@ -7,12 +7,9 @@ from ._array_object import Array
 from ._creation_functions import asarray
 from ._data_type_functions import broadcast_to, iinfo
 from ._dtypes import (
-    _boolean_dtypes,
     _complex_floating_dtypes,
     _dtype_categories,
-    _floating_dtypes,
     _integer_dtypes,
-    _integer_or_boolean_dtypes,
     _numeric_dtypes,
     _real_floating_dtypes,
     _real_numeric_dtypes,
