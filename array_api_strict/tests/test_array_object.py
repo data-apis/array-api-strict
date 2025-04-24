@@ -412,10 +412,12 @@ def test_operators():
 
 
 @pytest.mark.parametrize("op,dtypes", binary_op_dtypes.items())
-def test_binary_operators_vs_numpy_generics(op, dtypes):
-    """Test that np.bool_, np.int64, np.float32, np.float64, np.complex64, np.complex128
-    are disallowed in binary operators.
-    np.float64 and np.complex128 are subclasses of float and complex, so they need
+def test_binary_operators_numpy_scalars(op, dtypes):
+    """
+    Test that NumPy scalars (np.generic) are explicitly disallowed.
+
+    This must notably include np.float64 and np.complex128, which are
+    subclasses of float and complex respectively, so they need
     special treatment in order to be rejected.
     """
     match = "Expected Array or Python scalar"

@@ -81,12 +81,13 @@ def test_where_device_mismatch(cond_device, x1_device, x2_device):
 
 
 @pytest.mark.parametrize("dtype", _all_dtypes)
-def test_where_numpy_generics(dtype):
+def test_where_numpy_scalars(dtype):
     """
-    Test that NumPy generics are explicitly disallowed.
+    Test that NumPy scalars (np.generic) are explicitly disallowed.
 
-    This must notably includes np.float64 and np.complex128, which are
-    subclasses of float and complex respectively.
+    This must notably include np.float64 and np.complex128, which are
+    subclasses of float and complex respectively, so they need
+    special treatment in order to be rejected.
     """
     cond = xp.asarray(True)
     x1 = xp.asarray(1, dtype=dtype)

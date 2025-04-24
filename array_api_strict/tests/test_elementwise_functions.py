@@ -181,12 +181,13 @@ def test_elementwise_function_device_mismatch(func_name):
 
 
 @pytest.mark.parametrize("func_name", elementwise_function_input_types)
-def test_elementwise_function_vs_numpy_generics(func_name):
+def test_elementwise_function_numpy_scalars(func_name):
     """
-    Test that NumPy generics are explicitly disallowed.
+    Test that NumPy scalars (np.generic) are explicitly disallowed.
 
-    This must notably includes np.float64 and np.complex128, which are
-    subclasses of float and complex respectively.
+    This must notably include np.float64 and np.complex128, which are
+    subclasses of float and complex respectively, so they need
+    special treatment in order to be rejected.
     """
     func = getattr(_elementwise_functions, func_name)
     dtypes = elementwise_function_input_types[func_name]
@@ -203,6 +204,8 @@ def test_elementwise_function_vs_numpy_generics(func_name):
                 _ = func(a, a)
                 with pytest.raises(TypeError, match="neither Array nor Python scalars"):
                     func(a, b)
+                with pytest.raises(TypeError, match="neither Array nor Python scalars"):
+                    func(b, a)
             else:
                 _ = func(a)
                 with pytest.raises(TypeError, match="allowed"):
