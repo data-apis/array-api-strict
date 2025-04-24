@@ -255,30 +255,37 @@ def _check_op_array_scalar(dtypes, a, s, func, func_name, BIG_INT=BIG_INT):
             func(s)
         return False
 
+binary_op_dtypes = {
+    "__add__": "numeric",
+    "__and__": "integer or boolean",
+    "__eq__": "all",
+    "__floordiv__": "real numeric",
+    "__ge__": "real numeric",
+    "__gt__": "real numeric",
+    "__le__": "real numeric",
+    "__lshift__": "integer",
+    "__lt__": "real numeric",
+    "__mod__": "real numeric",
+    "__mul__": "numeric",
+    "__ne__": "all",
+    "__or__": "integer or boolean",
+    "__pow__": "numeric",
+    "__rshift__": "integer",
+    "__sub__": "numeric",
+    "__truediv__": "floating-point",
+    "__xor__": "integer or boolean",
+}
+unary_op_dtypes = {
+    "__abs__": "numeric",
+    "__invert__": "integer or boolean",
+    "__neg__": "numeric",
+    "__pos__": "numeric",
+}
 
 def test_operators():
     # For every operator, we test that it works for the required type
     # combinations and raises TypeError otherwise
-    binary_op_dtypes = {
-        "__add__": "numeric",
-        "__and__": "integer or boolean",
-        "__eq__": "all",
-        "__floordiv__": "real numeric",
-        "__ge__": "real numeric",
-        "__gt__": "real numeric",
-        "__le__": "real numeric",
-        "__lshift__": "integer",
-        "__lt__": "real numeric",
-        "__mod__": "real numeric",
-        "__mul__": "numeric",
-        "__ne__": "all",
-        "__or__": "integer or boolean",
-        "__pow__": "numeric",
-        "__rshift__": "integer",
-        "__sub__": "numeric",
-        "__truediv__": "floating-point",
-        "__xor__": "integer or boolean",
-    }
+
     # Recompute each time because of in-place ops
     def _array_vals():
         for d in _integer_dtypes:
@@ -337,12 +344,6 @@ def test_operators():
                             else:
                                 assert_raises(TypeError, lambda: getattr(x, _op)(y))
 
-    unary_op_dtypes = {
-        "__abs__": "numeric",
-        "__invert__": "integer or boolean",
-        "__neg__": "numeric",
-        "__pos__": "numeric",
-    }
     for op, dtypes in unary_op_dtypes.items():
         for a in _array_vals():
             if (
@@ -408,6 +409,53 @@ def test_operators():
                     assert_raises(ValueError, lambda: x.__imatmul__(y))
                 else:
                     x.__imatmul__(y)
+
+
+@pytest.mark.parametrize("op,dtypes", binary_op_dtypes.items())
+def test_binary_operators_vs_numpy_generics(op, dtypes):
+    """Test that np.bool_, np.int64, np.float32, np.float64, np.complex64, np.complex128
+    are disallowed in binary operators.
+    np.float64 and np.complex128 are subclasses of float and complex, so they need
+    special treatment in order to be rejected.
+    """
+    match = "Expected Array or Python scalar"
+
+    if dtypes not in ("numeric", "integer", "real numeric", "floating-point"):
+        a = asarray(True)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.bool_(True))
+
+    if dtypes != "floating-point":
+        a = asarray(1)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.int64(1))
+
+    if dtypes not in ("integer", "integer or boolean"):
+        a = asarray(1.,)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.float32(1.))
+        with pytest.raises(TypeError, match=match):
+            func(np.float64(1.))
+
+    if dtypes not in ("integer", "integer or boolean", "real numeric"):
+        a = asarray(1.,)
+        func = getattr(a, op)
+        with pytest.raises(TypeError, match=match):
+            func(np.complex64(1.))
+        with pytest.raises(TypeError, match=match):
+            func(np.complex128(1.))
+
+
+@pytest.mark.parametrize("op,dtypes", binary_op_dtypes.items())
+def test_binary_operators_device_mismatch(op, dtypes):
+    dtype = float64 if dtypes == "floating-point" else int64
+    a = asarray(1, dtype=dtype, device=CPU_DEVICE)
+    b = asarray(1, dtype=dtype, device=Device("device1"))
+    with pytest.raises(ValueError, match="different devices"):
+        getattr(a, op)(b)
 
 
 def test_python_scalar_construtors():
