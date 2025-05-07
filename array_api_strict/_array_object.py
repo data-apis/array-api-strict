@@ -233,7 +233,7 @@ class Array:
 
         return other
 
-    def _check_device(self, other: Array | complex) -> None:
+    def _check_type_device(self, other: Array | complex) -> None:
         """Check that other is either a Python scalar or an array on a device
         compatible with the current array.
         """
