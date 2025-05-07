@@ -8,8 +8,8 @@ _py_scalars = (bool, int, float, complex)
 
 
 def _maybe_normalize_py_scalars(
-    x1: Array | bool | int | float | complex,
-    x2: Array | bool | int | float | complex,
+    x1: Array | complex,
+    x2: Array | complex,
     dtype_category: str,
     func_name: str,
 ) -> tuple[Array, Array]:
