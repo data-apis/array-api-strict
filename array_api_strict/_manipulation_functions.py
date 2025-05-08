@@ -138,6 +138,10 @@ def roll(
 
     See its docstring for more information.
     """
+    if not isinstance(shift, int | tuple):
+        raise ValueError(
+            f"`shift` can only be an int or a tuple, got {type(shift)=} instead."
+        )
     return Array._new(np.roll(x._array, shift, axis=axis), device=x.device)
 
 
