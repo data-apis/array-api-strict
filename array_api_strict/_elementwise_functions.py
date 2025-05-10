@@ -1,15 +1,16 @@
+from collections.abc import Callable
+from functools import wraps
+from types import NoneType
+
 import numpy as np
 
 from ._array_object import Array
 from ._creation_functions import asarray
 from ._data_type_functions import broadcast_to, iinfo
 from ._dtypes import (
-    _boolean_dtypes,
     _complex_floating_dtypes,
     _dtype_categories,
-    _floating_dtypes,
     _integer_dtypes,
-    _integer_or_boolean_dtypes,
     _numeric_dtypes,
     _real_floating_dtypes,
     _real_numeric_dtypes,
@@ -35,7 +36,7 @@ def _binary_ufunc_proto(x1, x2, dtype_category, func_name, np_func):
     return Array._new(np_func(x1._array, x2._array), device=x1.device)
 
 
-_binary_docstring_template = """
+_docstring_template = """
 Array API compatible wrapper for :py:func:`np.%s <numpy.%s>`.
 
 See its docstring for more information.
@@ -117,7 +118,7 @@ for func_name, dtype_category in _binary_funcs.items():
     func = _create_binary_func(func_name, dtype_category, np_func)
     func.__name__ = func_name
 
-    func.__doc__ = _binary_docstring_template % (numpy_name, numpy_name)
+    func.__doc__ = _docstring_template % (numpy_name, numpy_name)
     func.__annotations__['x1'] = _annotations[dtype_category]
     func.__annotations__['x2'] = _annotations[dtype_category]
 
@@ -153,115 +154,86 @@ if _bitwise_right_shift.__doc__: # noqa: F821
 del func, _create_binary_func
 
 
-def abs(x: Array, /) -> Array:
+def _create_unary_func(
+    func_name: str, 
+    dtype_category: str,
+    np_func_name: str | None = None,
+) -> Callable[[Array], Array]:
+    allowed_dtypes = _dtype_categories[dtype_category]
+    np_func_name = np_func_name or func_name
+    np_func = getattr(np, np_func_name)
+
+    def func(x: Array, /) -> Array:
+        if not isinstance(x, Array):
+            raise TypeError(f"Only Array objects are allowed; got {type(x)}")
+        if x.dtype not in allowed_dtypes:
+            raise TypeError(
+                f"Only {dtype_category} dtypes are allowed in {func_name}; "
+                f"got {x.dtype}."
+            )
+        return Array._new(np_func(x._array), device=x.device)
+
+    func.__name__ = func_name
+    func.__doc__ = _docstring_template % (np_func_name, np_func_name)
+    return func
+
+
+def _identity_if_integer(func: Callable[[Array], Array]) -> Callable[[Array], Array]:
+    """Hack around NumPy 1.x behaviour for ceil, floor, and trunc
+    vs. integer inputs
     """
-    Array API compatible wrapper for :py:func:`np.abs <numpy.abs>`.
 
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in abs")
-    return Array._new(np.abs(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def acos(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arccos <numpy.arccos>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in acos")
-    return Array._new(np.arccos(x._array), device=x.device)
+    @wraps(func)
+    def wrapper(x: Array, /) -> Array:
+        if isinstance(x, Array) and x.dtype in _integer_dtypes:
+            return x
+        return func(x)
+    
+    return wrapper
 
 
-# Note: the function name is different here
-def acosh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arccosh <numpy.arccosh>`.
+abs = _create_unary_func("abs", "numeric")
+acos = _create_unary_func("acos", "floating-point", "arccos")
+acosh = _create_unary_func("acosh", "floating-point", "arccosh")
+asin = _create_unary_func("asin", "floating-point", "arcsin")
+asinh = _create_unary_func("asinh", "floating-point", "arcsinh")
+atan = _create_unary_func("atan", "floating-point", "arctan")
+atanh = _create_unary_func("atanh", "floating-point", "arctanh")
+bitwise_invert = _create_unary_func("bitwise_invert", "integer or boolean", "invert")
+ceil = _identity_if_integer(_create_unary_func("ceil", "real numeric"))
+conj = _create_unary_func("conj", "numeric")
+cos = _create_unary_func("cos", "floating-point", "cos")
+cosh = _create_unary_func("cosh", "floating-point", "cosh")
+exp = _create_unary_func("exp", "floating-point")
+expm1 = _create_unary_func("expm1", "floating-point")
+floor = _identity_if_integer(_create_unary_func("floor", "real numeric"))
+imag = _create_unary_func("imag", "complex floating-point")
+isfinite = _create_unary_func("isfinite", "numeric")
+isinf = _create_unary_func("isinf", "numeric")
+isnan = _create_unary_func("isnan", "numeric")
+log = _create_unary_func("log", "floating-point")
+log10 = _create_unary_func("log10", "floating-point")
+log1p = _create_unary_func("log1p", "floating-point")
+log2 = _create_unary_func("log2", "floating-point")
+logical_not = _create_unary_func("logical_not", "boolean")
+negative = _create_unary_func("negative", "numeric")
+positive = _create_unary_func("positive", "numeric")
+real = _create_unary_func("real", "numeric")
+reciprocal = requires_api_version("2024.12")(
+    _create_unary_func("reciprocal", "floating-point")
+)
+round = _create_unary_func("round", "numeric")
+signbit = requires_api_version("2023.12")(
+    _create_unary_func("signbit", "real floating-point")
+)
+sin = _create_unary_func("sin", "floating-point")
+sinh = _create_unary_func("sinh", "floating-point")
+sqrt = _create_unary_func("sqrt", "floating-point")
+square = _create_unary_func("square", "numeric")
+tan = _create_unary_func("tan", "floating-point")
+tanh = _create_unary_func("tanh", "floating-point")
+trunc = _identity_if_integer(_create_unary_func("trunc", "real numeric"))
 
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in acosh")
-    return Array._new(np.arccosh(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def asin(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arcsin <numpy.arcsin>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in asin")
-    return Array._new(np.arcsin(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def asinh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arcsinh <numpy.arcsinh>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in asinh")
-    return Array._new(np.arcsinh(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def atan(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arctan <numpy.arctan>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in atan")
-    return Array._new(np.arctan(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def atanh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.arctanh <numpy.arctanh>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in atanh")
-    return Array._new(np.arctanh(x._array), device=x.device)
-
-
-# Note: the function name is different here
-def bitwise_invert(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.invert <numpy.invert>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _integer_or_boolean_dtypes:
-        raise TypeError("Only integer or boolean dtypes are allowed in bitwise_invert")
-    return Array._new(np.invert(x._array), device=x.device)
-
-
-def ceil(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.ceil <numpy.ceil>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in ceil")
-    if x.dtype in _integer_dtypes:
-        # Note: The return dtype of ceil is the same as the input
-        return x
-    return Array._new(np.ceil(x._array), device=x.device)
-
-# WARNING: This function is not yet tested by the array-api-tests test suite.
 
 # Note: min and max argument names are different and not optional in numpy.
 @requires_api_version('2023.12')
@@ -276,41 +248,39 @@ def clip(
 
     See its docstring for more information.
     """
-    if isinstance(min, Array) and x.device != min.device:
-        raise ValueError(f"Arrays from two different devices ({x.device} and {min.device}) can not be combined.")
-    if isinstance(max, Array) and x.device != max.device:
-        raise ValueError(f"Arrays from two different devices ({x.device} and {max.device}) can not be combined.")
+    if not isinstance(x, Array):
+        raise TypeError(f"Only Array objects are allowed; got {type(x)}")
 
     if (x.dtype not in _real_numeric_dtypes
         or isinstance(min, Array) and min.dtype not in _real_numeric_dtypes
         or isinstance(max, Array) and max.dtype not in _real_numeric_dtypes):
         raise TypeError("Only real numeric dtypes are allowed in clip")
-    if not isinstance(min, (int, float, Array, type(None))):
-        raise TypeError("min must be an None, int, float, or an array")
-    if not isinstance(max, (int, float, Array, type(None))):
-        raise TypeError("max must be an None, int, float, or an array")
-
-    # Mixed dtype kinds is implementation defined
-    if (x.dtype in _integer_dtypes
-        and (isinstance(min, float) or
-             isinstance(min, Array) and min.dtype in _real_floating_dtypes)):
-        raise TypeError("min must be integral when x is integral")
-    if (x.dtype in _integer_dtypes
-        and (isinstance(max, float) or
-             isinstance(max, Array) and max.dtype in _real_floating_dtypes)):
-        raise TypeError("max must be integral when x is integral")
-    if (x.dtype in _real_floating_dtypes
-        and (isinstance(min, int) or
-             isinstance(min, Array) and min.dtype in _integer_dtypes)):
-        raise TypeError("min must be floating-point when x is floating-point")
-    if (x.dtype in _real_floating_dtypes
-        and (isinstance(max, int) or
-             isinstance(max, Array) and max.dtype in _integer_dtypes)):
-        raise TypeError("max must be floating-point when x is floating-point")
 
     if min is max is None:
-        # Note: NumPy disallows min = max = None
         return x
+
+    for argname, arg in ("min", min), ("max", max):
+        if isinstance(arg, Array):
+            if x.device != arg.device:
+                raise ValueError(
+                    f"Arrays from two different devices ({x.device} and {arg.device}) "
+                    "can not be combined."
+                )
+        # Disallow subclasses of Python scalars, e.g. np.float64
+        elif type(arg) not in (int, float, NoneType):
+            raise TypeError(
+                f"{argname} must be None, int, float, or Array; got {type(arg)}"
+            )
+
+        # Mixed dtype kinds is implementation defined
+        if (x.dtype in _integer_dtypes
+            and (isinstance(arg, float) or
+                isinstance(arg, Array) and arg.dtype in _real_floating_dtypes)):
+            raise TypeError(f"{argname} must be integral when x is integral")
+        if (x.dtype in _real_floating_dtypes
+            and (isinstance(arg, int) or
+                isinstance(arg, Array) and arg.dtype in _integer_dtypes)):
+            raise TypeError(f"{arg} must be floating-point when x is floating-point")
 
     # Normalize to make the below logic simpler
     if min is not None:
@@ -370,330 +340,17 @@ def clip(
     return Array._new(out, device=device)
 
 
-def conj(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.conj <numpy.conj>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in conj")
-    return Array._new(np.conj(x._array), device=x.device)
-
-
-def cos(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.cos <numpy.cos>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in cos")
-    return Array._new(np.cos(x._array), device=x.device)
-
-
-def cosh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.cosh <numpy.cosh>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in cosh")
-    return Array._new(np.cosh(x._array), device=x.device)
-
-
-def exp(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.exp <numpy.exp>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in exp")
-    return Array._new(np.exp(x._array), device=x.device)
-
-
-def expm1(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.expm1 <numpy.expm1>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in expm1")
-    return Array._new(np.expm1(x._array), device=x.device)
-
-
-def floor(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.floor <numpy.floor>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in floor")
-    if x.dtype in _integer_dtypes:
-        # Note: The return dtype of floor is the same as the input
-        return x
-    return Array._new(np.floor(x._array), device=x.device)
-
-
-def imag(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.imag <numpy.imag>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _complex_floating_dtypes:
-        raise TypeError("Only complex floating-point dtypes are allowed in imag")
-    return Array._new(np.imag(x._array), device=x.device)
-
-
-def isfinite(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.isfinite <numpy.isfinite>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in isfinite")
-    return Array._new(np.isfinite(x._array), device=x.device)
-
-
-def isinf(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.isinf <numpy.isinf>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in isinf")
-    return Array._new(np.isinf(x._array), device=x.device)
-
-
-def isnan(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.isnan <numpy.isnan>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in isnan")
-    return Array._new(np.isnan(x._array), device=x.device)
-
-
-def log(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.log <numpy.log>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in log")
-    return Array._new(np.log(x._array), device=x.device)
-
-
-def log1p(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.log1p <numpy.log1p>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in log1p")
-    return Array._new(np.log1p(x._array), device=x.device)
-
-
-def log2(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.log2 <numpy.log2>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in log2")
-    return Array._new(np.log2(x._array), device=x.device)
-
-
-def log10(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.log10 <numpy.log10>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in log10")
-    return Array._new(np.log10(x._array), device=x.device)
-
-
-def logical_not(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.logical_not <numpy.logical_not>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _boolean_dtypes:
-        raise TypeError("Only boolean dtypes are allowed in logical_not")
-    return Array._new(np.logical_not(x._array), device=x.device)
-
-
-def negative(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.negative <numpy.negative>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in negative")
-    return Array._new(np.negative(x._array), device=x.device)
-
-
-def positive(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.positive <numpy.positive>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in positive")
-    return Array._new(np.positive(x._array), device=x.device)
-
-
-def real(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.real <numpy.real>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in real")
-    return Array._new(np.real(x._array), device=x.device)
-
-
-@requires_api_version('2024.12')
-def reciprocal(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.reciprocal <numpy.reciprocal>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in reciprocal")
-    return Array._new(np.reciprocal(x._array), device=x.device)
-
-
-def round(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.round <numpy.round>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in round")
-    return Array._new(np.round(x._array), device=x.device)
-
-
 def sign(x: Array, /) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.sign <numpy.sign>`.
 
     See its docstring for more information.
     """
+    if not isinstance(x, Array):
+        raise TypeError(f"Only Array objects are allowed; got {type(x)}")
     if x.dtype not in _numeric_dtypes:
         raise TypeError("Only numeric dtypes are allowed in sign")
+    # Special treatment to work around non-compliant NumPy 1.x behaviour
     if x.dtype in _complex_floating_dtypes:
         return x/abs(x)
     return Array._new(np.sign(x._array), device=x.device)
-
-
-@requires_api_version('2023.12')
-def signbit(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.signbit <numpy.signbit>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _real_floating_dtypes:
-        raise TypeError("Only real floating-point dtypes are allowed in signbit")
-    return Array._new(np.signbit(x._array), device=x.device)
-
-
-def sin(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.sin <numpy.sin>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in sin")
-    return Array._new(np.sin(x._array), device=x.device)
-
-
-def sinh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.sinh <numpy.sinh>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in sinh")
-    return Array._new(np.sinh(x._array), device=x.device)
-
-
-def square(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.square <numpy.square>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _numeric_dtypes:
-        raise TypeError("Only numeric dtypes are allowed in square")
-    return Array._new(np.square(x._array), device=x.device)
-
-
-def sqrt(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.sqrt <numpy.sqrt>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in sqrt")
-    return Array._new(np.sqrt(x._array), device=x.device)
-
-
-def tan(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.tan <numpy.tan>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in tan")
-    return Array._new(np.tan(x._array), device=x.device)
-
-
-def tanh(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.tanh <numpy.tanh>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _floating_dtypes:
-        raise TypeError("Only floating-point dtypes are allowed in tanh")
-    return Array._new(np.tanh(x._array), device=x.device)
-
-
-def trunc(x: Array, /) -> Array:
-    """
-    Array API compatible wrapper for :py:func:`np.trunc <numpy.trunc>`.
-
-    See its docstring for more information.
-    """
-    if x.dtype not in _real_numeric_dtypes:
-        raise TypeError("Only real numeric dtypes are allowed in trunc")
-    if x.dtype in _integer_dtypes:
-        # Note: The return dtype of trunc is the same as the input
-        return x
-    return Array._new(np.trunc(x._array), device=x.device)

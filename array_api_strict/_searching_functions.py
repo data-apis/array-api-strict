@@ -98,6 +98,9 @@ def where(condition: Array, x1: Array | complex, x2: Array | complex, /) -> Arra
 
     See its docstring for more information.
     """
+    if not isinstance(condition, Array):
+        raise TypeError(f"`condition` must be an Array; got {type(condition)}")
+
     x1, x2 = _maybe_normalize_py_scalars(x1, x2, "all", "where")
 
     # Call result type here just to raise on disallowed type combinations
