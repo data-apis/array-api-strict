@@ -149,7 +149,7 @@ def std(
     /,
     *,
     axis: int | tuple[int, ...] | None = None,
-    correction: int | float = 0.0,
+    correction: float = 0.0,
     keepdims: bool = False,
 ) -> Array:
     # Note: the keyword argument correction is different here
@@ -181,7 +181,7 @@ def var(
     /,
     *,
     axis: int | tuple[int, ...] | None = None,
-    correction: int | float = 0.0,
+    correction: float = 0.0,
     keepdims: bool = False,
 ) -> Array:
     # Note: the keyword argument correction is different here

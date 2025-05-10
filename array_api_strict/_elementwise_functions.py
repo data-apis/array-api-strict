@@ -51,15 +51,15 @@ def _create_binary_func(func_name, dtype_category, np_func):
 # static type annotation for ArrayOrPythonScalar arguments given a category
 # NB: keep the keys in sync with the _dtype_categories dict
 _annotations = {
-    "all": "bool | int | float | complex | Array",
-    "real numeric": "int | float | Array",
-    "numeric": "int | float | complex | Array",
+    "all": "complex | Array",
+    "real numeric": "float | Array",
+    "numeric": "complex | Array",
     "integer": "int | Array",
-    "integer or boolean": "bool | int | Array",
+    "integer or boolean": "int | Array",
     "boolean": "bool | Array",
     "real floating-point": "float | Array",
     "complex floating-point": "complex | Array",
-    "floating-point": "float | complex | Array",
+    "floating-point": "complex | Array",
 }
 
 
@@ -268,8 +268,8 @@ def ceil(x: Array, /) -> Array:
 def clip(
     x: Array,
     /,
-    min: Array | int | float | None = None,
-    max: Array | int | float | None = None,
+    min: Array | float | None = None,
+    max: Array | float | None = None,
 ) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.clip <numpy.clip>`.
