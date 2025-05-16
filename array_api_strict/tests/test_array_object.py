@@ -637,7 +637,7 @@ def test_array_namespace():
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2026.12"))
 
 def test_iter():
-    pytest.raises(TypeError, lambda: iter(asarray(3)))
+    pytest.raises(TypeError, lambda: next(iter(asarray(3))))
     assert list(ones(3)) == [asarray(1.), asarray(1.), asarray(1.)]
     assert all_(isinstance(a, Array) for a in iter(ones(3)))
     assert all_(a.shape == () for a in iter(ones(3)))
