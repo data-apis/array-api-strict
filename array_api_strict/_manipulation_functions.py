@@ -113,6 +113,8 @@ def reshape(x: Array, /, shape: tuple[int, ...], *, copy: bool | None = None) ->
 
     See its docstring for more information.
     """
+    if not isinstance(shape, tuple):
+        raise TypeError(f"`shape` must be a tuple of ints; got {shape=} instead.")
 
     data = x._array
     if copy:
