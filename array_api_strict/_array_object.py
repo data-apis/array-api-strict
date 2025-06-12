@@ -67,9 +67,7 @@ class Device:
 CPU_DEVICE = Device()
 ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
-# See https://github.com/data-apis/array-api-strict/issues/67 and the comment
-# on __array__ below.
-_allow_array = True
+_default = object()
 
 
 class Array:
@@ -151,40 +149,28 @@ class Array:
 
     __str__ = __repr__
 
-    # In the future, _allow_array will be set to False, which will disallow
-    # __array__. This means calling `np.func()` on an array_api_strict array
-    # will give an error. If we don't explicitly disallow it, NumPy defaults
-    # to creating an object dtype array, which would lead to confusing error
-    # messages at best and surprising bugs at worst. The reason for doing this
-    # is that __array__ is not actually supported by the standard, so it can
-    # lead to code assuming np.asarray(other_array) would always work in the
-    # standard.
-    #
-    # This was implemented historically for compatibility, and removing it has
+    # `__array__` was implemented historically for compatibility, and removing it has
     # caused issues for some libraries (see
     # https://github.com/data-apis/array-api-strict/issues/67).
-    def __array__(
-        self, dtype: None | np.dtype[Any] = None, copy: None | bool = None
-    ) -> npt.NDArray[Any]:
-        # We have to allow this to be internally enabled as there's no other
-        # easy way to parse a list of Array objects in asarray().
-        if _allow_array:
-            if self._device != CPU_DEVICE:
-                raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
-            # copy keyword is new in 2.0.0; for older versions don't use it
-            # retry without that keyword.
-            if np.__version__[0] < '2':
-                return np.asarray(self._array, dtype=dtype)
-            elif np.__version__.startswith('2.0.0-dev0'):
-                # Handle dev version for which we can't know based on version
-                # number whether or not the copy keyword is supported.
-                try:
-                    return np.asarray(self._array, dtype=dtype, copy=copy)
-                except TypeError:
-                    return np.asarray(self._array, dtype=dtype)
-            else:
-                return np.asarray(self._array, dtype=dtype, copy=copy)
-        raise ValueError("Conversion from an array_api_strict array to a NumPy ndarray is not supported")
+
+    # Instead of `__array__` we now implement the buffer protocol.
+    # Note that it makes array-apis-strict requiring python>=3.12
+    def __buffer__(self, flags):
+        if self._device != CPU_DEVICE:
+            raise RuntimeError(f"Can not convert array on the '{self._device}' device to a Numpy array.")
+        return self._array.__buffer__(flags)
+
+    # We do not define __release_buffer__, per the discussion at
+    # https://github.com/data-apis/array-api-strict/pull/115#pullrequestreview-2917178729
+
+    def __array__(self, *args, **kwds):
+        # a stub for python < 3.12; otherwise numpy silently produces object arrays
+        import sys
+        minor, major = sys.version_info.minor, sys.version_info.major
+        if major < 3 or minor < 12:
+            raise TypeError(
+                "Interoperation with NumPy requires python >= 3.12. Please upgrade."
+            )
 
     # These are various helper functions to make the array behavior match the
     # spec in places where it either deviates from or is more strict than
