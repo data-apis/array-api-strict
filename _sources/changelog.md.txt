@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.4.0 (XXX)
+## 2.4.0 (2025-06-16)
 
 ### Major Changes
 
@@ -39,7 +39,7 @@ The following users contributed to this release:
 
 Lumir Balhar,
 Evgeni Burovski,
-Joren Hammudoglu
+Joren Hammudoglu,
 Tim Head,
 Guido Imperiale,
 Lucy Liu
