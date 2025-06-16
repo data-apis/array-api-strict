@@ -1,5 +1,50 @@
 # Changelog
 
+## 2.4.0 (XXX)
+
+### Major Changes
+
+- The array object no longer defines `__array__`, and conversion to NumPy relies on the
+  buffer protocol, `__buffer__` instead. This change should be completely transparent to
+  users. Please report any issues this change causes however.
+
+- Support for Python versions 3.9-3.11 was dropped. The minimum supported Python
+  versions is now 3.12. 
+
+
+### Minor Changes
+
+- `asarray` no longer accepts nested sequences of arrays. This is consistent with the
+   standard, which only allows _a (possibly nested) sequence of Python scalars_. In most
+   cases, this requires changing `asarray(list_of_arrays)` to `stack(list_of_arrays)`.
+   Note that this effectively disallows code such as
+   `asarray([x[i] for i in range(x.shape[0]])` since indexing 1D arrays produces 0D
+   arrays, not python scalars.
+
+- Fix fancy indexing in a mult-device setting. The indexed arrays and all indexer arrays
+  must be the same device. Otherwise, an error is raised.
+
+- Make `finfo` and `iinfo` accept arrays or dtypes, as required by the standard.
+
+- Make `roll` only accept integers and tuples for the `shift` argument.
+
+- Make `reshape` only accept tuples for the `shape` argument.
+
+- Make testing of array iteration compatible with Python 3.14.
+
+
+### Contributors
+
+The following users contributed to this release:
+
+Lumir Balhar,
+Evgeni Burovski,
+Joren Hammudoglu
+Tim Head,
+Guido Imperiale,
+Lucy Liu
+
+
 ## 2.3.1 (2025-03-20)
 
 This is a bugfix release with no new features compared to 2.3. This release fixes an
