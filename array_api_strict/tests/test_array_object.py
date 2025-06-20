@@ -18,12 +18,14 @@ from .._dtypes import (
     _integer_or_boolean_dtypes,
     _real_numeric_dtypes,
     _numeric_dtypes,
+    uint8,
     int8,
     int16,
     int32,
     int64,
     uint64,
     float64,
+    complex128,
     bool as bool_,
 )
 from .._flags import set_array_api_strict_flags
@@ -191,6 +193,29 @@ def test_indexing_arrays_different_devices():
 
     with pytest.raises(ValueError, match="Array indexing is only allowed when"):
         a[idx1, idx2]
+
+
+def test_setitem_invalid_promotions():
+    # Check that violating these two raises:
+    #   Setting array values must not affect the data type of self, and
+    #   Behavior must otherwise follow Type Promotion Rules.
+    a = asarray([1, 2, 3])
+    with pytest.raises(TypeError):
+        a[0] = 3.5
+
+    with pytest.raises(TypeError):
+        a[0] = asarray(3.5)
+
+    a = asarray([1, 2, 3], dtype=uint8)
+    with pytest.raises(TypeError):
+        a[0] = asarray(42, dtype=uint64)
+
+    a = asarray([1, 2, 3], dtype=float64)
+    with pytest.raises(TypeError):
+        a[0] = 3.5j
+
+    with pytest.raises(TypeError):
+        a[0] = asarray(3.5j, dtype=complex128)
 
 
 def test_promoted_scalar_inherits_device():

@@ -942,6 +942,15 @@ class Array:
         self._validate_index(key, op="setitem")
         # Indexing self._array with array_api_strict arrays can be erroneous
         np_key = key._array if isinstance(key, Array) else key
+
+        # sanitize the value
+        other = value
+        if isinstance(value, (bool, int, float, complex)):
+            other = self._promote_scalar(value)
+        dt = _result_type(self.dtype, other.dtype)
+        if dt != self.dtype:
+            raise TypeError(f"mismatched dtypes: {self.dtype = } and {other.dtype = }")
+
         self._array.__setitem__(np_key, asarray(value)._array)
 
     def __sub__(self, other: Array | complex, /) -> Array:
