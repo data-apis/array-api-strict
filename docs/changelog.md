@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.4.1 (unreleased)
+
+### Major Changes
+
+- The array object defines `__array__` again when `__buffer__` is not available.
+
+- Support for Python versions 3.10 and 3.11 has been reinstated.
+
+
+### Minor Changes
+
+- Arithmetic operations no longer accept NumPy arrays.
+
+- Disallow `__setitem__` for invalid dtype combinations (e.g. setting a float value
+into an integer array)
+
+
+### Contributors
+
+The following users contributed to this release:
+
+Evgeni Burovski,
+Guido Imperiale
+
+
 ## 2.4.0 (2025-06-16)
 
 ### Major Changes
