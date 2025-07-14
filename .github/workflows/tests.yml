@@ -6,11 +6,15 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13']
-        numpy-version: ['1.26', 'dev']
+        numpy-version: ['1.26', '2.3', 'dev']
         exclude:
+          - python-version: '3.10'
+            numpy-version: '2.3'
+          - python-version: '3.10'
+            numpy-version: 'dev'            
           - python-version: '3.13'
             numpy-version: '1.26'
-      fail-fast: true
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
