@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.4.1 (unreleased)
+## 2.4.1 (2025-07-27)
 
 ### Major Changes
 
@@ -22,6 +22,7 @@ into an integer array)
 The following users contributed to this release:
 
 Evgeni Burovski,
+Lucas Colley,
 Guido Imperiale
 
 
