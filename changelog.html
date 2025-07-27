@@ -5,12 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Releasing" href="releasing.html" /><link rel="prev" title="API Reference" href="api.html" />
 
-    <link rel="shortcut icon" href="_static/favicon.png"/><!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
+    <link rel="shortcut icon" href="_static/favicon.png"/><!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
         <title>Changelog - array-api-strict documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=acfd86a5" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=dc4c535e" />
     
     
@@ -18,20 +18,20 @@
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
       }
     }
@@ -191,7 +191,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  
   <span class="sidebar-brand-text">array-api-strict  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -246,8 +245,8 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
-<section id="unreleased">
-<h2>2.4.1 (unreleased)<a class="headerlink" href="#unreleased" title="Link to this heading">¶</a></h2>
+<section id="id1">
+<h2>2.4.1 (2025-07-27)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <section id="major-changes">
 <h3>Major Changes<a class="headerlink" href="#major-changes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -267,13 +266,14 @@ into an integer array)</p></li>
 <h3>Contributors<a class="headerlink" href="#contributors" title="Link to this heading">¶</a></h3>
 <p>The following users contributed to this release:</p>
 <p>Evgeni Burovski,
+Lucas Colley,
 Guido Imperiale</p>
 </section>
 </section>
-<section id="id1">
-<h2>2.4.0 (2025-06-16)<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <section id="id2">
-<h3>Major Changes<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<h2>2.4.0 (2025-06-16)<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<section id="id3">
+<h3>Major Changes<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The array object no longer defines <code class="docutils literal notranslate"><span class="pre">__array__</span></code>, and conversion to NumPy relies on the
 buffer protocol, <code class="docutils literal notranslate"><span class="pre">__buffer__</span></code> instead. This change should be completely transparent to
@@ -282,8 +282,8 @@ users. Please report any issues this change causes however.</p></li>
 versions is now 3.12.</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Minor Changes<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3>Minor Changes<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">asarray</span></code> no longer accepts nested sequences of arrays. This is consistent with the
 standard, which only allows <em>a (possibly nested) sequence of Python scalars</em>. In most
@@ -299,8 +299,8 @@ must be the same device. Otherwise, an error is raised.</p></li>
 <li><p>Make testing of array iteration compatible with Python 3.14.</p></li>
 </ul>
 </section>
-<section id="id4">
-<h3>Contributors<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3>Contributors<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>The following users contributed to this release:</p>
 <p>Lumir Balhar,
 Evgeni Burovski,
@@ -310,16 +310,16 @@ Guido Imperiale,
 Lucy Liu</p>
 </section>
 </section>
-<section id="id5">
-<h2>2.3.1 (2025-03-20)<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<section id="id6">
+<h2>2.3.1 (2025-03-20)<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
 <p>This is a bugfix release with no new features compared to 2.3. This release fixes an
 issue with <code class="docutils literal notranslate"><span class="pre">where</span></code> for scalar arguments, found in downstream testing of the 2024.12
 support.</p>
 </section>
-<section id="id6">
-<h2>2.3 (2025-02-27)<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
 <section id="id7">
-<h3>Major Changes<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<h2>2.3 (2025-02-27)<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h3>Major Changes<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>The default version of the array API standard is now 2024.12. Previous versions can
 still be enabled via the <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">flags API</span></a>.</p>
@@ -356,8 +356,8 @@ Note that <code class="docutils literal notranslate"><span class="pre">imag</spa
 the data type of their output.</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>Minor Changes<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3>Minor Changes<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">vecdot</span></code> now conjugates the first argument, in accordance with the standard.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">astype</span></code> now raises a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> instead of casting a complex floating-point
@@ -369,8 +369,8 @@ and raises a <code class="docutils literal notranslate"><span class="pre">TypeEr
 <li><p>the build system now uses <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, not <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>.</p></li>
 </ul>
 </section>
-<section id="id9">
-<h3>Contributors<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<section id="id10">
+<h3>Contributors<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <p>The following users contributed to this release:</p>
 <p>Aaron Meurer
 Clément Robert
@@ -380,10 +380,10 @@ Lucas Colley
 Tim Head</p>
 </section>
 </section>
-<section id="id10">
-<h2>2.2 (2024-11-11)<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
 <section id="id11">
-<h3>Major Changes<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<h2>2.2 (2024-11-11)<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<section id="id12">
+<h3>Major Changes<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Preliminary support for the draft 2024.12 version of the standard is now
 implemented. This is disabled by default, but can be enabled with the <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">flags
@@ -406,8 +406,8 @@ array functions, is not yet implemented but will be in a future version.</p>
 </li>
 </ul>
 </section>
-<section id="id12">
-<h3>Minor Changes<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="id13">
+<h3>Minor Changes<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">__array_namespace_info__()</span></code> now returns a class instead of a module. This
 prevents extraneous names that aren’t part of the standard from appearing on
@@ -415,10 +415,10 @@ it.</p></li>
 </ul>
 </section>
 </section>
-<section id="id13">
-<h2>2.1.3 (2024-11-08)<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
 <section id="id14">
-<h3>Major Changes<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<h2>2.1.3 (2024-11-08)<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="id15">
+<h3>Major Changes<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Revert the change to require NumPy &gt;= 2.1 and Python &gt;= 3.10 from
 array-api-strict 2.1.2. array-api-strict now requires NumPy &gt;= 1.21 and
@@ -433,19 +433,19 @@ more discussion about this.</p></li>
 </ul>
 </section>
 </section>
-<section id="id15">
-<h2>2.1.2 (2024-11-07)<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
 <section id="id16">
-<h3>Major Changes<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<h2>2.1.2 (2024-11-07)<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<section id="id17">
+<h3>Major Changes<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>array-api-strict now requires NumPy &gt;= 2.1 and Python &gt;= 3.10</p></li>
 </ul>
 </section>
 </section>
-<section id="id17">
-<h2>2.1.1 (2024-11-07)<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
 <section id="id18">
-<h3>Major Changes<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<h2>2.1.1 (2024-11-07)<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<section id="id19">
+<h3>Major Changes<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Remove the <code class="docutils literal notranslate"><span class="pre">__array__</span></code> method from array-api-strict arrays. This means they
 will no longer be implicitly converted to NumPy arrays when passed to <code class="docutils literal notranslate"><span class="pre">np</span></code>
@@ -454,8 +454,8 @@ isn’t part of the array API standard. To portably convert an array API
 strict array to a NumPy array, use <code class="docutils literal notranslate"><span class="pre">np.from_dlpack(x)</span></code></p></li>
 </ul>
 </section>
-<section id="id19">
-<h3>Minor Changes<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<section id="id20">
+<h3>Minor Changes<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Use a more robust implementation of <code class="docutils literal notranslate"><span class="pre">clip()</span></code> that handles corner cases better.</p></li>
 <li><p>Fix the definition of <code class="docutils literal notranslate"><span class="pre">sign()</span></code> for complex numbers when using NumPy 1.x.</p></li>
@@ -466,10 +466,10 @@ strict array to a NumPy array, use <code class="docutils literal notranslate"><s
 </ul>
 </section>
 </section>
-<section id="id20">
-<h2>2.1 (2024-10-18)<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
 <section id="id21">
-<h3>Major Changes<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<h2>2.1 (2024-10-18)<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
+<section id="id22">
+<h3>Major Changes<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The default version of the array API standard is now 2023.12. 2022.12 can
 still be enabled via the <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">flags API</span></a>.</p></li>
@@ -485,18 +485,18 @@ instance, implicitly combining arrays on different devices results in an
 exception. (Thanks to <a class="reference external" href="https://github.com/betatim">&#64;betatim</a>).</p></li>
 </ul>
 </section>
-<section id="id22">
-<h3>Minor Changes<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<section id="id23">
+<h3>Minor Changes<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Avoid implicitly relying on <code class="docutils literal notranslate"><span class="pre">__array__</span></code> in some places. These changes should
 not be usef visible.</p></li>
 </ul>
 </section>
 </section>
-<section id="id23">
-<h2>2.0.1 (2024-07-01)<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
 <section id="id24">
-<h3>Minor Changes<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<h2>2.0.1 (2024-07-01)<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h2>
+<section id="id25">
+<h3>Minor Changes<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Re-allow iteration on 1-D arrays. A change from 2.0 fixed iter() raising on
 n-D arrays but also made 1-D arrays raise. The standard does not explicitly
@@ -505,10 +505,10 @@ implementation allows it to work, so for now, it is kept intact as working.</p><
 </ul>
 </section>
 </section>
-<section id="id25">
-<h2>2.0 (2024-06-27)<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
 <section id="id26">
-<h3>Major Changes<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<h2>2.0 (2024-06-27)<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
+<section id="id27">
+<h3>Major Changes<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>array-api-strict has a new set of <a class="reference internal" href="api.html#array-api-strict-flags"><span class="std std-ref">flags</span></a> that can
 be used to dynamically enable or disable features in array-api-strict. These
@@ -527,23 +527,23 @@ variable <span class="target" id="index-0"></span><a class="reference internal" 
 change the default version to 2023.12.</p></li>
 </ul>
 </section>
-<section id="id27">
-<h3>Minor Changes<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<section id="id28">
+<h3>Minor Changes<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Calling <code class="docutils literal notranslate"><span class="pre">iter()</span></code> on an array now correctly raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
 <li><p>Add some missing names to <code class="docutils literal notranslate"><span class="pre">__all__</span></code>.</p></li>
 </ul>
 </section>
 </section>
-<section id="id28">
-<h2>1.1.1 (2024-04-29)<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h2>
+<section id="id29">
+<h2>1.1.1 (2024-04-29)<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fix the <code class="docutils literal notranslate"><span class="pre">api_version</span></code> argument to <code class="docutils literal notranslate"><span class="pre">__array_namespace__</span></code> to accept
 <code class="docutils literal notranslate"><span class="pre">'2021.12'</span></code> or <code class="docutils literal notranslate"><span class="pre">'2022.12'</span></code>.</p></li>
 </ul>
 </section>
-<section id="id29">
-<h2>1.1 (2024-04-08)<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
+<section id="id30">
+<h2>1.1 (2024-04-08)<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fix the <code class="docutils literal notranslate"><span class="pre">copy</span></code> flag in <code class="docutils literal notranslate"><span class="pre">__array__</span></code> for NumPy 2.0.</p></li>
 <li><p>Add full <code class="docutils literal notranslate"><span class="pre">copy=False</span></code> support to <code class="docutils literal notranslate"><span class="pre">asarray()</span></code>. This is emulated in NumPy 1.26 by creating
@@ -552,8 +552,8 @@ the array and seeing if it is copied. For NumPy 2.0, the new native
 <li><p>Add broadcasting support to <code class="docutils literal notranslate"><span class="pre">cross</span></code>.</p></li>
 </ul>
 </section>
-<section id="id30">
-<h2>1.0 (2024-01-24)<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
+<section id="id31">
+<h2>1.0 (2024-01-24)<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
 <p>This is the first release of <code class="docutils literal notranslate"><span class="pre">array_api_strict</span></code>. It is extracted from
 <code class="docutils literal notranslate"><span class="pre">numpy.array_api</span></code>, which was included as an experimental submodule in NumPy
 versions prior to 2.0. Note that the commit history in this repository is
@@ -645,60 +645,60 @@ was added.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#unreleased">2.4.1 (unreleased)</a><ul>
+<li><a class="reference internal" href="#id1">2.4.1 (2025-07-27)</a><ul>
 <li><a class="reference internal" href="#major-changes">Major Changes</a></li>
 <li><a class="reference internal" href="#minor-changes">Minor Changes</a></li>
 <li><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id1">2.4.0 (2025-06-16)</a><ul>
-<li><a class="reference internal" href="#id2">Major Changes</a></li>
-<li><a class="reference internal" href="#id3">Minor Changes</a></li>
-<li><a class="reference internal" href="#id4">Contributors</a></li>
+<li><a class="reference internal" href="#id2">2.4.0 (2025-06-16)</a><ul>
+<li><a class="reference internal" href="#id3">Major Changes</a></li>
+<li><a class="reference internal" href="#id4">Minor Changes</a></li>
+<li><a class="reference internal" href="#id5">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id5">2.3.1 (2025-03-20)</a></li>
-<li><a class="reference internal" href="#id6">2.3 (2025-02-27)</a><ul>
-<li><a class="reference internal" href="#id7">Major Changes</a></li>
-<li><a class="reference internal" href="#id8">Minor Changes</a></li>
-<li><a class="reference internal" href="#id9">Contributors</a></li>
+<li><a class="reference internal" href="#id6">2.3.1 (2025-03-20)</a></li>
+<li><a class="reference internal" href="#id7">2.3 (2025-02-27)</a><ul>
+<li><a class="reference internal" href="#id8">Major Changes</a></li>
+<li><a class="reference internal" href="#id9">Minor Changes</a></li>
+<li><a class="reference internal" href="#id10">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id10">2.2 (2024-11-11)</a><ul>
-<li><a class="reference internal" href="#id11">Major Changes</a></li>
-<li><a class="reference internal" href="#id12">Minor Changes</a></li>
+<li><a class="reference internal" href="#id11">2.2 (2024-11-11)</a><ul>
+<li><a class="reference internal" href="#id12">Major Changes</a></li>
+<li><a class="reference internal" href="#id13">Minor Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id13">2.1.3 (2024-11-08)</a><ul>
-<li><a class="reference internal" href="#id14">Major Changes</a></li>
+<li><a class="reference internal" href="#id14">2.1.3 (2024-11-08)</a><ul>
+<li><a class="reference internal" href="#id15">Major Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id15">2.1.2 (2024-11-07)</a><ul>
-<li><a class="reference internal" href="#id16">Major Changes</a></li>
+<li><a class="reference internal" href="#id16">2.1.2 (2024-11-07)</a><ul>
+<li><a class="reference internal" href="#id17">Major Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id17">2.1.1 (2024-11-07)</a><ul>
-<li><a class="reference internal" href="#id18">Major Changes</a></li>
-<li><a class="reference internal" href="#id19">Minor Changes</a></li>
+<li><a class="reference internal" href="#id18">2.1.1 (2024-11-07)</a><ul>
+<li><a class="reference internal" href="#id19">Major Changes</a></li>
+<li><a class="reference internal" href="#id20">Minor Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id20">2.1 (2024-10-18)</a><ul>
-<li><a class="reference internal" href="#id21">Major Changes</a></li>
-<li><a class="reference internal" href="#id22">Minor Changes</a></li>
+<li><a class="reference internal" href="#id21">2.1 (2024-10-18)</a><ul>
+<li><a class="reference internal" href="#id22">Major Changes</a></li>
+<li><a class="reference internal" href="#id23">Minor Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id23">2.0.1 (2024-07-01)</a><ul>
-<li><a class="reference internal" href="#id24">Minor Changes</a></li>
+<li><a class="reference internal" href="#id24">2.0.1 (2024-07-01)</a><ul>
+<li><a class="reference internal" href="#id25">Minor Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id25">2.0 (2024-06-27)</a><ul>
-<li><a class="reference internal" href="#id26">Major Changes</a></li>
-<li><a class="reference internal" href="#id27">Minor Changes</a></li>
+<li><a class="reference internal" href="#id26">2.0 (2024-06-27)</a><ul>
+<li><a class="reference internal" href="#id27">Major Changes</a></li>
+<li><a class="reference internal" href="#id28">Minor Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id28">1.1.1 (2024-04-29)</a></li>
-<li><a class="reference internal" href="#id29">1.1 (2024-04-08)</a></li>
-<li><a class="reference internal" href="#id30">1.0 (2024-01-24)</a></li>
+<li><a class="reference internal" href="#id29">1.1.1 (2024-04-29)</a></li>
+<li><a class="reference internal" href="#id30">1.1 (2024-04-08)</a></li>
+<li><a class="reference internal" href="#id31">1.0 (2024-01-24)</a></li>
 </ul>
 </li>
 </ul>
@@ -713,7 +713,7 @@ was added.</p></li>
 </div><script src="_static/documentation_options.js?v=5929fcd5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     </body>
