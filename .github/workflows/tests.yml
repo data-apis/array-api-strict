@@ -28,9 +28,10 @@ jobs:
           if [[ "${{ matrix.numpy-version }}" == "dev" ]]; then
             python -m pip install --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple numpy;
           else
-            python -m pip install 'numpy>=1.26,<2.0';
+            python -m pip install 'numpy=='${{ matrix.numpy-version }}
           fi
-          python -m pip install -r requirements-dev.txt
+          python -m pip install pytest hypothesis
+          python -c'import numpy as np; print(f"{np.__version__ = }")'
       - name: Run Tests
         run: |
           pytest
