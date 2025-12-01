@@ -1,8 +1,9 @@
 import sys
+import warnings
 import operator
 from builtins import all as all_
 
-from numpy.testing import assert_raises, suppress_warnings
+from numpy.testing import assert_raises
 import numpy as np
 import pytest
 
@@ -269,10 +270,12 @@ def _check_op_array_scalar(dtypes, a, s, func, func_name, BIG_INT=BIG_INT):
 
         else:
             # Only test for no error
-            with suppress_warnings() as sup:
+            with warnings.catch_warnings():
                 # ignore warnings from pow(BIG_INT)
-                sup.filter(RuntimeWarning,
-                           "invalid value encountered in power")
+                warnings.filterwarnings(
+                    "ignore", category=RuntimeWarning,
+                    message="invalid value encountered in power"
+                )
                 func(s)
             return True
 
