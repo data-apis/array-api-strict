@@ -166,7 +166,7 @@ issue, but this hasn't necessarily been tested thoroughly.
    `Device("device1")` and `Device("device2")`. This allows testing of arrays on
    different devices, without the need for special hardware.
    `x.device` is always a `Device` object, and `device` keywords to creation
-   functions only accept these three device objects or `None`. A future version of
+   functions only accept the above three device objects or `None`. A future version of
    array-api-strict [may add support for a CuPy
    backend](https://github.com/data-apis/array-api-strict/issues/5) so that
    more significant device support can be tested.
