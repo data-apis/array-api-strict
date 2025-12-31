@@ -372,10 +372,13 @@ to NumPy, but nonetheless, performance is not a primary concern for this
 library, since it is only intended to be used for testing purposes.</p></li>
 <li><p>Since NumPy is a CPU-only library, the <a class="reference external" href="https://data-apis.org/array-api/latest/design_topics/device_support.html">device
 support</a>
-in array-api-strict is superficial only. <code class="docutils literal notranslate"><span class="pre">x.device</span></code> is always a (private)
-<code class="docutils literal notranslate"><span class="pre">CPU_DEVICE</span></code> object, and <code class="docutils literal notranslate"><span class="pre">device</span></code> keywords to creation functions only
-accept either this object or <code class="docutils literal notranslate"><span class="pre">None</span></code>. A future version of array-api-strict
-<a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/5">may add support for a CuPy
+in array-api-strict is superficial only.
+array-api-strict supports three ‘devices’; the default <code class="docutils literal notranslate"><span class="pre">CPU_DEVICE</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Device(&quot;device1&quot;)</span></code> and <code class="docutils literal notranslate"><span class="pre">Device(&quot;device2&quot;)</span></code>. This allows testing of arrays on
+different devices, without the need for special hardware.
+<code class="docutils literal notranslate"><span class="pre">x.device</span></code> is always a <code class="docutils literal notranslate"><span class="pre">Device</span></code> object, and <code class="docutils literal notranslate"><span class="pre">device</span></code> keywords to creation
+functions only accept the above three device objects or <code class="docutils literal notranslate"><span class="pre">None</span></code>. A future version of
+array-api-strict <a class="reference external" href="https://github.com/data-apis/array-api-strict/issues/5">may add support for a CuPy
 backend</a> so that
 more significant device support can be tested.</p></li>
 <li><p>Although only array types are expected in array-api-strict functions,

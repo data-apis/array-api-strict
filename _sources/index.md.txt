@@ -161,10 +161,13 @@ issue, but this hasn't necessarily been tested thoroughly.
 
 3. Since NumPy is a CPU-only library, the [device
    support](https://data-apis.org/array-api/latest/design_topics/device_support.html)
-   in array-api-strict is superficial only. `x.device` is always a (private)
-   `CPU_DEVICE` object, and `device` keywords to creation functions only
-   accept either this object or `None`. A future version of array-api-strict
-   [may add support for a CuPy
+   in array-api-strict is superficial only.
+   array-api-strict supports three 'devices'; the default `CPU_DEVICE`,
+   `Device("device1")` and `Device("device2")`. This allows testing of arrays on
+   different devices, without the need for special hardware.
+   `x.device` is always a `Device` object, and `device` keywords to creation
+   functions only accept the above three device objects or `None`. A future version of
+   array-api-strict [may add support for a CuPy
    backend](https://github.com/data-apis/array-api-strict/issues/5) so that
    more significant device support can be tested.
 
