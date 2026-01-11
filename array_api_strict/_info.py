@@ -130,5 +130,5 @@ class __array_namespace_info__:
         raise ValueError(f"unsupported kind: {kind!r}")
 
     @requires_api_version('2023.12')
-    def devices(self) -> list[Device]:
-        return list(ALL_DEVICES)
+    def devices(self) -> tuple[Device]:
+        return tuple(ALL_DEVICES)
