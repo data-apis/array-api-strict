@@ -312,3 +312,12 @@ def test_scalars():
 
                         with pytest.raises(TypeError):
                             func(s, s)
+
+
+def test_clip_none():
+    # regression test: clip(x) is a copy of x, not a view
+    x = asarray([1, 2, 3])
+    y = array_api_strict.clip(x)
+
+    y[1] = 42
+    assert x[1] == 2
