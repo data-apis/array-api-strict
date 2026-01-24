@@ -257,7 +257,7 @@ def clip(
         raise TypeError("Only real numeric dtypes are allowed in clip")
 
     if min is max is None:
-        return x
+        return Array._new(x._array.copy(), device=x.device)
 
     for argname, arg in ("min", min), ("max", max):
         if isinstance(arg, Array):
