@@ -304,7 +304,7 @@ def linspace(
     )
 
 
-def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> list[Array]:
+def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> tuple[Array, ...]:
     """
     Array API compatible wrapper for :py:func:`np.meshgrid <numpy.meshgrid>`.
 
@@ -327,10 +327,12 @@ def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> list[Array
     else:
         device = None
 
-    return [
+    typ = list if get_array_api_strict_flags()['api_version'] < '2025.12' else tuple
+
+    return typ(
         Array._new(array, device=device)
         for array in np.meshgrid(*[a._array for a in arrays], indexing=indexing)
-    ]
+    )
 
 
 def ones(
