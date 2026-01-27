@@ -16,7 +16,7 @@ from ._dtypes import (
     _signed_integer_dtypes,
     _unsigned_integer_dtypes,
 )
-from ._flags import get_array_api_strict_flags
+from ._flags import get_array_api_strict_flags, requires_api_version
 
 
 # Note: astype is a function, not an array method as in NumPy.
@@ -60,6 +60,16 @@ def broadcast_arrays(*arrays: Array) -> list[Array]:
     return [
         Array._new(array, device=arrays[0].device) for array in np.broadcast_arrays(*[a._array for a in arrays])
     ]
+
+
+@requires_api_version("2025.12")
+def broadcast_shapes(*shapes: tuple[int, ...]) -> tuple[int, ...]:
+    """
+    Array API compatible wrapper for :py:func:`np.broadcast_shapes <numpy.broadcast_shapes>`.
+
+    See its docstring for more information.
+    """
+    return np.broadcast_shapes(*shapes)
 
 
 def broadcast_to(x: Array, /, shape: tuple[int, ...]) -> Array:
