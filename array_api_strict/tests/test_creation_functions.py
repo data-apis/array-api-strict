@@ -161,6 +161,7 @@ def test_full_errors():
     assert_raises(ValueError, lambda: full((1,), 0, device="gpu"))
     assert_raises(ValueError, lambda: full((1,), 0, dtype=int))
     assert_raises(ValueError, lambda: full((1,), 0, dtype="i"))
+    assert_raises(TypeError, lambda: full((1,), asarray(0)))
 
 
 def test_full_like_errors():
@@ -169,6 +170,7 @@ def test_full_like_errors():
     assert_raises(ValueError, lambda: full_like(asarray(1), 0, device="gpu"))
     assert_raises(ValueError, lambda: full_like(asarray(1), 0, dtype=int))
     assert_raises(ValueError, lambda: full_like(asarray(1), 0, dtype="i"))
+    assert_raises(TypeError, lambda: full(asarray(1), asarray(0)))
 
 
 def test_linspace_errors():
