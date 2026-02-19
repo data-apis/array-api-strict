@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env:
   PYTEST_ARGS: "-v -rxXfE --hypothesis-disable-deadline --max-examples 500 -n 4"
-  API_VERSIONS: "2023.12 2024.12"
+  API_VERSIONS: "2023.12 2024.12 2025.12"
 
 jobs:
   array-api-tests:
