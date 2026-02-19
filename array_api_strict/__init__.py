@@ -301,9 +301,9 @@ from ._searching_functions import argmax, argmin, nonzero, count_nonzero, search
 
 __all__ += ["argmax", "argmin", "nonzero", "count_nonzero", "searchsorted", "where"]
 
-from ._set_functions import unique_all, unique_counts, unique_inverse, unique_values
+from ._set_functions import unique_all, unique_counts, unique_inverse, unique_values, isin
 
-__all__ += ["unique_all", "unique_counts", "unique_inverse", "unique_values"]
+__all__ += ["unique_all", "unique_counts", "unique_inverse", "unique_values", "isin"]
 
 from ._sorting_functions import argsort, sort
 
