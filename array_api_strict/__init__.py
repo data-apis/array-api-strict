@@ -73,6 +73,7 @@ __all__ += [
 from ._data_type_functions import (
     astype,
     broadcast_arrays,
+    broadcast_shapes,
     broadcast_to,
     can_cast,
     finfo,
@@ -84,6 +85,7 @@ from ._data_type_functions import (
 __all__ += [
     "astype",
     "broadcast_arrays",
+    "broadcast_shapes",
     "broadcast_to",
     "can_cast",
     "finfo",
