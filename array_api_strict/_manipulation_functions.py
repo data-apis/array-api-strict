@@ -30,7 +30,7 @@ def concat(
     )
 
 
-def expand_dims(x: Array, /, *, axis: int) -> Array:
+def expand_dims(x: Array, /, axis: int) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.expand_dims <numpy.expand_dims>`.
 
