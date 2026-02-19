@@ -669,10 +669,10 @@ def test_array_keys_use_private_array():
 def test_array_namespace():
     a = ones((3, 3))
     assert a.__array_namespace__() == array_api_strict
-    assert array_api_strict.__array_api_version__ == "2024.12"
+    assert array_api_strict.__array_api_version__ == "2025.12"
 
     assert a.__array_namespace__(api_version=None) is array_api_strict
-    assert array_api_strict.__array_api_version__ == "2024.12"
+    assert array_api_strict.__array_api_version__ == "2025.12"
 
     assert a.__array_namespace__(api_version="2022.12") is array_api_strict
     assert array_api_strict.__array_api_version__ == "2022.12"
@@ -685,12 +685,12 @@ def test_array_namespace():
     assert array_api_strict.__array_api_version__ == "2021.12"
 
     with pytest.warns(UserWarning):
-        assert a.__array_namespace__(api_version="2025.12") is array_api_strict
-    assert array_api_strict.__array_api_version__ == "2025.12"
+        assert a.__array_namespace__(api_version="2026.12") is array_api_strict
+    assert array_api_strict.__array_api_version__ == "2026.12"
 
 
     pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2021.11"))
-    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2026.12"))
+    pytest.raises(ValueError, lambda: a.__array_namespace__(api_version="2027.12"))
 
 def test_iter():
     pytest.raises(TypeError, lambda: next(iter(asarray(3))))
