@@ -20,7 +20,7 @@ import sys
 from collections.abc import Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Final, Literal, SupportsIndex
+from typing import Any, Final, Literal, SupportsIndex, Callable
 
 import numpy as np
 import numpy.typing as npt
@@ -125,6 +125,9 @@ class Array:
         raise TypeError(
             "The array_api_strict Array object should not be instantiated directly. Use an array creation function, such as asarray(), instead."
         )
+    
+    def __reduce__(self) -> tuple[Callable, tuple[npt.NDArray[Any], Device]]:
+        return (self._new, (self._array, self._device))
 
     # These functions are not required by the spec, but are implemented for
     # the sake of usability.

@@ -1,6 +1,7 @@
 import sys
 import warnings
 import operator
+import pickle
 from builtins import all as all_
 
 from numpy.testing import assert_raises
@@ -747,3 +748,15 @@ def test_dlpack_2023_12(api_version):
         a.__dlpack__(copy=False)
         a.__dlpack__(copy=True)
         a.__dlpack__(copy=None)
+
+def test_pickle():
+    """Check that arrays are pickleable (despite raising on `__new__`)"""
+    a = ones(2)
+    min_supported_protocol = 2
+    for protocol in range(min_supported_protocol, pickle.HIGHEST_PROTOCOL + 1):
+        bytes = pickle.dumps(a, protocol=protocol)
+        a_from_pickle = pickle.loads(bytes)
+        assert a_from_pickle.device == a.device
+        assert a_from_pickle.dtype == a.dtype
+        assert a_from_pickle.shape == a.shape
+        assert all(a_from_pickle == a)
