@@ -1,5 +1,69 @@
 # Changelog
 
+## 2.5 (2026-02-23)
+
+This release targets the 2025.12 revision of the Array API standard, and supports
+Python versions 3.10--3.14.
+
+### Major Changes
+
+- The default version of the array API standard is now 2025.12. Previous versions can
+  still be enabled via the [flags API](array-api-strict-flags), e.g., by calling
+  `set_array_api_strict_flags(api_version='2024.12')` or setting
+  `ARRAY_API_STRICT_API_VERSION=2024.12`.
+
+  Note that this support is still relatively undertested. Please [report any
+  issues](https://github.com/data-apis/array-api-strict/issues) you find.
+
+- The following functions, new in the 2025.12 revision, are implemented:
+
+  - `isin`
+  - `broadcast_shapes`
+  - `linalg.eig`
+  - `linalg.eigvals`
+
+The following updates to existing APIs have been implemented, per the 2025.12 Array API
+standard revision:
+
+  - `searchsorted` now accepts a python scalar for its second argument,
+    `x2`.
+  - `expand_dims` now accepts tuples of axes.
+  - `permute_dims` now accepts negative axes, with the usual meaning (`axis=-1` is
+    the last axis, `-2` is the second-to-last axis, and so on).
+
+The following functions now return tuples instead of lists:
+
+  - `__array_namespace_info__().devices`
+  - `broadcast_arrays`
+  - `meshgrid` 
+
+
+- Array objects can now be pickled.
+
+
+### Minor Changes
+
+- Several functions were diverging from the standard, and have been fixed to follow
+  the 2025.12 revision of the standard:
+
+  - `clip` has been updated to accept python `int` scalars for its `min` and `max`
+     arguments for clipping a floating-point array.
+  - `clip` has been updated to always returns a copy of an input array.
+  - `full` and `full_like` now reject array values for the `fill_value` argument.
+  - `expand_dims` accepts its axis argument as either positional or keyword argument.
+
+- `sign` of a complex zero, `sign(0 + 0j)` has been fixed to return zero.
+
+
+### Contributors
+
+The following users contributed to this release:
+
+Evgeni Burovski,
+Lucas Colley,
+Lucy Liu
+
+
 ## 2.4.1 (2025-07-27)
 
 ### Major Changes
@@ -7,7 +71,6 @@
 - The array object defines `__array__` again when `__buffer__` is not available.
 
 - Support for Python versions 3.10 and 3.11 has been reinstated.
-
 
 ### Minor Changes
 
