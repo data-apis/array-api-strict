@@ -130,5 +130,8 @@ class __array_namespace_info__:
         raise ValueError(f"unsupported kind: {kind!r}")
 
     @requires_api_version('2023.12')
-    def devices(self) -> list[Device]:
-        return list(ALL_DEVICES)
+    def devices(self) -> tuple[Device]:
+        if get_array_api_strict_flags()['api_version'] < '2025.12':
+            return list(ALL_DEVICES)
+        else:
+            return tuple(ALL_DEVICES)

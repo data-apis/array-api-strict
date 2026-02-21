@@ -49,7 +49,7 @@ def astype(
     return Array._new(x._array.astype(dtype=dtype._np_dtype, copy=copy), device=device)
 
 
-def broadcast_arrays(*arrays: Array) -> list[Array]:
+def broadcast_arrays(*arrays: Array) -> tuple[Array, ...]:
     """
     Array API compatible wrapper for :py:func:`np.broadcast_arrays <numpy.broadcast_arrays>`.
 
@@ -57,9 +57,11 @@ def broadcast_arrays(*arrays: Array) -> list[Array]:
     """
     from ._array_object import Array
 
-    return [
+    typ = list if get_array_api_strict_flags()['api_version'] < '2025.12' else tuple
+
+    return typ(
         Array._new(array, device=arrays[0].device) for array in np.broadcast_arrays(*[a._array for a in arrays])
-    ]
+    )
 
 
 @requires_api_version("2025.12")
