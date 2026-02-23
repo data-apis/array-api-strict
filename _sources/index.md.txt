@@ -15,12 +15,10 @@ libraries. Consuming library code should use the
 support the array API. Rather, it is intended to be used in the test suites of
 consuming libraries to test their array API usage.
 
-array-api-strict currently supports the
-[2023.12](https://data-apis.org/array-api/latest/changelog.html#v2022-12)
-version of the standard.
-[2022.12](https://data-apis.org/array-api/latest/changelog.html#v2023-12)
-support is also implemented, [and can be enabled with a
-flag](array-api-strict-flags).
+`array-api-strict` currently supports the
+[2025.12](https://data-apis.org/array-api/2025.12/changelog.html)
+version of the standard. Support for previous versions is also implemented,
+[and can be enabled with a flag](array-api-strict-flags).
 
 ## Install
 
@@ -37,7 +35,7 @@ and [Conda-forge](https://anaconda.org/conda-forge/array-api-strict)
 conda install --channel conda-forge array-api-strict
 ```
 
-array-api-strict supports NumPy 1.26 and NumPy 2.0.
+array-api-strict supports NumPy 1.26 and NumPy 2.0-2.4.
 
 ## Rationale
 
