@@ -212,15 +212,15 @@ def from_dlpack(
         if copy is not _undef:
             raise ValueError("The copy argument to from_dlpack requires at least version 2023.12 of the array API")
 
-    # Going to wait for upstream numpy support
     if device is not _undef:
         _check_device(device)
     else:
         device = None
-    if copy not in [_undef, None]:
-        raise NotImplementedError("The copy argument to from_dlpack is not yet implemented")
+    if copy in [_undef, None]:
+        # numpy 1.26 does not have the copy= arg
+        return Array._new(np.from_dlpack(x), device=device)
 
-    return Array._new(np.from_dlpack(x), device=device)
+    return Array._new(np.from_dlpack(x, copy=copy), device=device)
 
 
 def full(
