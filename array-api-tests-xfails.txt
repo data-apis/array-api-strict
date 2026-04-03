@@ -45,3 +45,7 @@ array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +infinity an
 array_api_tests/test_special_cases.py::test_unary[acosh(real(x_i) is +0 and imag(x_i) is NaN) -> NaN \xb1 \u03c0j/2]
 
 array_api_tests/test_special_cases.py::test_unary[sqrt(real(x_i) is +infinity and isfinite(imag(x_i)) and imag(x_i) > 0) -> +0 + infinity j]
+
+# remove this when array-api-strict 2.6 is released: this is only for array-api-tests,
+# which runs self-tests against a released array-api-strict
+array_api_tests/test_dlpack.py::test_from_dlpack
