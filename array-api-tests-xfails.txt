@@ -49,3 +49,6 @@ array_api_tests/test_special_cases.py::test_unary[sqrt(real(x_i) is +infinity an
 # remove this when array-api-strict 2.6 is released: this is only for array-api-tests,
 # which runs self-tests against a released array-api-strict
 array_api_tests/test_dlpack.py::test_from_dlpack
+
+# NumPy 1.26 : NotImplementedError: The copy argument to __dlpack__ is not yet implemented
+array_api_tests/test_dlpack.py::test_dunder_dlpack
