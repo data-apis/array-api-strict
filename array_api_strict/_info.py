@@ -125,7 +125,7 @@ class __array_namespace_info__:
         if isinstance(kind, tuple):
             res: DataTypes = {}
             for k in kind:
-                res.update(self.dtypes(kind=k))
+                res.update(self.dtypes(kind=k, device=device))
             return res
         raise ValueError(f"unsupported kind: {kind!r}")
 
