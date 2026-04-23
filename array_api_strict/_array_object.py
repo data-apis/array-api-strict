@@ -20,7 +20,7 @@ import sys
 from collections.abc import Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Final, Literal, SupportsIndex, Callable
+from typing import Any, Literal, SupportsIndex, Callable
 
 import numpy as np
 import numpy.typing as npt
@@ -40,33 +40,9 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
+from ._devices import CPU_DEVICE, ALL_DEVICES, Device
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
-
-
-class Device:
-    _device: Final[str]
-    __slots__ = ("_device", "__weakref__")
-
-    def __init__(self, device: str = "CPU_DEVICE"):
-        if device not in ("CPU_DEVICE", "device1", "device2"):
-            raise ValueError(f"The device '{device}' is not a valid choice.")
-        self._device = device
-
-    def __repr__(self) -> str:
-        return f"array_api_strict.Device('{self._device}')"
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Device):
-            return False
-        return self._device == other._device
-
-    def __hash__(self) -> int:
-        return hash(("Device", self._device))
-
-
-CPU_DEVICE = Device()
-ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 
 class Array:

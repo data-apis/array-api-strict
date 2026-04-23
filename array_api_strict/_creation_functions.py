@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from ._dtypes import DType, _all_dtypes, _np_dtype
+from ._devices import CPU_DEVICE, Device, device_supports_dtype, check_device as _check_device
 from ._flags import get_array_api_strict_flags
 from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeIs
 
     # Circular import
-    from ._array_object import Array, Device
+    from ._array_object import Array
 
 
 class Undef(Enum):
@@ -24,10 +25,15 @@ class Undef(Enum):
 _undef = Undef.UNDEF
 
 
-def _check_valid_dtype(dtype: DType | None) -> None:
+def _check_valid_dtype(dtype: DType | None, device: Device | None = None) -> None:
     # Note: Only spelling dtypes as the dtype objects is supported.
-    if dtype not in (None,) + _all_dtypes:
-        raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
+    if dtype is not None:
+        if dtype not in _all_dtypes:
+            raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
+
+        if device is not None:
+            if not device_supports_dtype(device, dtype):
+                raise ValueError(f"Device {device!r} does not support dtype={dtype!r}.")
 
 
 def _supports_buffer_protocol(obj: object) -> TypeIs[SupportsBufferProtocol]:
@@ -36,18 +42,6 @@ def _supports_buffer_protocol(obj: object) -> TypeIs[SupportsBufferProtocol]:
     except TypeError:
         return False
     return True
-
-
-def _check_device(device: Device | None) -> None:
-    # _array_object imports in this file are inside the functions to avoid
-    # circular imports
-    from ._array_object import ALL_DEVICES, Device
-
-    if device is not None and not isinstance(device, Device):
-        raise ValueError(f"Unsupported device {device!r}")
-
-    if device is not None and device not in ALL_DEVICES:
-        raise ValueError(f"Unsupported device {device!r}")
 
 
 def asarray(
@@ -65,11 +59,12 @@ def asarray(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
+    _check_device(device)
+    _check_valid_dtype(dtype, device)
     _np_dtype = None
     if dtype is not None:
         _np_dtype = dtype._np_dtype
-    _check_device(device)
+
     if isinstance(obj, Array) and device is None:
         device = obj.device
 
@@ -127,8 +122,8 @@ def arange(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(
         np.arange(start, stop, step, dtype=_np_dtype(dtype)),
@@ -149,8 +144,8 @@ def empty(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.empty(shape, dtype=_np_dtype(dtype)), device=device)
 
@@ -165,10 +160,10 @@ def empty_like(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
     if device is None:
         device = x.device
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.empty_like(x._array, dtype=_np_dtype(dtype)), device=device)
 
@@ -189,8 +184,8 @@ def eye(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(
         np.eye(n_rows, M=n_cols, k=k, dtype=_np_dtype(dtype)), device=device
@@ -237,8 +232,8 @@ def full(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     if not isinstance(fill_value, bool | int | float | complex):
         msg = f"Expected Python scalar fill_value, got type {type(fill_value)}"
@@ -266,10 +261,10 @@ def full_like(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
     if device is None:
         device = x.device
+    _check_valid_dtype(dtype, device)
 
     if not isinstance(fill_value, bool | int | float | complex):
         msg = f"Expected Python scalar fill_value, got type {type(fill_value)}"
@@ -300,8 +295,8 @@ def linspace(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(
         np.linspace(start, stop, num, dtype=_np_dtype(dtype), endpoint=endpoint),
@@ -353,8 +348,8 @@ def ones(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.ones(shape, dtype=_np_dtype(dtype)), device=device)
 
@@ -369,10 +364,10 @@ def ones_like(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
     if device is None:
         device = x.device
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.ones_like(x._array, dtype=_np_dtype(dtype)), device=device)
 
@@ -418,8 +413,8 @@ def zeros(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.zeros(shape, dtype=_np_dtype(dtype)), device=device)
 
@@ -434,9 +429,9 @@ def zeros_like(
     """
     from ._array_object import Array
 
-    _check_valid_dtype(dtype)
     _check_device(device)
     if device is None:
         device = x.device
+    _check_valid_dtype(dtype, device)
 
     return Array._new(np.zeros_like(x._array, dtype=_np_dtype(dtype)), device=device)
