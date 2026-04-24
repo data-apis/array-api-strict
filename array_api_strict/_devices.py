@@ -1,7 +1,7 @@
 from typing import Final
 
-from ._dtypes import DType, float64, complex128
 from ._dtypes import (
+    DType, float32, float64, complex64, complex128, int64,
     _all_dtypes, _boolean_dtypes, _signed_integer_dtypes,
     _unsigned_integer_dtypes, _integer_dtypes, _real_floating_dtypes,
     _complex_floating_dtypes, _numeric_dtypes
@@ -49,6 +49,22 @@ def check_device(device: Device | None) -> None:
 
 
 # Helpers for device-specific dtype support
+
+def get_default_dtypes(device: Device | None = None) -> dict[str, Device]:
+    if device == _F32_DEVICE:
+        return {
+            "real floating": float32,
+            "complex floating": complex64,
+            "integral": int64,
+            "indexing": int64,
+        }
+    else:
+        return {
+            "real floating": float64,
+            "complex floating": complex128,
+            "integral": int64,
+            "indexing": int64,
+        }
 
 
 def device_supports_dtype(device: Device | None, dtype: DType |None) -> bool:

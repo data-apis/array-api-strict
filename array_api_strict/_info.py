@@ -1,8 +1,7 @@
 import numpy as np
 
-from . import _dtypes as dt
 from . import _devices
-from ._array_object import ALL_DEVICES, CPU_DEVICE, Device
+from ._devices import ALL_DEVICES, CPU_DEVICE, Device
 from ._flags import get_array_api_strict_flags, requires_api_version
 from ._typing import Capabilities, DataTypes, DefaultDataTypes
 
@@ -41,12 +40,7 @@ class __array_namespace_info__:
         *,
         device: Device | None = None,
     ) -> DefaultDataTypes:
-        return {
-            "real floating": dt.float64,
-            "complex floating": dt.complex128,
-            "integral": dt.int64,
-            "indexing": dt.int64,
-        }
+        return _devices.get_default_dtypes(device)
 
     @requires_api_version('2023.12')
     def dtypes(

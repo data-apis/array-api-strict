@@ -53,3 +53,16 @@ class TestF32Device:
         all_dtypes = info.dtypes(device=f32_device)
         assert "float64" not in all_dtypes
         assert "complex128" not in all_dtypes
+
+    def test_info_default_dtypes(self):
+        f32_device = xp.Device("F32_device")
+        info = xp.__array_namespace_info__()
+        defaults = info.default_dtypes(device=f32_device)
+        assert defaults["real floating"] == xp.float32
+        assert defaults["complex floating"] == xp.complex64
+
+        cpu_device = xp.Device()
+        info = xp.__array_namespace_info__()
+        defaults = info.default_dtypes(device=cpu_device)
+        assert defaults["real floating"] == xp.float64
+        assert defaults["complex floating"] == xp.complex128
