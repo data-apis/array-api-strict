@@ -23,7 +23,9 @@ from .._creation_functions import (
     zeros_like,
 )
 from .._dtypes import float32, float64
-from .._array_object import Array, CPU_DEVICE, Device
+from .._array_object import Array
+from .._devices import CPU_DEVICE, ALL_DEVICES, Device
+from .._info import __array_namespace_info__
 from .._flags import set_array_api_strict_flags
 
 def test_asarray_errors():
@@ -212,6 +214,7 @@ def test_zeros_like_errors():
     assert_raises(ValueError, lambda: zeros_like(asarray(1), dtype=int))
     assert_raises(ValueError, lambda: zeros_like(asarray(1), dtype="i"))
 
+
 def test_meshgrid_dtype_errors():
     # Doesn't raise
     meshgrid()
@@ -219,6 +222,57 @@ def test_meshgrid_dtype_errors():
     meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float32))
 
     assert_raises(ValueError, lambda: meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float64)))
+
+
+
+def _full(a, *args, **kwds):
+    return full(a, fill_value=42, *args, **kwds)
+
+
+def _full_like(a, *args, **kwds):
+    return full_like(a, fill_value=42, *args, **kwds)
+
+
+class TestDefaultDType:
+
+    info = __array_namespace_info__()
+
+    @pytest.mark.parametrize("device", ALL_DEVICES)
+    @pytest.mark.parametrize("func", [empty, zeros, ones, _full])
+    def test_ones_etc(self, func, device):
+        a = func(1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+
+    @pytest.mark.parametrize("func", [empty_like, zeros_like, ones_like, _full_like])
+    def test_ones_like_etc_correct(self, func):
+        # float32 is preserved
+        a = ones(2, dtype=float32)
+        device = Device('F32_device')
+        b = func(a, device=device)
+        assert b.dtype == self.info.default_dtypes(device=device)["real floating"]
+
+    @pytest.mark.parametrize("func", [empty_like, zeros_like, ones_like, _full_like])
+    def test_ones_like_etc_incorrect(self, func):
+        a = ones(2)
+        assert a.dtype == float64
+        assert a.device == Device()
+
+        # XXX: a.dtype not supported by the device: ValueError or TypeError?
+
+        # >>> a = torch.ones(3, dtype=torch.float64, device='cpu')
+        # >>> torch.ones_like(a, device='mps')
+        # TypeError: Cannot convert a MPS Tensor to float64 dtype as the MPS framework
+        # doesn't support float64.
+        with pytest.raises(TypeError):
+            func(a, device=Device('F32_device'))
+# TODO:
+# def asarray(
+# def arange(
+# def eye(
+# def linspace(
+# def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> tuple[Array, ...]:
+# def tril(x: Array, /, *, k: int = 0) -> Array:
+# def triu(x: Array, /, *, k: int = 0) -> Array:
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])

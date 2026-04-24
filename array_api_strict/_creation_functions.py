@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from ._dtypes import DType, _all_dtypes, _np_dtype
-from ._devices import CPU_DEVICE, Device, device_supports_dtype, check_device as _check_device
+from ._devices import (
+    CPU_DEVICE, Device, device_supports_dtype, get_default_dtypes,
+    check_device as _check_device
+)
 from ._flags import get_array_api_strict_flags
 from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
 
@@ -146,6 +149,8 @@ def empty(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        dtype = get_default_dtypes(device)["real floating"]
 
     return Array._new(np.empty(shape, dtype=_np_dtype(dtype)), device=device)
 
@@ -234,6 +239,8 @@ def full(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        dtype = get_default_dtypes(device)["real floating"]
 
     if not isinstance(fill_value, bool | int | float | complex):
         msg = f"Expected Python scalar fill_value, got type {type(fill_value)}"
@@ -350,6 +357,8 @@ def ones(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        dtype = get_default_dtypes(device)["real floating"]
 
     return Array._new(np.ones(shape, dtype=_np_dtype(dtype)), device=device)
 
@@ -415,6 +424,8 @@ def zeros(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        dtype = get_default_dtypes(device)["real floating"]
 
     return Array._new(np.zeros(shape, dtype=_np_dtype(dtype)), device=device)
 
