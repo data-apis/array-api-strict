@@ -3,7 +3,8 @@ from typing import Literal
 
 import numpy as np
 
-from ._array_object import ALL_DEVICES, Array, Device
+from ._array_object import Array
+from ._devices import ALL_DEVICES, Device
 from ._data_type_functions import astype
 from ._dtypes import (
     DType,

@@ -3,8 +3,9 @@ import pytest
 import array_api_strict as xp
 
 from array_api_strict import ArrayAPIStrictFlags
-from .._array_object import ALL_DEVICES, CPU_DEVICE, Device
+from .._devices import ALL_DEVICES, CPU_DEVICE, Device
 from .._dtypes import _all_dtypes
+
 
 
 def test_where_with_scalars():

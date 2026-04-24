@@ -7,7 +7,7 @@ import numpy as np
 
 from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
 from ._devices import (
-    CPU_DEVICE, Device, device_supports_dtype, get_default_dtypes,
+    Device, device_supports_dtype, get_default_dtypes,
     check_device as _check_device
 )
 from ._flags import get_array_api_strict_flags

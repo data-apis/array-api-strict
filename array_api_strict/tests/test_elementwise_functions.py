@@ -6,7 +6,7 @@ import pytest
 
 
 from .. import asarray, _elementwise_functions
-from .._array_object import ALL_DEVICES, CPU_DEVICE, Device
+from .._devices import ALL_DEVICES, CPU_DEVICE, Device
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._dtypes import (
     _dtype_categories,

@@ -40,7 +40,7 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
-from ._devices import CPU_DEVICE, ALL_DEVICES, Device
+from ._devices import CPU_DEVICE, Device
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
