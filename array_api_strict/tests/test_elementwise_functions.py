@@ -21,6 +21,7 @@ from .._dtypes import (
     int64,
     uint64,
 )
+from .._info import __array_namespace_info__
 from .test_array_object import _check_op_array_scalar, BIG_INT
 
 import array_api_strict
@@ -144,6 +145,10 @@ def test_elementwise_function_device_persists(func_name, types, device):
             yield asarray(1., dtype=dtype, device=device)
 
     dtypes = _dtype_categories[types]
+
+    supported_dtypes = __array_namespace_info__().dtypes(device=device)
+    dtypes = [dt for dt in dtypes if dt in supported_dtypes]
+
     func = getattr(_elementwise_functions, func_name)
 
     for x in _array_vals(dtypes):
