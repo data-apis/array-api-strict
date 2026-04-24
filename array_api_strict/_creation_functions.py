@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from ._dtypes import DType, _all_dtypes, _np_dtype
+from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
 from ._devices import (
     CPU_DEVICE, Device, device_supports_dtype, get_default_dtypes,
     check_device as _check_device
@@ -239,12 +239,20 @@ def full(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
-    if dtype is None:
-        dtype = get_default_dtypes(device)["real floating"]
 
     if not isinstance(fill_value, bool | int | float | complex):
         msg = f"Expected Python scalar fill_value, got type {type(fill_value)}"
         raise TypeError(msg)
+
+    if dtype is None:
+        if type(fill_value) == bool:
+            dtype = xp_bool
+        else:
+            kind = {
+                int: "integral", float: "real floating", complex: "complex floating"
+            }[type(fill_value)]
+            dtype = get_default_dtypes(device)[kind]
+
     res = np.full(shape, fill_value, dtype=_np_dtype(dtype))
     if DType(res.dtype) not in _all_dtypes:
         # This will happen if the fill value is not something that NumPy

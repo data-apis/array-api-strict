@@ -226,11 +226,11 @@ def test_meshgrid_dtype_errors():
 
 
 def _full(a, *args, **kwds):
-    return full(a, fill_value=42, *args, **kwds)
+    return full(a, fill_value=42.0, *args, **kwds)
 
 
 def _full_like(a, *args, **kwds):
-    return full_like(a, fill_value=42, *args, **kwds)
+    return full_like(a, fill_value=42.0, *args, **kwds)
 
 
 class TestDefaultDType:
