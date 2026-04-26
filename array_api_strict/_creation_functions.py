@@ -193,6 +193,8 @@ def eye(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        dtype = get_default_dtypes(device)["real floating"]
 
     return Array._new(
         np.eye(n_rows, M=n_cols, k=k, dtype=_np_dtype(dtype)), device=device

@@ -273,15 +273,20 @@ class TestDefaultDType:
         with pytest.raises((TypeError, ValueError)):
             func(a, device=Device('F32_device'), dtype=float64)
 
+    def test_eye(self):
+        device = Device('F32_device')
+        a = eye(3, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+
+        with pytest.raises((TypeError, ValueError)):
+            eye(3, device=device, dtype=float64)
+
 
 # TODO:
 # def asarray(
 # def arange(
-# def eye(
 # def linspace(
-# def meshgrid(*arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> tuple[Array, ...]:
-# def tril(x: Array, /, *, k: int = 0) -> Array:
-# def triu(x: Array, /, *, k: int = 0) -> Array:
+
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
