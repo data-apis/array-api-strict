@@ -318,6 +318,11 @@ def linspace(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        if isinstance(start, complex) or isinstance(stop, complex):
+            dtype = get_default_dtypes(device)["complex floating"]
+        else:
+            dtype = get_default_dtypes(device)["real floating"]
 
     return Array._new(
         np.linspace(start, stop, num, dtype=_np_dtype(dtype), endpoint=endpoint),
