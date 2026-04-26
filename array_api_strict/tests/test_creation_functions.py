@@ -263,8 +263,17 @@ class TestDefaultDType:
         # >>> torch.ones_like(a, device='mps')
         # TypeError: Cannot convert a MPS Tensor to float64 dtype as the MPS framework
         # doesn't support float64.
-        with pytest.raises(TypeError):
+
+        # incompatible dtype inferred from `a.dtype`
+        with pytest.raises((TypeError, ValueError)):
             func(a, device=Device('F32_device'))
+
+        # `a.dtype` is compatible but the explicit dtype= argument is incompatible
+        a = ones(2, dtype=float32)
+        with pytest.raises((TypeError, ValueError)):
+            func(a, device=Device('F32_device'), dtype=float64)
+
+
 # TODO:
 # def asarray(
 # def arange(

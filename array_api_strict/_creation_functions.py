@@ -168,6 +168,8 @@ def empty_like(
     _check_device(device)
     if device is None:
         device = x.device
+    if dtype is None:
+        dtype = x.dtype
     _check_valid_dtype(dtype, device)
 
     return Array._new(np.empty_like(x._array, dtype=_np_dtype(dtype)), device=device)
@@ -279,6 +281,8 @@ def full_like(
     _check_device(device)
     if device is None:
         device = x.device
+    if dtype is None:
+        dtype = x.dtype
     _check_valid_dtype(dtype, device)
 
     if not isinstance(fill_value, bool | int | float | complex):
@@ -384,6 +388,8 @@ def ones_like(
     _check_device(device)
     if device is None:
         device = x.device
+    if dtype is None:
+        dtype = x.dtype
     _check_valid_dtype(dtype, device)
 
     return Array._new(np.ones_like(x._array, dtype=_np_dtype(dtype)), device=device)
@@ -451,6 +457,8 @@ def zeros_like(
     _check_device(device)
     if device is None:
         device = x.device
+    if dtype is None:
+        dtype = x.dtype
     _check_valid_dtype(dtype, device)
 
     return Array._new(np.zeros_like(x._array, dtype=_np_dtype(dtype)), device=device)
