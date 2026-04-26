@@ -127,6 +127,11 @@ def arange(
 
     _check_device(device)
     _check_valid_dtype(dtype, device)
+    if dtype is None:
+        if any(isinstance(x, float) for x in (start, stop, step)):
+            dtype = get_default_dtypes(device)["real floating"]
+        else:
+            dtype = get_default_dtypes(device)["integral"]
 
     return Array._new(
         np.arange(start, stop, step, dtype=_np_dtype(dtype)),

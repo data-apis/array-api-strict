@@ -281,7 +281,6 @@ class TestDefaultDType:
         with pytest.raises((TypeError, ValueError)):
             eye(3, device=device, dtype=float64)
 
-
     def test_linspace(self):
         device = Device('F32_device')
 
@@ -294,11 +293,23 @@ class TestDefaultDType:
         with pytest.raises((TypeError, ValueError)):
             linspace(1, 10, 11, device=device, dtype=float64)
 
+    def test_arange(self):
+        device = Device('F32_device')
 
+        a = arange(0, 10, 1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["integral"]
+
+        a = arange(0.0, 10, 1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+
+        with pytest.raises((TypeError, ValueError)):
+            arange(0, 10, 1, device=device, dtype=float64)
+
+        with pytest.raises((TypeError, ValueError)):
+            arange(0.0, 10, 1, device=device, dtype=float64)
 
 # TODO:
 # def asarray(
-# def arange(
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
