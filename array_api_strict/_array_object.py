@@ -40,7 +40,7 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
-from ._devices import CPU_DEVICE, Device
+from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
@@ -89,10 +89,15 @@ class Array:
             raise TypeError(
                 f"The array_api_strict namespace does not support the dtype '{x.dtype}'"
             )
-        obj._array = x
-        obj._dtype = _dtype
+
         if device is None:
             device = CPU_DEVICE
+        if not device_supports_dtype(device, _dtype):
+            raise ValueError(f"Device {device!r} does not support dtype={_dtype!r}.")
+
+        obj._array = x
+        obj._dtype = _dtype
+
         obj._device = device
         return obj
 
