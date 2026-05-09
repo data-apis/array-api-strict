@@ -960,6 +960,10 @@ class Array:
         other = value
         if isinstance(value, (bool, int, float, complex)):
             other = self._promote_scalar(value)
+        else:
+            if value.device != self.device:
+                raise ValueError(f"mismatched devices: {self.device = } != {value.device =}.")
+
         dt = _result_type(self.dtype, other.dtype)
         if dt != self.dtype:
             raise TypeError(f"mismatched dtypes: {self.dtype = } and {other.dtype = }")
