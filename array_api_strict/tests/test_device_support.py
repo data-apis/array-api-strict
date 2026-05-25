@@ -38,6 +38,18 @@ def test_fft_device_support_real(func_name):
     assert x.device == y.device
 
 
+@pytest.mark.parametrize("func_name", ("fftfreq", "rfftfreq"))
+def test_fft_default_dtype(func_name):
+    func = getattr(xp.fft, func_name)
+    device = xp.Device("F32_device")
+    res = func(3, device=device)
+    assert res.device == device
+    assert res.dtype == xp.__array_namespace_info__().default_dtypes(device=device)["real floating"]
+
+    with pytest.raises(ValueError):
+        func(3, device=device, dtype=xp.float64)
+
+
 class TestF32Device:
     @pytest.mark.parametrize("dtype_str", ["float64", "complex128"])
     def test_f64_raises(self, dtype_str):

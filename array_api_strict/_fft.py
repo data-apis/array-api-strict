@@ -4,7 +4,7 @@ from typing import Literal
 import numpy as np
 
 from ._array_object import Array
-from ._devices import ALL_DEVICES, Device
+from ._devices import ALL_DEVICES, Device, device_supports_dtype
 from ._data_type_functions import astype
 from ._dtypes import (
     DType,
@@ -14,6 +14,7 @@ from ._dtypes import (
     complex64,
     float32,
 )
+from ._info import __array_namespace_info__
 from ._flags import requires_extension
 
 
@@ -269,6 +270,15 @@ def fftfreq(
     np_result = np.fft.fftfreq(n, d=d)
     if dtype:
         np_result = np_result.astype(dtype._np_dtype)
+
+    if not device_supports_dtype(device, DType(np_result.dtype)):
+        if dtype:
+            # user input unsupported
+            raise ValueError(f"Device {device!r} does not support dtype={dtype!r}.")
+
+        dt = __array_namespace_info__().default_dtypes(device=device)["real floating"]
+        np_result = np_result.astype(dt._np_dtype)
+
     return Array._new(np_result, device=device)
 
 @requires_extension('fft')
@@ -293,6 +303,15 @@ def rfftfreq(
     np_result = np.fft.rfftfreq(n, d=d)
     if dtype:
         np_result = np_result.astype(dtype._np_dtype)
+
+    if not device_supports_dtype(device, DType(np_result.dtype)):
+        if dtype:
+            # user input unsupported
+            raise ValueError(f"Device {device!r} does not support dtype={dtype!r}.")
+
+        dt = __array_namespace_info__().default_dtypes(device=device)["real floating"]
+        np_result = np_result.astype(dt._np_dtype)
+
     return Array._new(np_result, device=device)
 
 @requires_extension('fft')
