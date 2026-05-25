@@ -7,7 +7,6 @@ from .._devices import ALL_DEVICES, CPU_DEVICE, Device
 from .._dtypes import _all_dtypes
 
 
-
 def test_where_with_scalars():
     x = xp.asarray([1, 2, 3, 1])
 
