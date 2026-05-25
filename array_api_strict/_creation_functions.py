@@ -106,6 +106,27 @@ def asarray(
         raise OverflowError("Integer out of bounds for array dtypes")
 
     res = np.array(obj, dtype=_np_dtype, copy=copy)
+
+    # numpy default dtype may differ; if so, adjust the dtype
+    if dtype is None and device is not None:
+        res_dtype = DType(res.dtype)
+        if not device_supports_dtype(device, res_dtype):
+            # find out the default dtype for the device
+            from ._data_type_functions import isdtype
+            if isdtype(res_dtype, "bool"):
+                targ_dtype = DType("bool")
+            elif isdtype(res_dtype, "integral"):
+                targ_dtype = get_default_dtypes(device)["integral"]
+            elif isdtype(res_dtype, "real floating"):
+                targ_dtype = get_default_dtypes(device)["real floating"]
+            elif isdtype(res_dtype, "complex floating"):
+                targ_dtype = get_default_dtypes(device)["complex floating"]
+            else:
+                raise ValueError(f"{res_dtype = } not understood.")
+            del isdtype
+
+            res = res.astype(targ_dtype._np_dtype)
+
     return Array._new(res, device=device)
 
 

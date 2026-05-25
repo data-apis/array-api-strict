@@ -22,7 +22,7 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import float32, float64
+from .._dtypes import float32, float64, bool as xp_bool
 from .._array_object import Array
 from .._devices import CPU_DEVICE, ALL_DEVICES, Device
 from .._info import __array_namespace_info__
@@ -250,6 +250,7 @@ class TestDefaultDType:
         device = Device('F32_device')
         b = func(a, device=device)
         assert b.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert b.device == device
 
     @pytest.mark.parametrize("func", [empty_like, zeros_like, ones_like, _full_like])
     def test_ones_like_etc_incorrect(self, func):
@@ -277,6 +278,7 @@ class TestDefaultDType:
         device = Device('F32_device')
         a = eye(3, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
 
         with pytest.raises((TypeError, ValueError)):
             eye(3, device=device, dtype=float64)
@@ -286,6 +288,7 @@ class TestDefaultDType:
 
         a = linspace(1, 10, 11, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
 
         a = linspace(1+0j, 10, 11, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["complex floating"]
@@ -298,9 +301,11 @@ class TestDefaultDType:
 
         a = arange(0, 10, 1, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["integral"]
+        assert a.device == device
 
         a = arange(0.0, 10, 1, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
 
         with pytest.raises((TypeError, ValueError)):
             arange(0, 10, 1, device=device, dtype=float64)
@@ -308,8 +313,47 @@ class TestDefaultDType:
         with pytest.raises((TypeError, ValueError)):
             arange(0.0, 10, 1, device=device, dtype=float64)
 
-# TODO:
-# def asarray(
+    def test_asarray(self):
+        device = Device('F32_device')
+
+        ### asarray(python_object)
+        for x in (True, [False,]):
+            arr = asarray(x, device=device)
+            assert arr.dtype == xp_bool
+            assert arr.device == device
+
+        for x in [1, [1,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['integral']
+            assert arr.device == device
+
+        for x in [1.0, [1.0,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['real floating']
+            assert arr.device == device
+
+        for x in [1j, [1j,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['complex floating']
+            assert arr.device == device
+
+        # asarray(python_object, dtype=unsupported_by_device)
+        with pytest.raises(ValueError, match="Device"):
+            asarray(1, dtype=float64, device=device)
+
+        ### asarray(array)
+
+        # compatible dtypes, device transfer
+        src = asarray(1, dtype=float32, device=Device('device1'))
+        dst = asarray(src, device=device)
+        assert dst.device == device
+        assert dst.dtype == float32
+
+        # incompatible dtypes, device transfer
+        src = asarray(1, dtype=float64, device=Device('device1'))
+
+        with pytest.raises(ValueError, match="Device"):
+            asarray(src, device=device)
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
