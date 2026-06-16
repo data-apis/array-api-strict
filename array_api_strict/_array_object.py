@@ -69,6 +69,35 @@ CPU_DEVICE = Device()
 ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
 
 
+class DLDeviceType(IntEnum):
+    kDLCPU = 1
+    kDLCUDA = 2
+
+
+_DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
+    CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
+    Device("device1"): (DLDeviceType.kDLCUDA, 0),
+    Device("device2"): (DLDeviceType.kDLCUDA, 1),
+}
+
+_DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
+    (int(device_type), device_id): logical_device
+    for logical_device, (device_type, device_id) in _DLPACK_DEVICE_FOR.items()
+}
+
+
+def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[int, int]:
+    return (int(device_type), device_id)
+
+
+def _device_from_dlpack_device(
+    device_type: IntEnum | int, device_id: int
+) -> Device:
+    return _DLPACK_DEVICE_TO_LOGICAL.get(
+        _normalize_dl_device(device_type, device_id), CPU_DEVICE
+    )
+
+
 class Array:
     """
     n-d array object for the array API namespace.
@@ -630,22 +659,40 @@ class Array:
                 raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
             return self._array.__dlpack__(stream=stream)
-        else:
-            kwargs = {'stream': stream}
-            if max_version is not _undef:
-                kwargs['max_version'] = max_version
-            if dl_device is not _undef:
-                kwargs['dl_device'] = dl_device
-            if copy is not _undef:
-                kwargs['copy'] = copy
-            return self._array.__dlpack__(**kwargs)
+
+        kwargs: dict[str, Any] = {'stream': stream}
+        self_dl_device = _normalize_dl_device(*_DLPACK_DEVICE_FOR[self._device])
+        cpu_dl_device = _normalize_dl_device(DLDeviceType.kDLCPU, 0)
+        numpy_dl_device: tuple[IntEnum, int] | None = None
+
+        if dl_device not in [_undef, None]:
+            requested = _normalize_dl_device(dl_device[0], dl_device[1])
+            if requested == self_dl_device:
+                pass
+            elif requested == cpu_dl_device and self_dl_device != cpu_dl_device:
+                if copy is False:
+                    raise BufferError(
+                        "Cannot export array to CPU without copying when copy=False"
+                    )
+                if copy is _undef:
+                    copy = True
+                numpy_dl_device = (DLDeviceType.kDLCPU, 0)
+            else:
+                raise BufferError("unsupported device requested")
+
+        if max_version is not _undef:
+            kwargs['max_version'] = max_version
+        if numpy_dl_device is not None:
+            kwargs['dl_device'] = numpy_dl_device
+        if copy is not _undef:
+            kwargs['copy'] = copy
+        return self._array.__dlpack__(**kwargs)
 
     def __dlpack_device__(self) -> tuple[IntEnum, int]:
         """
         Performs the operation __dlpack_device__.
         """
-        # Note: device support is required for this
-        return self._array.__dlpack_device__()
+        return _DLPACK_DEVICE_FOR[self._device]
 
     def __eq__(self, other: Array | complex, /) -> Array:  # type: ignore[override]
         """

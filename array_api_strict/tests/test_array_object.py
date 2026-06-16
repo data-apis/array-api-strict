@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from .. import ones, arange, reshape, asarray, result_type, all, equal, stack
-from .._array_object import Array, CPU_DEVICE, Device
+from .._array_object import Array, CPU_DEVICE, Device, DLDeviceType
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
@@ -748,6 +748,40 @@ def test_dlpack_2023_12(api_version):
         a.__dlpack__(copy=False)
         a.__dlpack__(copy=True)
         a.__dlpack__(copy=None)
+
+@pytest.mark.parametrize(
+    ("device", "expected"),
+    [
+        (CPU_DEVICE, (DLDeviceType.kDLCPU, 0)),
+        (Device("device1"), (DLDeviceType.kDLCUDA, 0)),
+        (Device("device2"), (DLDeviceType.kDLCUDA, 1)),
+    ],
+)
+def test_dlpack_device_numbers(device, expected):
+    a = asarray([1, 2, 3], device=device)
+    assert a.__dlpack_device__() == expected
+
+
+@pytest.mark.parametrize("device", [CPU_DEVICE, Device("device1"), Device("device2")])
+def test_dlpack_export_with_matching_dl_device(device):
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        pytest.skip("dl_device argument requires NumPy >= 2.1.0")
+    set_array_api_strict_flags(api_version="2023.12")
+
+    a = asarray([1, 2, 3], device=device)
+    a.__dlpack__(dl_device=a.__dlpack_device__())
+
+
+@pytest.mark.parametrize("device", [Device("device1"), Device("device2")])
+def test_dlpack_cross_device_export_buffer_error(device):
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        pytest.skip("dl_device argument requires NumPy >= 2.1.0")
+    set_array_api_strict_flags(api_version="2023.12")
+
+    a = asarray([1, 2, 3], device=device)
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=(DLDeviceType.kDLCPU, 0), copy=False)
+
 
 def test_pickle():
     """Check that arrays are pickleable (despite raising on `__new__`)"""
