@@ -247,3 +247,13 @@ def test_from_dlpack_default_device():
     y = from_dlpack(x)
     z = from_dlpack(np.asarray([1, 2, 3]))
     assert x.device == y.device == z.device == CPU_DEVICE
+
+
+@pytest.mark.parametrize(
+    "device",
+    [Device("device1"), Device("device2")],
+)
+def test_from_dlpack_preserves_device(device):
+    x = asarray([1, 2, 3], device=device)
+    y = from_dlpack(x)
+    assert y.device == device

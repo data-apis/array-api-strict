@@ -216,6 +216,11 @@ def from_dlpack(
         _check_device(device)
     else:
         device = None
+        if hasattr(x, "__dlpack_device__"):
+            from ._array_object import _device_from_dlpack_device
+
+            dl_type, dl_id = x.__dlpack_device__()
+            device = _device_from_dlpack_device(dl_type, dl_id)
     if copy in [_undef, None]:
         # numpy 1.26 does not have the copy= arg
         return Array._new(np.from_dlpack(x), device=device)
