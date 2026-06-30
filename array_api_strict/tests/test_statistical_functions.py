@@ -55,3 +55,19 @@ def test_mean_complex():
     with pytest.raises(TypeError):
         xp.mean(xp.arange(3))
 
+
+def test_cumsum_device():
+    x = xp.arange(3, device=xp.Device('device1'))
+    y = xp.cumulative_sum(x, include_initial=True)
+    expected = xp.asarray([0, 0, 1, 3], device=x.device)
+    assert y.device == expected.device
+    assert xp.all(y == expected)
+
+
+def test_cumprod_device():
+    x = xp.arange(1, 4, device=xp.Device('device1'))
+    y = xp.cumulative_prod(x, include_initial=True)
+    expected = xp.asarray([1, 1, 2, 6], device=x.device)
+    assert y.device == expected.device
+    assert xp.all(y == expected)
+
