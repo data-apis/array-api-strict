@@ -39,7 +39,10 @@ def cumulative_sum(
     if include_initial:
         if axis < 0:
             axis += x.ndim
-        x = concat([zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
+        x = concat(
+            [zeros(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype, device=x.device), x],
+            axis=axis
+        )
     return Array._new(np.cumsum(x._array, axis=axis, dtype=_np_dtype(dtype)), device=x.device)
 
 
@@ -66,7 +69,10 @@ def cumulative_prod(
     if include_initial:
         if axis < 0:
             axis += x.ndim
-        x = concat([ones(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype), x], axis=axis)
+        x = concat(
+            [ones(x.shape[:axis] + (1,) + x.shape[axis + 1:], dtype=x.dtype, device=x.device), x],
+            axis=axis
+        )
     return Array._new(np.cumprod(x._array, axis=axis, dtype=_np_dtype(dtype)), device=x.device)
 
 
