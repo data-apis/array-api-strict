@@ -238,12 +238,12 @@
 <h1>Releasing<a class="headerlink" href="#releasing" title="Link to this heading">¶</a></h1>
 <p>To release array-api-strict:</p>
 <ul class="contains-task-list">
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> Create a release branch and make a PR on GitHub.</p></li>
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> Update <code class="docutils literal notranslate"><span class="pre">changelog.md</span></code> with the changes for the release.</p></li>
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> Make sure the CI is passing on the release branch PR. Also double check that
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">Create a release branch and make a PR on GitHub.</p></li>
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">Update <code class="docutils literal notranslate"><span class="pre">changelog.md</span></code> with the changes for the release.</p></li>
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">Make sure the CI is passing on the release branch PR. Also double check that
 you have properly pulled <code class="docutils literal notranslate"><span class="pre">main</span></code> and merged it into the release branch so
 that the branch contains all the necessary changes for the release.</p></li>
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> When you are ready to make the release, create a tag with the release number</p>
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">When you are ready to make the release, create a tag with the release number</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">tag</span> <span class="o">-</span><span class="n">a</span> <span class="mf">2.2</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;array-api-strict 2.2&quot;</span>
 </pre></div>
 </div>
@@ -258,8 +258,8 @@ goes wrong, you may need to delete the tag from GitHub and try again.</p>
 in the package metadata is all automatically computed from the tag, so it is
 not necessary to update the version anywhere else.</p>
 </li>
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> Once the release is published, you can merge the PR.</p></li>
-<li class="task-list-item enabled"><p><input class="task-list-item-checkbox"  type="checkbox"> The conda-forge bot will automatically send a PR to the
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">Once the release is published, you can merge the PR.</p></li>
+<li class="task-list-item enabled"><p><input class="task-list-item-checkbox" type="checkbox">The conda-forge bot will automatically send a PR to the
 <a class="reference external" href="https://github.com/conda-forge/array-api-strict-feedstock">array-api-strict-feedstock</a>
 updating the version, which you should merge.</p></li>
 </ul>
