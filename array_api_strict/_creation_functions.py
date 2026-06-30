@@ -247,7 +247,7 @@ def from_dlpack(
     else:
         device = None
         if hasattr(x, "__dlpack_device__"):
-            from ._array_object import _device_from_dlpack_device
+            from ._devices import _device_from_dlpack_device
 
             dl_type, dl_id = x.__dlpack_device__()
             device = _device_from_dlpack_device(dl_type, dl_id)
