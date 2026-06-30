@@ -220,6 +220,14 @@ def test_setitem_invalid_promotions():
         a[0] = asarray(3.5j, dtype=complex128)
 
 
+def test_setitem_device_transfer():
+    a = arange(3)
+    b = arange(4, 1, -1, device=Device('device1'))
+
+    with pytest.raises(ValueError):
+        a[:] = b[:]
+
+
 def test_promoted_scalar_inherits_device():
     device1 = Device("device1")
     x = asarray([1., 2, 3], device=device1)
