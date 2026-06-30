@@ -20,7 +20,7 @@ import sys
 from collections.abc import Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Final, Literal, SupportsIndex, Callable
+from typing import Any, Literal, SupportsIndex, Callable
 
 import numpy as np
 import numpy.typing as npt
@@ -40,62 +40,9 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
+from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
-
-
-class Device:
-    _device: Final[str]
-    __slots__ = ("_device", "__weakref__")
-
-    def __init__(self, device: str = "CPU_DEVICE"):
-        if device not in ("CPU_DEVICE", "device1", "device2"):
-            raise ValueError(f"The device '{device}' is not a valid choice.")
-        self._device = device
-
-    def __repr__(self) -> str:
-        return f"array_api_strict.Device('{self._device}')"
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Device):
-            return False
-        return self._device == other._device
-
-    def __hash__(self) -> int:
-        return hash(("Device", self._device))
-
-
-CPU_DEVICE = Device()
-ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"))
-
-
-class DLDeviceType(IntEnum):
-    kDLCPU = 1
-    kDLCUDA = 2
-
-
-_DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
-    CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
-    Device("device1"): (DLDeviceType.kDLCUDA, 0),
-    Device("device2"): (DLDeviceType.kDLCUDA, 1),
-}
-
-_DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
-    (int(device_type), device_id): logical_device
-    for logical_device, (device_type, device_id) in _DLPACK_DEVICE_FOR.items()
-}
-
-
-def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[int, int]:
-    return (int(device_type), device_id)
-
-
-def _device_from_dlpack_device(
-    device_type: IntEnum | int, device_id: int
-) -> Device:
-    return _DLPACK_DEVICE_TO_LOGICAL.get(
-        _normalize_dl_device(device_type, device_id), CPU_DEVICE
-    )
 
 
 class Array:
@@ -142,10 +89,15 @@ class Array:
             raise TypeError(
                 f"The array_api_strict namespace does not support the dtype '{x.dtype}'"
             )
-        obj._array = x
-        obj._dtype = _dtype
+
         if device is None:
             device = CPU_DEVICE
+        if not device_supports_dtype(device, _dtype):
+            raise ValueError(f"Device {device!r} does not support dtype={_dtype!r}.")
+
+        obj._array = x
+        obj._dtype = _dtype
+
         obj._device = device
         return obj
 
