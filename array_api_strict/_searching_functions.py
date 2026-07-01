@@ -120,3 +120,25 @@ def where(condition: Array, x1: Array | complex, x2: Array | complex, /) -> Arra
 
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.where(condition._array, x1._array, x2._array), device=x1.device)
+
+
+def top_k(a, k, /, axis=-1, *, mode="largest"):
+    if k <= 0:
+        raise ValueError(f'k(={k}) provided must be positive.')
+
+    positive_axis = axis if axis > 0 else axis % arr.ndim
+
+    slice_start = (np.s_[:],) * positive_axis
+    if largest:
+        indices_array = np.argpartition(arr, -k, axis=axis)
+        slice = slice_start + (np.s_[-k:],)
+        topk_indices = indices_array[slice]
+    else:
+        indices_array = np.argpartition(arr, k-1, axis=axis)
+        slice = slice_start + (np.s_[:k],)
+        topk_indices = indices_array[slice]
+
+    topk_values = np.take_along_axis(arr, topk_indices, axis=axis)
+
+    return topk_values, topk_indices
+
