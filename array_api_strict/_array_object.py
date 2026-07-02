@@ -429,7 +429,7 @@ class Array:
                 isinstance(i, SupportsIndex)  # i.e. ints
                 or isinstance(i, slice)
                 or i == Ellipsis
-                or i is None
+                or (op == "getitem" and i is None) # `None` disallowed in setitem
                 or isinstance(i, Array)
                 or isinstance(i, np.ndarray)
             ):
