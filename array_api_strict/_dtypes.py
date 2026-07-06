@@ -11,11 +11,11 @@ import numpy.typing as npt
 
 class DType:
     _np_dtype: Final[np.dtype[Any]]
-    _canonic_name: Final[Any]
-    __slots__ = ("_np_dtype", "_canonic_name", "__weakref__")
+    _canonical_name: Final[Any]
+    __slots__ = ("_np_dtype", "_canonical_name", "__weakref__")
 
     def __init__(self, np_dtype: npt.DTypeLike):
-        self._canonic_name = np_dtype
+        self._canonical_name = np_dtype
         self._np_dtype = np.dtype(np_dtype)
 
     def __repr__(self) -> str:

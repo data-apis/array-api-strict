@@ -8,7 +8,7 @@ from ._dtypes import (
     _complex_floating_dtypes, _numeric_dtypes
 )
 
-_ALL_DEVICE_NAMES = ("CPU_DEVICE", "device1", "device2", "F32_device")
+_ALL_DEVICE_NAMES = ("CPU_DEVICE", "device1", "device2", "no_float64")
 
 class Device:
     _device: Final[str]
@@ -30,15 +30,11 @@ class Device:
     def __hash__(self) -> int:
         return hash(("Device", self._device))
 
-    def _supported_dtypes(self) -> list[DType]:
-        # XXX useful? Unused ATM
-        return list(dt for dt in _all_dtypes if device_supports_dtype(self, dt))
-
 
 CPU_DEVICE = Device()
-_F32_DEVICE = Device("F32_device")
+NO_FLOAT64_DEVICE = Device("no_float64")
 
-ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"), _F32_DEVICE)
+ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"), NO_FLOAT64_DEVICE)
 
 class DLDeviceType(IntEnum):
     kDLCPU = 1
@@ -50,7 +46,7 @@ _DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
     CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
     Device("device1"): (DLDeviceType.kDLCUDA, 0),
     Device("device2"): (DLDeviceType.kDLCUDA, 1),
-    _F32_DEVICE: (DLDeviceType.kDLMETAL, 0),
+    NO_FLOAT64_DEVICE: (DLDeviceType.kDLMETAL, 0),
 }
 
 _DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
@@ -81,8 +77,8 @@ def check_device(device: Device | None) -> None:
 
 # Helpers for device-specific dtype support
 
-def get_default_dtypes(device: Device | None = None) -> dict[str, Device]:
-    if device == _F32_DEVICE:
+def get_default_dtypes(device: Device | None = None) -> dict[str, DType]:
+    if device == NO_FLOAT64_DEVICE:
         return {
             "real floating": float32,
             "complex floating": complex64,
@@ -100,8 +96,8 @@ def get_default_dtypes(device: Device | None = None) -> dict[str, Device]:
 
 def device_supports_dtype(device: Device | None, dtype: DType |None) -> bool:
     """True if `device` supports `dtype`, False otherwise."""
-    # special-case F32_device
-    if device == _F32_DEVICE:
+    # Device("no_float64") supports all dtypes except float64 and complex128
+    if device == NO_FLOAT64_DEVICE:
         return dtype not in (float64, complex128)
 
     # All other devices support all dtypes
@@ -110,7 +106,7 @@ def device_supports_dtype(device: Device | None, dtype: DType |None) -> bool:
 
 def _map_supported(dtypes: list[DType], device: Device) -> dict[str, DType]:
     return {
-        dt._canonic_name: dt
+        dt._canonical_name: dt
         for dt in dtypes
         if device_supports_dtype(device, dt)
     }

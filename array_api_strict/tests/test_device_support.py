@@ -41,7 +41,7 @@ def test_fft_device_support_real(func_name):
 @pytest.mark.parametrize("func_name", ("fftfreq", "rfftfreq"))
 def test_fft_default_dtype(func_name):
     func = getattr(xp.fft, func_name)
-    device = xp.Device("F32_device")
+    device = xp.Device("no_float64")
     res = func(3, device=device)
     assert res.device == device
     assert res.dtype == xp.__array_namespace_info__().default_dtypes(device=device)["real floating"]
@@ -53,23 +53,23 @@ def test_fft_default_dtype(func_name):
 class TestF32Device:
     @pytest.mark.parametrize("dtype_str", ["float64", "complex128"])
     def test_f64_raises(self, dtype_str):
-        f32_device = xp.Device("F32_device")
+        f32_only_device = xp.Device("no_float64")
         dtype = getattr(xp, dtype_str)
         with pytest.raises(ValueError):
-            xp.arange(3, device=f32_device, dtype=dtype)
+            xp.arange(3, device=f32_only_device, dtype=dtype)
 
     def test_info_no_f64(self):
-        f32_device = xp.Device("F32_device")
+        f32_only_device = xp.Device("no_float64")
 
         info = xp.__array_namespace_info__()
-        all_dtypes = info.dtypes(device=f32_device)
+        all_dtypes = info.dtypes(device=f32_only_device)
         assert "float64" not in all_dtypes
         assert "complex128" not in all_dtypes
 
     def test_info_default_dtypes(self):
-        f32_device = xp.Device("F32_device")
+        f32_only_device = xp.Device("no_float64")
         info = xp.__array_namespace_info__()
-        defaults = info.default_dtypes(device=f32_device)
+        defaults = info.default_dtypes(device=f32_only_device)
         assert defaults["real floating"] == xp.float32
         assert defaults["complex floating"] == xp.complex64
 

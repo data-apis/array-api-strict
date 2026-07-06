@@ -247,7 +247,7 @@ class TestDefaultDType:
     def test_ones_like_etc_correct(self, func):
         # float32 is preserved
         a = ones(2, dtype=float32)
-        device = Device('F32_device')
+        device = Device('no_float64')
         b = func(a, device=device)
         assert b.dtype == self.info.default_dtypes(device=device)["real floating"]
         assert b.device == device
@@ -267,15 +267,15 @@ class TestDefaultDType:
 
         # incompatible dtype inferred from `a.dtype`
         with pytest.raises((TypeError, ValueError)):
-            func(a, device=Device('F32_device'))
+            func(a, device=Device('no_float64'))
 
         # `a.dtype` is compatible but the explicit dtype= argument is incompatible
         a = ones(2, dtype=float32)
         with pytest.raises((TypeError, ValueError)):
-            func(a, device=Device('F32_device'), dtype=float64)
+            func(a, device=Device('no_float64'), dtype=float64)
 
     def test_eye(self):
-        device = Device('F32_device')
+        device = Device('no_float64')
         a = eye(3, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
         assert a.device == device
@@ -284,7 +284,7 @@ class TestDefaultDType:
             eye(3, device=device, dtype=float64)
 
     def test_linspace(self):
-        device = Device('F32_device')
+        device = Device('no_float64')
 
         a = linspace(1, 10, 11, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
@@ -297,7 +297,7 @@ class TestDefaultDType:
             linspace(1, 10, 11, device=device, dtype=float64)
 
     def test_arange(self):
-        device = Device('F32_device')
+        device = Device('no_float64')
 
         a = arange(0, 10, 1, device=device)
         assert a.dtype == self.info.default_dtypes(device=device)["integral"]
@@ -314,7 +314,7 @@ class TestDefaultDType:
             arange(0.0, 10, 1, device=device, dtype=float64)
 
     def test_asarray(self):
-        device = Device('F32_device')
+        device = Device('no_float64')
 
         ### asarray(python_object)
         for x in (True, [False,]):
