@@ -111,7 +111,9 @@ def asarray(
     if dtype is None and device is not None:
         res_dtype = DType(res.dtype)
         if not device_supports_dtype(device, res_dtype):
-            # find out the default dtype for the device
+            # The dtype selected by Numpy might not be the default dtype
+            # on this device. If the dtype is not supported by the device we
+            # try to find one that is, aka the default dtype of this device.
             from ._data_type_functions import isdtype
             if isdtype(res_dtype, "bool"):
                 targ_dtype = DType("bool")
