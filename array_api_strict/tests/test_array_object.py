@@ -9,7 +9,8 @@ import numpy as np
 import pytest
 
 from .. import ones, arange, reshape, asarray, result_type, all, equal, stack
-from .._array_object import Array, CPU_DEVICE, Device, DLDeviceType
+from .._array_object import Array
+from .._devices import CPU_DEVICE, Device, DLDeviceType
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,

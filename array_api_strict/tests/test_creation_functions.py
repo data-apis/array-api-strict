@@ -22,8 +22,10 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import float32, float64
-from .._array_object import Array, CPU_DEVICE, Device
+from .._dtypes import float32, float64, complex64, bool as xp_bool
+from .._array_object import Array
+from .._devices import CPU_DEVICE, ALL_DEVICES, Device
+from .._info import __array_namespace_info__
 from .._flags import set_array_api_strict_flags
 
 def test_asarray_errors():
@@ -212,6 +214,7 @@ def test_zeros_like_errors():
     assert_raises(ValueError, lambda: zeros_like(asarray(1), dtype=int))
     assert_raises(ValueError, lambda: zeros_like(asarray(1), dtype="i"))
 
+
 def test_meshgrid_dtype_errors():
     # Doesn't raise
     meshgrid()
@@ -219,6 +222,150 @@ def test_meshgrid_dtype_errors():
     meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float32))
 
     assert_raises(ValueError, lambda: meshgrid(asarray([1.], dtype=float32), asarray([1.], dtype=float64)))
+
+
+
+def _full(a, *args, **kwds):
+    return full(a, fill_value=42.0, *args, **kwds)
+
+
+def _full_like(a, *args, **kwds):
+    return full_like(a, fill_value=42.0, *args, **kwds)
+
+
+class TestDefaultDType:
+
+    info = __array_namespace_info__()
+
+    @pytest.mark.parametrize("device", ALL_DEVICES)
+    @pytest.mark.parametrize("func", [empty, zeros, ones, _full])
+    def test_ones_etc(self, func, device):
+        a = func(1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+
+    @pytest.mark.parametrize("func", [empty_like, zeros_like, ones_like, _full_like])
+    def test_ones_like_etc_correct(self, func):
+        # float32 is preserved
+        a = ones(2, dtype=float32)
+        device = Device('no_float64')
+        b = func(a, device=device)
+        assert b.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert b.device == device
+
+    @pytest.mark.parametrize("func", [empty_like, zeros_like, ones_like, _full_like])
+    def test_ones_like_etc_incorrect(self, func):
+        a = ones(2)
+        assert a.dtype == float64
+        assert a.device == Device()
+
+        # XXX: a.dtype not supported by the device: ValueError or TypeError?
+
+        # >>> a = torch.ones(3, dtype=torch.float64, device='cpu')
+        # >>> torch.ones_like(a, device='mps')
+        # TypeError: Cannot convert a MPS Tensor to float64 dtype as the MPS framework
+        # doesn't support float64.
+
+        # incompatible dtype inferred from `a.dtype`
+        with pytest.raises((TypeError, ValueError)):
+            func(a, device=Device('no_float64'))
+
+        # `a.dtype` is compatible but the explicit dtype= argument is incompatible
+        a = ones(2, dtype=float32)
+        with pytest.raises((TypeError, ValueError)):
+            func(a, device=Device('no_float64'), dtype=float64)
+
+    def test_eye(self):
+        device = Device('no_float64')
+        a = eye(3, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
+
+        with pytest.raises((TypeError, ValueError)):
+            eye(3, device=device, dtype=float64)
+
+    def test_linspace(self):
+        device = Device('no_float64')
+
+        a = linspace(1, 10, 11, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
+
+        a = linspace(1+0j, 10, 11, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["complex floating"]
+
+        with pytest.raises((TypeError, ValueError)):
+            linspace(1, 10, 11, device=device, dtype=float64)
+
+    def test_arange(self):
+        device = Device('no_float64')
+
+        a = arange(0, 10, 1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["integral"]
+        assert a.device == device
+
+        a = arange(0.0, 10, 1, device=device)
+        assert a.dtype == self.info.default_dtypes(device=device)["real floating"]
+        assert a.device == device
+
+        with pytest.raises((TypeError, ValueError)):
+            arange(0, 10, 1, device=device, dtype=float64)
+
+        with pytest.raises((TypeError, ValueError)):
+            arange(0.0, 10, 1, device=device, dtype=float64)
+
+    def test_asarray(self):
+        device = Device('no_float64')
+
+        ### asarray(python_object)
+        for x in (True, [False,]):
+            arr = asarray(x, device=device)
+            assert arr.dtype == xp_bool
+            assert arr.device == device
+
+        for x in [1, [1,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['integral']
+            assert arr.device == device
+
+        for x in [1.0, [1.0,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['real floating']
+            assert arr.device == device
+
+        for x in [1j, [1j,]]:
+            arr = asarray(x, device=device)
+            assert arr.dtype == self.info.default_dtypes(device=device)['complex floating']
+            assert arr.device == device
+
+        # asarray(python_object, dtype=unsupported_by_device)
+        with pytest.raises(ValueError, match="Device"):
+            asarray(1, dtype=float64, device=device)
+
+        ### asarray(array)
+
+        # compatible dtypes, device transfer
+        src = asarray(1, dtype=float32, device=Device('device1'))
+        dst = asarray(src, device=device)
+        assert dst.device == device
+        assert dst.dtype == float32
+
+        # incompatible dtypes, device transfer
+        src = asarray(1, dtype=float64, device=Device('device1'))
+
+        with pytest.raises(ValueError, match="Device"):
+            asarray(src, device=device)
+
+
+def test_asarray_device_2():
+    # device2 allows float64 but defaults to float32
+    x = asarray([1.0], device=Device('device2'))
+    assert x.dtype == float32
+
+    x = asarray([1j], device=Device('device2'))
+    assert x.dtype == complex64
+
+    y = asarray([1.0], device=Device('device2'), dtype=float64)
+    assert y.dtype == float64
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
