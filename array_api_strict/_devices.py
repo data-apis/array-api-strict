@@ -78,6 +78,15 @@ def check_device(device: Device | None) -> None:
 
 def get_default_dtypes(device: Device | None = None) -> dict[str, DType]:
     if device == NO_FLOAT64_DEVICE:
+        # mimic an MPS device which does not have float64 at all
+        return {
+            "real floating": float32,
+            "complex floating": complex64,
+            "integral": int64,
+            "indexing": int64,
+        }
+    elif device == Device('device2'):
+        # mimic a torch CPU device: support float64 but default to float32
         return {
             "real floating": float32,
             "complex floating": complex64,

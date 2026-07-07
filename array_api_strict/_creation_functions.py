@@ -110,23 +110,22 @@ def asarray(
     # numpy default dtype may differ; if so, adjust the dtype
     if dtype is None and device is not None:
         res_dtype = DType(res.dtype)
-        if not device_supports_dtype(device, res_dtype):
-            # The dtype selected by Numpy might not be the default dtype
-            # on this device. If the dtype is not supported by the device we
-            # try to find one that is, aka the default dtype of this device.
-            from ._data_type_functions import isdtype
-            if isdtype(res_dtype, "bool"):
-                target_dtype = DType("bool")
-            elif isdtype(res_dtype, "integral"):
-                target_dtype = get_default_dtypes(device)["integral"]
-            elif isdtype(res_dtype, "real floating"):
-                target_dtype = get_default_dtypes(device)["real floating"]
-            elif isdtype(res_dtype, "complex floating"):
-                target_dtype = get_default_dtypes(device)["complex floating"]
-            else:
-                raise ValueError(f"{res_dtype = } not understood.")
+        # The dtype selected by Numpy might not be the default dtype
+        # on this device. We thus find the default dtype for the dtype "kind", and
+        # cast to the device-appropriate default.
+        from ._data_type_functions import isdtype
+        if isdtype(res_dtype, "bool"):
+            target_dtype = DType("bool")
+        elif isdtype(res_dtype, "integral"):
+            target_dtype = get_default_dtypes(device)["integral"]
+        elif isdtype(res_dtype, "real floating"):
+            target_dtype = get_default_dtypes(device)["real floating"]
+        elif isdtype(res_dtype, "complex floating"):
+            target_dtype = get_default_dtypes(device)["complex floating"]
+        else:
+            raise ValueError(f"{res_dtype = } not understood.")
 
-            res = res.astype(target_dtype._np_dtype)
+        res = res.astype(target_dtype._np_dtype)
 
     return Array._new(res, device=device)
 

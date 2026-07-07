@@ -22,7 +22,7 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import float32, float64, bool as xp_bool
+from .._dtypes import float32, float64, complex64, bool as xp_bool
 from .._array_object import Array
 from .._devices import CPU_DEVICE, ALL_DEVICES, Device
 from .._info import __array_namespace_info__
@@ -354,6 +354,18 @@ class TestDefaultDType:
 
         with pytest.raises(ValueError, match="Device"):
             asarray(src, device=device)
+
+
+def test_asarray_device_2():
+    # device2 allows float64 but defaults to float32
+    x = asarray([1.0], device=Device('device2'))
+    assert x.dtype == float32
+
+    x = asarray([1j], device=Device('device2'))
+    assert x.dtype == complex64
+
+    y = asarray([1.0], device=Device('device2'), dtype=float64)
+    assert y.dtype == float64
 
 
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
