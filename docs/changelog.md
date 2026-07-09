@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.6 (2026-07-09)
+
+- `__setitem__` method of array objects got stricter:
+
+   - `__setitem__` method now disallows device transfers: if the right-hand side
+     argument is an array on a device which differs from the device of the left-hand
+     argument, an error is raised. Note that this change follows
+     the draft of a future Array API standard revision, see
+     [gh-1005](https://github.com/data-apis/array-api/pull/1005) for discussion.
+   - `None` is no longer allowed as an indexing key. 
+
+- Array objects expose a DLPack device number, via their `__dlpack_device__` method.
+- `from_dlpack` function now supports `copy=` argument.
+
+- `Device` objects are now allowed to only support a subset of data types, and can
+  have a device-dependent default data types. Note that this enhancement follows
+  the draft of a future Array API standard revision, see
+  [gh-1005](https://github.com/data-apis/array-api/pull/1005) for discussion.
+  - A new device object, `Device("no_float64")` was added which only supports
+    single-precision float and complex data types; this device mimics the behavior
+    of a "metal"/MPS device which does not support double precision floats.
+    Attempting to create an array with float64 or complex128 data type on this device
+    raises an error.
+  - The existing `Device("device2")` object has been modified: it supports float64 data
+    type but defaults to float32 and complex64:
+    `asarray([1.0], device=Device("device2")).dtype` is `float32`.
+
+
+### Contributors
+
+The following users contributed to this release:
+
+Evgeni Burovski,
+Lucas Colley,
+Ralf Gommers,
+Tim Head.
+
+
 ## 2.5 (2026-02-23)
 
 This release targets the 2025.12 revision of the Array API standard, and supports
