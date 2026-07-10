@@ -62,8 +62,9 @@ def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[in
 def _device_from_dlpack_device(
     device_type: IntEnum | int, device_id: int
 ) -> Device:
-    # NB: if the (device_type, device_id) pair not known, raise
-    return _DLPACK_DEVICE_TO_LOGICAL[_normalize_dl_device(device_type, device_id)]
+    return _DLPACK_DEVICE_TO_LOGICAL.get(
+        _normalize_dl_device(device_type, device_id), CPU_DEVICE
+    )
 
 
 def check_device(device: Device | None) -> None:
