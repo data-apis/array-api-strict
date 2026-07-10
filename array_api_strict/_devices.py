@@ -39,14 +39,12 @@ ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"), NO_FLOAT64_DEVI
 class DLDeviceType(IntEnum):
     kDLCPU = 1
     kDLCUDA = 2
-    kDLMETAL = 8
 
 
 _DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
     CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
     Device("device1"): (DLDeviceType.kDLCUDA, 0),
     Device("device2"): (DLDeviceType.kDLCUDA, 1),
-    NO_FLOAT64_DEVICE: (DLDeviceType.kDLMETAL, 0),
 }
 
 _DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
