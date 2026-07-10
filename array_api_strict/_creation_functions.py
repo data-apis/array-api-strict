@@ -107,8 +107,12 @@ def asarray(
 
     res = np.array(obj, dtype=_np_dtype, copy=copy)
 
-    # numpy default dtype may differ; if so, adjust the dtype
-    if dtype is None and device is not None:
+    # numpy default dtype may differ; if so, adjust the dtype---
+    # unless `obj` is already an array, potentially from some other library.
+    # In the latter case, `obj.dtype` is a thing, numpy has already done the
+    # conversion and `res.dtype` is the numpy analog of `obj.dtype`
+    # (if numpy failed to convert `obj`, it has already raised an exception).
+    if dtype is None and device is not None and not hasattr(obj, "dtype"):
         res_dtype = DType(res.dtype)
         # The dtype selected by Numpy might not be the default dtype
         # on this device. We thus find the default dtype for the dtype "kind", and
