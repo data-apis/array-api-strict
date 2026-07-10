@@ -40,10 +40,7 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
-from ._devices import (
-    CPU_DEVICE, Device, device_supports_dtype, _normalize_dl_device, _DLPACK_DEVICE_FOR,
-    DLDeviceType
-)
+from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
@@ -614,31 +611,12 @@ class Array:
                 raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
             return self._array.__dlpack__(stream=stream)
-
-        kwargs: dict[str, Any] = {'stream': stream}
-        self_dl_device = _normalize_dl_device(*_DLPACK_DEVICE_FOR[self._device])
-        cpu_dl_device = _normalize_dl_device(DLDeviceType.kDLCPU, 0)
-        numpy_dl_device: tuple[IntEnum, int] | None = None
-
-        if dl_device not in [_undef, None]:
-            requested = _normalize_dl_device(dl_device[0], dl_device[1])
-            if requested == self_dl_device:
-                pass
-            elif requested == cpu_dl_device and self_dl_device != cpu_dl_device:
-                if copy is False:
-                    raise BufferError(
-                        "Cannot export array to CPU without copying when copy=False"
-                    )
-                if copy is _undef:
-                    copy = True
-                numpy_dl_device = (DLDeviceType.kDLCPU, 0)
-            else:
-                raise BufferError("unsupported device requested")
-
-        if max_version is not _undef:
-            kwargs['max_version'] = max_version
-        if numpy_dl_device is not None:
-            kwargs['dl_device'] = numpy_dl_device
+        else:
+            kwargs = {'stream': stream}
+            if max_version is not _undef:
+                kwargs['max_version'] = max_version
+            if dl_device is not _undef:
+                kwargs['dl_device'] = dl_device
         if copy is not _undef:
             kwargs['copy'] = copy
         return self._array.__dlpack__(**kwargs)
@@ -647,7 +625,8 @@ class Array:
         """
         Performs the operation __dlpack_device__.
         """
-        return _DLPACK_DEVICE_FOR[self._device]
+        # Note: device support is required for this
+        return self._array.__dlpack_device__()
 
     def __eq__(self, other: Array | complex, /) -> Array:  # type: ignore[override]
         """
