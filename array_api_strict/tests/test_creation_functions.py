@@ -368,6 +368,13 @@ def test_asarray_device_2():
     assert y.dtype == float64
 
 
+def test_asarray_device_1():
+    # regression test for https://github.com/data-apis/array-api-strict/issues/222
+    x = np.ones(3, dtype=np.float32)
+    y = asarray(x, device=Device('device1'))
+    assert y.dtype == float32
+
+
 @pytest.mark.parametrize("api_version", ['2021.12', '2022.12', '2023.12'])
 def from_dlpack_2023_12(api_version):
     if api_version != '2022.12':
