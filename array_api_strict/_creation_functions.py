@@ -246,7 +246,6 @@ def from_dlpack(
         if copy is not _undef:
             raise ValueError("The copy argument to from_dlpack requires at least version 2023.12 of the array API")
 
-    # Going to wait for upstream numpy support
     if device is not _undef:
         _check_device(device)
     else:
