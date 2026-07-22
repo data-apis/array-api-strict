@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, NamedTuple
 
 import numpy as np
 
@@ -7,6 +7,11 @@ from ._dtypes import _real_numeric_dtypes, _result_type
 from ._dtypes import bool as _bool
 from ._flags import requires_api_version, requires_data_dependent_shapes, get_array_api_strict_flags
 from ._helpers import _maybe_normalize_py_scalars
+
+
+class TopKResult(NamedTuple):
+    values: Array
+    indices: Array
 
 
 def argmax(x: Array, /, *, axis: int | None = None, keepdims: bool = False) -> Array:
@@ -120,3 +125,48 @@ def where(condition: Array, x1: Array | complex, x2: Array | complex, /) -> Arra
 
     x1, x2 = Array._normalize_two_args(x1, x2)
     return Array._new(np.where(condition._array, x1._array, x2._array), device=x1.device)
+
+
+
+def top_k(
+    a: Array,
+    k: int,
+    /,
+    *,
+    axis: int =-1,
+    mode: Literal["largest", "smallest"] = "largest"
+) -> TopKResult:
+    """
+    Array API compatible wrapper for :py:func:`np.top_k <numpy.top_k>`.
+
+    See its docstring for more information.
+    """
+    if k <= 0:
+        raise ValueError(f'k(={k}) provided must be positive.')
+
+    if mode not in ["largest", "smallest"]:
+        raise ValueError(f'{mode = } not in ["largest", "smallest"]')
+
+    if k > a.shape[axis]:
+        raise ValueError(f"{k = } exceeds {a.shape[axis] = }") 
+
+    positive_axis = axis if axis > 0 else axis % a.ndim
+
+    arr = a._array
+
+    slice_start = (np.s_[:],) * positive_axis
+    if mode == "largest":
+        indices_array = np.argpartition(arr, -k, axis=axis)
+        slice_ = slice_start + (np.s_[-k:],)
+        topk_indices = indices_array[slice_]
+    else:
+        indices_array = np.argpartition(arr, k-1, axis=axis)
+        slice_ = slice_start + (np.s_[:k],)
+        topk_indices = indices_array[slice_]
+
+    topk_values = np.take_along_axis(arr, topk_indices, axis=axis)
+
+    return TopKResult(
+        Array._new(topk_values, device=a.device),
+        Array._new(topk_indices, device=a.device)
+    )
