@@ -46,9 +46,8 @@ array_api_tests/test_special_cases.py::test_unary[acosh(real(x_i) is +0 and imag
 
 array_api_tests/test_special_cases.py::test_unary[sqrt(real(x_i) is +infinity and isfinite(imag(x_i)) and imag(x_i) > 0) -> +0 + infinity j]
 
-# remove this when array-api-strict 2.6 is released: this is only for array-api-tests,
-# which runs self-tests against a released array-api-strict
-array_api_tests/test_dlpack.py::test_from_dlpack
-
 # NumPy 1.26 : NotImplementedError: The copy argument to __dlpack__ is not yet implemented
 array_api_tests/test_dlpack.py::test_dunder_dlpack
+
+# NumPy 1.26: TypeError: numpy.from_dlpack() takes no keyword arguments
+array_api_tests/test_dlpack.py::test_from_dlpack
