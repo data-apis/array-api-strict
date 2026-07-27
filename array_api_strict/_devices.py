@@ -1,5 +1,4 @@
 from typing import Final
-from enum import IntEnum
 
 from ._dtypes import (
     DType, float32, float64, complex64, complex128, int64,
@@ -35,35 +34,6 @@ CPU_DEVICE = Device()
 NO_FLOAT64_DEVICE = Device("no_float64")
 
 ALL_DEVICES = (CPU_DEVICE, Device("device1"), Device("device2"), NO_FLOAT64_DEVICE)
-
-class DLDeviceType(IntEnum):
-    kDLCPU = 1
-    kDLCUDA = 2
-    kDLMETAL = 8
-
-
-_DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
-    CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
-    Device("device1"): (DLDeviceType.kDLCUDA, 0),
-    Device("device2"): (DLDeviceType.kDLCUDA, 1),
-    NO_FLOAT64_DEVICE: (DLDeviceType.kDLMETAL, 0),
-}
-
-_DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
-    (int(device_type), device_id): logical_device
-    for logical_device, (device_type, device_id) in _DLPACK_DEVICE_FOR.items()
-}
-
-
-def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[int, int]:
-    return (int(device_type), device_id)
-
-
-def _device_from_dlpack_device(
-    device_type: IntEnum | int, device_id: int
-) -> Device:
-    # NB: if the (device_type, device_id) pair not known, raise
-    return _DLPACK_DEVICE_TO_LOGICAL[_normalize_dl_device(device_type, device_id)]
 
 
 def check_device(device: Device | None) -> None:
