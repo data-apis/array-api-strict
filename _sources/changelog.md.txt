@@ -1,5 +1,20 @@
 # Changelog
 
+
+## 2.6.1 (2026-07-27)
+
+- Fix a 2.6 regression in `asarray(array_object_from_another_library)`, so that
+  the dtype of the result matches the dtype of the input. See
+  [gh-222](https://github.com/data-apis/array-api-strict/issues/222) for the
+  discussion.
+- Revert the addition of `__dlpack_device__` method. See
+  [gh-219](https://github.com/data-apis/array-api-strict/issues/219) for
+  discussion.
+- Add a new device object, `Device("no_x64")`, which support single-precision floats
+  and integers of up to 32-bit widths. This device mimics the default JAX behavior,
+  which does not support not only `float64` but also `int64` and `uint64` types.
+
+
 ## 2.6 (2026-07-09)
 
 - `__setitem__` method of array objects got stricter:
