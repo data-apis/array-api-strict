@@ -122,6 +122,7 @@ def reshape(x: Array, /, shape: tuple[int, ...], *, copy: bool | None = None) ->
 
     reshaped = np.reshape(data, shape)
 
+    # NB: `.size>0` works around that `x=np.asarray([]); np.shares_memory(x, x)` is False
     if copy is False and data.size > 0 and not np.shares_memory(data, reshaped):
         raise ValueError("Incompatible shape for a no-copy reshape.")
 
