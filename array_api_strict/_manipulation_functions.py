@@ -122,8 +122,8 @@ def reshape(x: Array, /, shape: tuple[int, ...], *, copy: bool | None = None) ->
 
     reshaped = np.reshape(data, shape)
 
-    if copy is False and not np.shares_memory(data, reshaped):
-        raise AttributeError("Incompatible shape for in-place modification.")
+    if copy is False and data.size > 0 and not np.shares_memory(data, reshaped):
+        raise ValueError("Incompatible shape for a no-copy reshape.")
 
     return Array._new(reshaped, device=x.device)
 
