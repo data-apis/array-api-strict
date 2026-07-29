@@ -10,7 +10,9 @@ import pytest
 
 from .. import ones, arange, reshape, asarray, result_type, all, equal, stack
 from .._array_object import Array
-from .._devices import CPU_DEVICE, Device
+from .._devices import (
+    ALL_DEVICES, CPU_DEVICE, Device, DLDeviceType, _DLPACK_DEVICE_FOR
+)
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
@@ -757,6 +759,71 @@ def test_dlpack_2023_12(api_version):
         a.__dlpack__(copy=False)
         a.__dlpack__(copy=True)
         a.__dlpack__(copy=None)
+
+
+@pytest.mark.parametrize(
+    ("device", "expected"),
+    [
+        (CPU_DEVICE, (DLDeviceType.kDLCPU, 0)),
+        (Device("device1"), (DLDeviceType.kDLCPU, 1)),
+        (Device("device2"), (DLDeviceType.kDLCPU, 2)),
+        (Device("no_float64"), (DLDeviceType.kDLCPU, 3)),
+        (Device("no_x64"), (DLDeviceType.kDLCPU, 4)),
+    ],
+)
+def test_dlpack_device_numbers(device, expected):
+    a = asarray([1, 2, 3], device=device)
+    assert a.__dlpack_device__() == expected
+
+
+def test_dlpack_device_map_is_complete():
+    assert set(_DLPACK_DEVICE_FOR) == set(ALL_DEVICES)
+    # devices which share a DLPack device cannot be told apart by from_dlpack
+    assert len(set(_DLPACK_DEVICE_FOR.values())) == len(ALL_DEVICES)
+
+
+@pytest.mark.parametrize(
+    "device", [device for device in ALL_DEVICES if device != CPU_DEVICE]
+)
+def test_dlpack_export_from_non_cpu_device(device):
+    a = asarray([1, 2, 3], device=device)
+
+    with pytest.raises(BufferError):
+        a.__dlpack__()
+    with pytest.raises(BufferError):
+        np.from_dlpack(a)
+
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        return
+
+    # asking for a device explicitly does not help: the array has to be moved
+    # to the CPU device first. Even asking for the device the array is already
+    # on is refused, since the capsule can only ever be tagged with the CPU
+    # device and the consumer would end up with the data on the wrong device.
+    # array-api-strict's special devices all use the same DLPack device number,
+    # but are meant to represent devices like a GPU or other accelerator.
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=a.__dlpack_device__())
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=(DLDeviceType.kDLCPU, 0))
+    with pytest.raises(BufferError):
+        np.from_dlpack(a, device="cpu")
+
+    np.from_dlpack(a.to_device(CPU_DEVICE))
+
+
+def test_dlpack_export_from_cpu_device():
+    a = asarray([1, 2, 3])
+
+    a.__dlpack__()
+    np.from_dlpack(a)
+
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        return
+
+    a.__dlpack__(dl_device=a.__dlpack_device__())
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=(DLDeviceType.kDLCUDA, 0))
 
 
 def test_pickle():

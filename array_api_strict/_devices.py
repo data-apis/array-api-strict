@@ -1,3 +1,4 @@
+from enum import IntEnum
 from typing import Final
 
 from ._dtypes import (
@@ -37,6 +38,66 @@ NO_X64_DEVICE = Device("no_x64")
 ALL_DEVICES = (
     CPU_DEVICE, Device("device1"), Device("device2"), NO_FLOAT64_DEVICE, NO_X64_DEVICE
 )
+
+
+class DLDeviceType(IntEnum):
+    """The DLPack device types, as defined by the DLPack ABI."""
+    kDLCPU = 1
+    kDLCUDA = 2
+    kDLCUDAHost = 3
+    kDLOpenCL = 4
+    kDLVulkan = 7
+    kDLMetal = 8
+    kDLVPI = 9
+    kDLROCM = 10
+    kDLROCMHost = 11
+    kDLExtDev = 12
+    kDLCUDAManaged = 13
+    kDLOneAPI = 14
+    kDLWebGPU = 15
+    kDLHexagon = 16
+    kDLMAIA = 17
+
+
+# All the devices of array_api_strict are fictitious and their data lives in host
+# memory, so they all report the CPU device type and are told apart by their device
+# id. Reporting anything else makes consumers such as pytorch dispatch to the
+# machinery of a device they cannot actually reach, see
+# https://github.com/data-apis/array-api-strict/issues/219
+_DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
+    CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
+    Device("device1"): (DLDeviceType.kDLCPU, 1),
+    Device("device2"): (DLDeviceType.kDLCPU, 2),
+    NO_FLOAT64_DEVICE: (DLDeviceType.kDLCPU, 3),
+    NO_X64_DEVICE: (DLDeviceType.kDLCPU, 4),
+}
+
+_DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
+    (int(device_type), device_id): logical_device
+    for logical_device, (device_type, device_id) in _DLPACK_DEVICE_FOR.items()
+}
+
+
+def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[int, int]:
+    # `device_type` may be a member of another library's DLPack enum
+    return (int(device_type), device_id)
+
+
+def _device_from_dlpack_device(
+    device_type: IntEnum | int, device_id: int
+) -> Device:
+    key = _normalize_dl_device(device_type, device_id)
+    try:
+        return _DLPACK_DEVICE_TO_LOGICAL[key]
+    except KeyError:
+        try:
+            type_name = DLDeviceType(key[0]).name
+        except ValueError:
+            type_name = str(key[0])
+        raise BufferError(
+            f"No array_api_strict device matches the DLPack device "
+            f"({type_name}, {device_id})."
+        ) from None
 
 
 def check_device(device: Device | None) -> None:

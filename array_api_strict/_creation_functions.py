@@ -7,7 +7,7 @@ import numpy as np
 
 from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
 from ._devices import (
-    Device, device_supports_dtype, get_default_dtypes,
+    Device, device_supports_dtype, get_default_dtypes, _device_from_dlpack_device,
     check_device as _check_device
 )
 from ._flags import get_array_api_strict_flags
@@ -250,6 +250,15 @@ def from_dlpack(
         _check_device(device)
     else:
         device = None
+        if hasattr(x, "__dlpack_device__"):
+            dl_type, dl_id = x.__dlpack_device__()
+            device = _device_from_dlpack_device(dl_type, dl_id)
+
+    if isinstance(x, Array):
+        # Arrays of this library are unwrapped instead of going through DLPack:
+        # the buffer is in host memory whatever the logical device is, and the
+        # DLPack export refuses arrays which are not on the CPU device.
+        x = x._array
 
     if copy in [_undef, None]:
         # numpy 1.26 does not have the copy= arg

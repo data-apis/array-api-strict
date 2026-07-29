@@ -40,7 +40,13 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
-from ._devices import CPU_DEVICE, Device, device_supports_dtype
+from ._devices import (
+    CPU_DEVICE,
+    Device,
+    _DLPACK_DEVICE_FOR,
+    _normalize_dl_device,
+    device_supports_dtype,
+)
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
@@ -602,6 +608,15 @@ class Array:
             if copy is not _undef:
                 raise ValueError("The copy argument to __dlpack__ requires at least version 2023.12 of the array API")
 
+        if self._device != CPU_DEVICE:
+            # Consistent with __buffer__ and __array__: data cannot leave a
+            # non-CPU device implicitly. Note that this also rules out consumers
+            # asking for the CPU device via dl_device: the array has to be moved
+            # to the CPU device first, with to_device or asarray.
+            raise BufferError(
+                f"Can't export array on the '{self._device}' device via DLPack."
+            )
+
         if np.lib.NumpyVersion(np.__version__) < '2.1.0':
             if max_version not in [_undef, None]:
                 raise NotImplementedError("The max_version argument to __dlpack__ is not yet implemented")
@@ -611,12 +626,20 @@ class Array:
                 raise NotImplementedError("The copy argument to __dlpack__ is not yet implemented")
 
             return self._array.__dlpack__(stream=stream)
-        else:
-            kwargs = {'stream': stream}
-            if max_version is not _undef:
-                kwargs['max_version'] = max_version
-            if dl_device is not _undef:
-                kwargs['dl_device'] = dl_device
+
+        kwargs: dict[str, Any] = {'stream': stream}
+        if max_version is not _undef:
+            kwargs['max_version'] = max_version
+        if dl_device is not _undef:
+            if dl_device is not None:
+                requested = _normalize_dl_device(*dl_device)
+                if requested != _normalize_dl_device(*_DLPACK_DEVICE_FOR[self._device]):
+                    raise BufferError("unsupported device requested")
+                # The request is for the device the array is already on, which a
+                # plain export satisfies. NumPy is not told about it, as it only
+                # knows about its own spelling of the CPU device.
+                dl_device = None
+            kwargs['dl_device'] = dl_device
         if copy is not _undef:
             kwargs['copy'] = copy
         return self._array.__dlpack__(**kwargs)
@@ -625,8 +648,7 @@ class Array:
         """
         Performs the operation __dlpack_device__.
         """
-        # Note: device support is required for this
-        return self._array.__dlpack_device__()
+        return _DLPACK_DEVICE_FOR[self._device]
 
     def __eq__(self, other: Array | complex, /) -> Array:  # type: ignore[override]
         """

@@ -24,7 +24,7 @@ from .._creation_functions import (
 )
 from .._dtypes import float32, float64, complex64, int32, int64, bool as xp_bool
 from .._array_object import Array
-from .._devices import CPU_DEVICE, ALL_DEVICES, Device
+from .._devices import CPU_DEVICE, ALL_DEVICES, Device, DLDeviceType
 from .._info import __array_namespace_info__
 from .._flags import set_array_api_strict_flags
 
@@ -412,4 +412,30 @@ def test_from_dlpack_default_device():
     y = from_dlpack(x)
     z = from_dlpack(np.asarray([1, 2, 3]))
     assert x.device == y.device == z.device == CPU_DEVICE
+
+
+@pytest.mark.parametrize("device", ALL_DEVICES)
+def test_from_dlpack_preserves_device(device):
+    x = asarray([1, 2, 3], device=device)
+    y = from_dlpack(x)
+    assert y.device == device
+
+
+def test_from_dlpack_unknown_device():
+    class ForeignArray:
+        """An array on a device which array_api_strict knows nothing about."""
+        def __init__(self):
+            self._array = np.asarray([1, 2, 3])
+
+        def __dlpack_device__(self):
+            return (DLDeviceType.kDLCUDA, 0)
+
+        def __dlpack__(self, **kwargs):
+            return self._array.__dlpack__(**kwargs)
+
+    with pytest.raises(BufferError):
+        from_dlpack(ForeignArray())
+
+    # an explicit device is a request to transfer, so nothing has to be inferred
+    assert from_dlpack(ForeignArray(), device=CPU_DEVICE).device == CPU_DEVICE
 
