@@ -20,7 +20,12 @@ import sys
 from collections.abc import Callable, Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Literal, Self, SupportsIndex
+from typing import Any, Literal, SupportsIndex
+
+try:
+    from typing import Self
+except ImportError:  # Python < 3.11
+    from typing_extensions import Self
 
 import numpy as np
 import numpy.typing as npt
