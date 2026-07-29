@@ -1,8 +1,8 @@
 import pytest
 
 import array_api_strict as xp
-
 from array_api_strict import ArrayAPIStrictFlags
+
 from .._devices import ALL_DEVICES, CPU_DEVICE, Device
 from .._dtypes import _all_dtypes
 
@@ -11,9 +11,11 @@ def test_where_with_scalars():
     x = xp.asarray([1, 2, 3, 1])
 
     # Versions up to and including 2023.12 don't support scalar arguments
-    with ArrayAPIStrictFlags(api_version='2023.12'):
-        with pytest.raises(AttributeError, match="object has no attribute 'dtype'"):
-            xp.where(x == 1, 42, 44)
+    with (
+        ArrayAPIStrictFlags(api_version='2023.12'),
+        pytest.raises(AttributeError, match="object has no attribute 'dtype'"),
+    ):
+        xp.where(x == 1, 42, 44)
 
     # Versions after 2023.12 support scalar arguments
     x_where = xp.where(x == 1, xp.asarray(42), 44)

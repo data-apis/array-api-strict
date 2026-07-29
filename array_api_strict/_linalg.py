@@ -9,7 +9,7 @@ from ._array_object import Array
 from ._data_type_functions import finfo
 from ._dtypes import DType, _floating_dtypes, _numeric_dtypes, complex64, complex128
 from ._elementwise_functions import conj
-from ._flags import get_array_api_strict_flags, requires_extension, requires_api_version
+from ._flags import get_array_api_strict_flags, requires_api_version, requires_extension
 from ._manipulation_functions import reshape
 from ._statistical_functions import _np_dtype_sumprod
 
@@ -232,7 +232,7 @@ def matrix_norm(
     *,
     keepdims: bool = False,
     ord: float | Literal["fro", "nuc"] | None = "fro",
-) -> Array:  # noqa: F821
+) -> Array:
     """
     Array API compatible wrapper for :py:func:`np.linalg.norm <numpy.linalg.norm>`.
 
@@ -330,7 +330,7 @@ def pinv(x: Array, /, *, rtol: float | Array | None = None) -> Array:
     return Array._new(np.linalg.pinv(x._array, rcond=rtol_np), device=x.device)
 
 @requires_extension('linalg')
-def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRResult:  # noqa: F821
+def qr(x: Array, /, *, mode: Literal['reduced', 'complete'] = 'reduced') -> QRResult:
     """
     Array API compatible wrapper for :py:func:`np.linalg.qr <numpy.linalg.qr>`.
 
@@ -373,13 +373,21 @@ def slogdet(x: Array, /) -> SlogdetResult:
 def _solve(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     try:
         from numpy.linalg._linalg import (  # type: ignore[attr-defined]
-        _makearray, _assert_stacked_2d, _assert_stacked_square,
-        _commonType, isComplexType, _raise_linalgerror_singular
+            _assert_stacked_2d,
+            _assert_stacked_square,
+            _commonType,
+            _makearray,
+            _raise_linalgerror_singular,
+            isComplexType,
         )
     except ImportError:
         from numpy.linalg.linalg import (  # type: ignore[attr-defined]
-        _makearray, _assert_stacked_2d, _assert_stacked_square,
-        _commonType, isComplexType, _raise_linalgerror_singular
+            _assert_stacked_2d,
+            _assert_stacked_square,
+            _commonType,
+            _makearray,
+            _raise_linalgerror_singular,
+            isComplexType,
         )
     from numpy.linalg import _umath_linalg
 

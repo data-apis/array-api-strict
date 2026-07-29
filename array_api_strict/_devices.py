@@ -1,17 +1,29 @@
 from typing import Final
 
 from ._dtypes import (
-    DType, float32, float64, complex64, complex128, int64, uint64, int32,
-    _all_dtypes, _boolean_dtypes, _signed_integer_dtypes,
-    _unsigned_integer_dtypes, _integer_dtypes, _real_floating_dtypes,
-    _complex_floating_dtypes, _numeric_dtypes
+    DType,
+    _all_dtypes,
+    _boolean_dtypes,
+    _complex_floating_dtypes,
+    _integer_dtypes,
+    _numeric_dtypes,
+    _real_floating_dtypes,
+    _signed_integer_dtypes,
+    _unsigned_integer_dtypes,
+    complex64,
+    complex128,
+    float32,
+    float64,
+    int32,
+    int64,
+    uint64,
 )
 
 _ALL_DEVICE_NAMES = ("CPU_DEVICE", "device1", "device2", "no_float64", "no_x64")
 
 class Device:
     _device: Final[str]
-    __slots__ = ("_device", "__weakref__")
+    __slots__ = ("__weakref__", "_device")
 
     def __init__(self, device: str = "CPU_DEVICE"):
         if device not in _ALL_DEVICE_NAMES:

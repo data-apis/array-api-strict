@@ -1,14 +1,14 @@
 import warnings
 
-from numpy.testing import assert_raises
 import numpy as np
-
 import pytest
+from numpy.testing import assert_raises
 
 from .. import all
+from .._array_object import Array
 from .._creation_functions import (
-    asarray,
     arange,
+    asarray,
     empty,
     empty_like,
     eye,
@@ -22,11 +22,12 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import float32, float64, complex64, int32, int64, bool as xp_bool
-from .._array_object import Array
-from .._devices import CPU_DEVICE, ALL_DEVICES, Device
-from .._info import __array_namespace_info__
+from .._devices import ALL_DEVICES, CPU_DEVICE, Device
+from .._dtypes import bool as xp_bool
+from .._dtypes import complex64, float32, float64, int32, int64
 from .._flags import set_array_api_strict_flags
+from .._info import __array_namespace_info__
+
 
 def test_asarray_errors():
     # Test various protections against incorrect usage
@@ -78,7 +79,7 @@ def test_asarray_copy():
     for obj in [True, 0, 0.0, 0j, [0], [[0]]]:
         asarray(obj, copy=True) # No error
         asarray(obj, copy=None) # No error
-        assert_raises(ValueError, lambda: asarray(obj, copy=False))
+        assert_raises(ValueError, lambda obj=obj: asarray(obj, copy=False))
 
     # Buffer protocol
     a = np.array([1])
@@ -226,11 +227,11 @@ def test_meshgrid_dtype_errors():
 
 
 def _full(a, *args, **kwds):
-    return full(a, fill_value=42.0, *args, **kwds)
+    return full(a, *args, fill_value=42.0, **kwds)
 
 
 def _full_like(a, *args, **kwds):
-    return full_like(a, fill_value=42.0, *args, **kwds)
+    return full_like(a, *args, fill_value=42.0, **kwds)
 
 
 class TestDefaultDType:
