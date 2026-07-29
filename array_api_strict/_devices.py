@@ -60,21 +60,19 @@ class DLDeviceType(IntEnum):
 
 
 # All the devices of array_api_strict are fictitious and their data lives in host
-# memory, so they all report the CPU device type and are told apart by their device
-# id. Reporting anything else makes consumers such as pytorch dispatch to the
-# machinery of a device they cannot actually reach, see
+# memory, so they all report the CPU device, which is device number zero. Reporting
+# anything else makes consumers such as pytorch dispatch to the machinery of a
+# device they cannot actually reach, see
 # https://github.com/data-apis/array-api-strict/issues/219
+# The logical devices cannot be told apart through DLPack, which is fine: only the
+# CPU device can be exported at all, and from_dlpack recovers the logical device of
+# an array from this library without going through DLPack.
 _DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
-    CPU_DEVICE: (DLDeviceType.kDLCPU, 0),
-    Device("device1"): (DLDeviceType.kDLCPU, 1),
-    Device("device2"): (DLDeviceType.kDLCPU, 2),
-    NO_FLOAT64_DEVICE: (DLDeviceType.kDLCPU, 3),
-    NO_X64_DEVICE: (DLDeviceType.kDLCPU, 4),
+    device: (DLDeviceType.kDLCPU, 0) for device in ALL_DEVICES
 }
 
 _DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
-    (int(device_type), device_id): logical_device
-    for logical_device, (device_type, device_id) in _DLPACK_DEVICE_FOR.items()
+    (int(DLDeviceType.kDLCPU), 0): CPU_DEVICE,
 }
 
 

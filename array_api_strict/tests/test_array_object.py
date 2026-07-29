@@ -761,25 +761,16 @@ def test_dlpack_2023_12(api_version):
         a.__dlpack__(copy=None)
 
 
-@pytest.mark.parametrize(
-    ("device", "expected"),
-    [
-        (CPU_DEVICE, (DLDeviceType.kDLCPU, 0)),
-        (Device("device1"), (DLDeviceType.kDLCPU, 1)),
-        (Device("device2"), (DLDeviceType.kDLCPU, 2)),
-        (Device("no_float64"), (DLDeviceType.kDLCPU, 3)),
-        (Device("no_x64"), (DLDeviceType.kDLCPU, 4)),
-    ],
-)
-def test_dlpack_device_numbers(device, expected):
+@pytest.mark.parametrize("device", ALL_DEVICES)
+def test_dlpack_device_numbers(device):
     a = asarray([1, 2, 3], device=device)
-    assert a.__dlpack_device__() == expected
+    # the data of every logical device lives in host memory, so they all report
+    # the CPU device, which is device number zero
+    assert a.__dlpack_device__() == (DLDeviceType.kDLCPU, 0)
 
 
 def test_dlpack_device_map_is_complete():
     assert set(_DLPACK_DEVICE_FOR) == set(ALL_DEVICES)
-    # devices which share a DLPack device cannot be told apart by from_dlpack
-    assert len(set(_DLPACK_DEVICE_FOR.values())) == len(ALL_DEVICES)
 
 
 @pytest.mark.parametrize(
@@ -797,11 +788,10 @@ def test_dlpack_export_from_non_cpu_device(device):
         return
 
     # asking for a device explicitly does not help: the array has to be moved
-    # to the CPU device first. Even asking for the device the array is already
-    # on is refused, since the capsule can only ever be tagged with the CPU
-    # device and the consumer would end up with the data on the wrong device.
-    # array-api-strict's special devices all use the same DLPack device number,
-    # but are meant to represent devices like a GPU or other accelerator.
+    # to the CPU device first. Even asking for the CPU device, which is what
+    # __dlpack_device__ reports, is refused: these devices are meant to
+    # represent a GPU or other accelerator, so the consumer would end up with
+    # the data on a device the array is not logically on.
     with pytest.raises(BufferError):
         a.__dlpack__(dl_device=a.__dlpack_device__())
     with pytest.raises(BufferError):

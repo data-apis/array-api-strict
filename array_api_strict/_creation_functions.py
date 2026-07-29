@@ -250,7 +250,11 @@ def from_dlpack(
         _check_device(device)
     else:
         device = None
-        if hasattr(x, "__dlpack_device__"):
+        if isinstance(x, Array):
+            # All the devices of this library share a DLPack device, so the
+            # logical device is read off the array itself.
+            device = x.device
+        elif hasattr(x, "__dlpack_device__"):
             dl_type, dl_id = x.__dlpack_device__()
             device = _device_from_dlpack_device(dl_type, dl_id)
 
