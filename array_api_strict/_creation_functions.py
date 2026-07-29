@@ -264,9 +264,14 @@ def from_dlpack(
         # DLPack export refuses arrays which are not on the CPU device.
         x = x._array
 
-    if copy in [_undef, None]:
-        # numpy 1.26 does not have the copy= arg
-        return Array._new(np.from_dlpack(x), device=device)
+    if copy is _undef:
+        copy = None
+
+    if np.lib.NumpyVersion(np.__version__) < '2.1.0':
+        # numpy 1.26 does not have the copy= arg, and its from_dlpack never
+        # copies: copy=False needs nothing extra, copy=True is done here.
+        out = np.from_dlpack(x)
+        return Array._new(np.copy(out) if copy else out, device=device)
 
     return Array._new(np.from_dlpack(x, copy=copy), device=device)
 
