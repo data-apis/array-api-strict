@@ -20,11 +20,10 @@ import sys
 from collections.abc import Callable, Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Literal, SupportsIndex
+from typing import Any, Literal, Self, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self
 
 from ._creation_functions import Undef, _undef, asarray
 from ._devices import CPU_DEVICE, Device, device_supports_dtype
