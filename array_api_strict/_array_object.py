@@ -24,7 +24,11 @@ from typing import Any, Literal, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self
+
+try:
+    from typing import Self
+except ImportError:  # Python < 3.11
+    from typing_extensions import Self
 
 from ._creation_functions import Undef, _undef, asarray
 from ._devices import CPU_DEVICE, Device, device_supports_dtype
