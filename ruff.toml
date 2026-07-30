@@ -4,4 +4,7 @@ ignore = [
   "E402",
   # Annoying style checks
   "E7",
+  "SIM117",
 ]
+[lint.isort]
+combine-as-imports = true

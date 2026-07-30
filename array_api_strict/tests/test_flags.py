@@ -1,20 +1,66 @@
-import sys
 import subprocess
+import sys
 
-from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
-                      reset_array_api_strict_flags)
-from .._fft import (fft, ifft, fftn, ifftn, rfft, irfft, rfftn, irfftn, hfft,
-                    ihfft, fftfreq, rfftfreq, fftshift, ifftshift)
-from .._linalg import (cholesky, cross, det, diagonal, eigh, eigvalsh, inv,
-                       matmul, matrix_norm, matrix_power, matrix_rank, matrix_transpose, outer, pinv,
-                       qr, slogdet, solve, svd, svdvals, tensordot, trace, vecdot, vector_norm)
-
-from .. import (asarray, unique_all, unique_counts, unique_inverse,
-                unique_values, nonzero, repeat)
+import pytest
 
 import array_api_strict as xp
 
-import pytest
+from .. import (
+    asarray,
+    nonzero,
+    repeat,
+    unique_all,
+    unique_counts,
+    unique_inverse,
+    unique_values,
+)
+from .._fft import (
+    fft,
+    fftfreq,
+    fftn,
+    fftshift,
+    hfft,
+    ifft,
+    ifftn,
+    ifftshift,
+    ihfft,
+    irfft,
+    irfftn,
+    rfft,
+    rfftfreq,
+    rfftn,
+)
+from .._flags import (
+    get_array_api_strict_flags,
+    reset_array_api_strict_flags,
+    set_array_api_strict_flags,
+)
+from .._linalg import (
+    cholesky,
+    cross,
+    det,
+    diagonal,
+    eigh,
+    eigvalsh,
+    inv,
+    matmul,
+    matrix_norm,
+    matrix_power,
+    matrix_rank,
+    matrix_transpose,
+    outer,
+    pinv,
+    qr,
+    slogdet,
+    solve,
+    svd,
+    svdvals,
+    tensordot,
+    trace,
+    vecdot,
+    vector_norm,
+)
+
 
 def test_flag_defaults():
     flags = get_array_api_strict_flags()
