@@ -23,6 +23,7 @@ from .._dtypes import (
     _numeric_dtypes,
     _real_floating_dtypes,
     _real_numeric_dtypes,
+    bool as bool_,
     complex128,
     float64,
     int8,
@@ -31,9 +32,6 @@ from .._dtypes import (
     int64,
     uint8,
     uint64,
-)
-from .._dtypes import (
-    bool as bool_,
 )
 from .._flags import set_array_api_strict_flags
 

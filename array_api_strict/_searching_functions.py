@@ -3,8 +3,7 @@ from typing import Literal
 import numpy as np
 
 from ._array_object import Array
-from ._dtypes import _real_numeric_dtypes, _result_type
-from ._dtypes import bool as _bool
+from ._dtypes import _real_numeric_dtypes, _result_type, bool as _bool
 from ._flags import (
     get_array_api_strict_flags,
     requires_api_version,

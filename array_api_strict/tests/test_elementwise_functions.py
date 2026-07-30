@@ -13,15 +13,13 @@ from .._dtypes import (
     _dtype_categories,
     _floating_dtypes,
     _integer_dtypes,
+    bool as xp_bool,
     float64,
     int8,
     int16,
     int32,
     int64,
     uint64,
-)
-from .._dtypes import (
-    bool as xp_bool,
 )
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._info import __array_namespace_info__
