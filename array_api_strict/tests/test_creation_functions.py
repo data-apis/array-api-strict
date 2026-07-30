@@ -1,14 +1,14 @@
 import warnings
 
-from numpy.testing import assert_raises
 import numpy as np
-
 import pytest
+from numpy.testing import assert_raises
 
 from .. import all
+from .._array_object import Array
 from .._creation_functions import (
-    asarray,
     arange,
+    asarray,
     empty,
     empty_like,
     eye,
@@ -22,11 +22,12 @@ from .._creation_functions import (
     zeros,
     zeros_like,
 )
-from .._dtypes import float32, float64, complex64, int32, int64, bool as xp_bool
-from .._array_object import Array
-from .._devices import CPU_DEVICE, ALL_DEVICES, Device
-from .._info import __array_namespace_info__
+from .._devices import ALL_DEVICES, CPU_DEVICE, Device
+from .._dtypes import bool as xp_bool
+from .._dtypes import complex64, float32, float64, int32, int64
 from .._flags import set_array_api_strict_flags
+from .._info import __array_namespace_info__
+
 
 def test_asarray_errors():
     # Test various protections against incorrect usage

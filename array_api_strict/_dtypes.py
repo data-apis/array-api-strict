@@ -12,7 +12,7 @@ import numpy.typing as npt
 class DType:
     _np_dtype: Final[np.dtype[Any]]
     _canonical_name: Final[Any]
-    __slots__ = ("_np_dtype", "_canonical_name", "__weakref__")
+    __slots__ = ("__weakref__", "_canonical_name", "_np_dtype")
 
     def __init__(self, np_dtype: npt.DTypeLike):
         self._canonical_name = np_dtype

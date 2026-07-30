@@ -17,15 +17,16 @@ from __future__ import annotations
 
 import operator
 import sys
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from enum import IntEnum
 from types import EllipsisType, ModuleType
-from typing import Any, Literal, SupportsIndex, Callable
+from typing import Any, Literal, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
 
 from ._creation_functions import Undef, _undef, asarray
+from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._dtypes import (
     DType,
     _all_dtypes,
@@ -40,7 +41,6 @@ from ._dtypes import (
     _real_to_complex_map,
     _result_type,
 )
-from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._flags import get_array_api_strict_flags, set_array_api_strict_flags
 from ._typing import PyCapsule
 
@@ -64,7 +64,7 @@ class Array:
     _array: npt.NDArray[Any]
     _dtype: DType
     _device: Device
-    __slots__ = ("_array", "_dtype", "_device", "__weakref__")
+    __slots__ = ("__weakref__", "_array", "_device", "_dtype")
 
     # Use a custom constructor instead of __init__, as manually initializing
     # this class is not supported API.

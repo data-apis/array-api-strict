@@ -3,9 +3,9 @@ from typing import NamedTuple
 import numpy as np
 
 from ._array_object import Array
-from ._flags import requires_data_dependent_shapes, requires_api_version
-from ._helpers import _maybe_normalize_py_scalars
 from ._dtypes import _result_type
+from ._flags import requires_api_version, requires_data_dependent_shapes
+from ._helpers import _maybe_normalize_py_scalars
 
 # Note: np.unique() is split into four functions in the array API:
 # unique_all, unique_counts, unique_inverse, and unique_values (this is done

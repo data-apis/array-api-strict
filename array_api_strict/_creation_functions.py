@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
-from ._devices import (
-    Device, device_supports_dtype, get_default_dtypes,
-    check_device as _check_device
-)
+from ._devices import Device, device_supports_dtype, get_default_dtypes
+from ._devices import check_device as _check_device
+from ._dtypes import DType, _all_dtypes, _np_dtype
+from ._dtypes import bool as xp_bool
 from ._flags import get_array_api_strict_flags
 from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
 

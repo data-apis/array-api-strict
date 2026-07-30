@@ -1,19 +1,18 @@
 import warnings
-from inspect import signature, getmodule
+from inspect import getmodule, signature
 
 import numpy as np
 import pytest
 
+import array_api_strict
 
-from .. import asarray, _elementwise_functions
+from .. import _elementwise_functions, asarray
 from .._devices import ALL_DEVICES, CPU_DEVICE, Device
-from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._dtypes import (
-    _dtype_categories,
     _boolean_dtypes,
+    _dtype_categories,
     _floating_dtypes,
     _integer_dtypes,
-    bool as xp_bool,
     float64,
     int8,
     int16,
@@ -21,10 +20,12 @@ from .._dtypes import (
     int64,
     uint64,
 )
+from .._dtypes import (
+    bool as xp_bool,
+)
+from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._info import __array_namespace_info__
-from .test_array_object import _check_op_array_scalar, BIG_INT
-
-import array_api_strict
+from .test_array_object import BIG_INT, _check_op_array_scalar
 
 
 def nargs(func):

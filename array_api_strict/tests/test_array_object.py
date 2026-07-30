@@ -1,39 +1,42 @@
-import sys
-import warnings
 import operator
 import pickle
+import sys
+import warnings
 from builtins import all as all_
 
-from numpy.testing import assert_raises
 import numpy as np
 import pytest
+from numpy.testing import assert_raises
 
-from .. import ones, arange, reshape, asarray, result_type, all, equal, stack
+import array_api_strict
+
+from .. import all, arange, asarray, equal, ones, reshape, result_type, stack
 from .._array_object import Array
 from .._devices import CPU_DEVICE, Device
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
-    _real_floating_dtypes,
-    _floating_dtypes,
     _complex_floating_dtypes,
+    _floating_dtypes,
     _integer_dtypes,
     _integer_or_boolean_dtypes,
-    _real_numeric_dtypes,
     _numeric_dtypes,
-    uint8,
+    _real_floating_dtypes,
+    _real_numeric_dtypes,
+    complex128,
+    float64,
     int8,
     int16,
     int32,
     int64,
+    uint8,
     uint64,
-    float64,
-    complex128,
+)
+from .._dtypes import (
     bool as bool_,
 )
 from .._flags import set_array_api_strict_flags
 
-import array_api_strict
 
 def test_validate_index():
     # The indexing tests in the official array API test suite test that the
@@ -360,10 +363,7 @@ def test_operators():
                                 or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
                                 or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
                                 or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
-                                ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
-                            # Ensure in-place operators only promote to the same dtype as the left operand.
-                            elif (
+                                ) or (
                                 _op.startswith("__i")
                                 and result_type(x.dtype, y.dtype) != x.dtype
                             ):

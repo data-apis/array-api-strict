@@ -1,9 +1,11 @@
 import cmath
+
 import pytest
 
-from .._flags import set_array_api_strict_flags, ArrayAPIStrictFlags
-
 import array_api_strict as xp
+
+from .._flags import ArrayAPIStrictFlags, set_array_api_strict_flags
+
 
 # sum, prod, and trace were changed in 2023.12 to not upcast floating-point dtypes
 # with dtype=None
@@ -44,9 +46,8 @@ def test_sum_prod_trace_2023_12(func_name):
 def test_mean_complex():
     a = xp.asarray([1j, 2j, 3j])
 
-    with ArrayAPIStrictFlags(api_version='2023.12'):
-        with pytest.raises(TypeError):
-            xp.mean(a)
+    with ArrayAPIStrictFlags(api_version='2023.12'), pytest.raises(TypeError):
+        xp.mean(a)
 
     m = xp.mean(a)
     assert cmath.isclose(complex(m), 2j)
