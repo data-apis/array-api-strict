@@ -13,6 +13,7 @@ from .._dtypes import (
     _dtype_categories,
     _floating_dtypes,
     _integer_dtypes,
+    bool as xp_bool,
     float64,
     int8,
     int16,
