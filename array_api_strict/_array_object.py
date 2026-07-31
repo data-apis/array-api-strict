@@ -25,6 +25,11 @@ from typing import Any, Literal, SupportsIndex
 import numpy as np
 import numpy.typing as npt
 
+try:
+    from typing import Self
+except ImportError:  # Python < 3.11
+    from typing_extensions import Self
+
 from ._creation_functions import Undef, _undef, asarray
 from ._devices import CPU_DEVICE, Device, device_supports_dtype
 from ._dtypes import (
@@ -102,7 +107,7 @@ class Array:
         return obj
 
     # Prevent Array() from working
-    def __new__(cls, *args: object, **kwargs: object) -> Array:
+    def __new__(cls, *args: object, **kwargs: object) -> Self:
         raise TypeError(
             "The array_api_strict Array object should not be instantiated directly. Use an array creation function, such as asarray(), instead."
         )
@@ -378,12 +383,10 @@ class Array:
         _key = key if isinstance(key, tuple) else (key,)
         for i in _key:
             if isinstance(i, bool) or not (
-                isinstance(i, SupportsIndex)  # i.e. ints
-                or isinstance(i, slice)
+                isinstance(i, (SupportsIndex, slice))
                 or i == Ellipsis
                 or (op == "getitem" and i is None) # `None` disallowed in setitem
-                or isinstance(i, Array)
-                or isinstance(i, np.ndarray)
+                or isinstance(i, (Array, np.ndarray))
             ):
                 raise IndexError(
                     f"Single-axes index {i} has {type(i)=}, but only "
@@ -448,7 +451,7 @@ class Array:
         else:
             ellipsis_start = None
             for pos, i in enumerate(nonexpanding_key):
-                if not (isinstance(i, Array) or isinstance(i, np.ndarray)):
+                if not (isinstance(i, (Array, np.ndarray))):
                     if i == Ellipsis:
                         ellipsis_start = pos
                         break
@@ -989,7 +992,7 @@ class Array:
         res = self._array.__xor__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __iadd__(self, other: Array | complex, /) -> Array:
+    def __iadd__(self, other: Array | complex, /) -> Self:
         """
         Performs the operation __iadd__.
         """
@@ -1012,7 +1015,7 @@ class Array:
         res = self._array.__radd__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __iand__(self, other: Array | int, /) -> Array:
+    def __iand__(self, other: Array | int, /) -> Self:
         """
         Performs the operation __iand__.
         """
@@ -1035,7 +1038,7 @@ class Array:
         res = self._array.__rand__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ifloordiv__(self, other: Array | float, /) -> Array:
+    def __ifloordiv__(self, other: Array | float, /) -> Self:
         """
         Performs the operation __ifloordiv__.
         """
@@ -1058,7 +1061,7 @@ class Array:
         res = self._array.__rfloordiv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ilshift__(self, other: Array | int, /) -> Array:
+    def __ilshift__(self, other: Array | int, /) -> Self:
         """
         Performs the operation __ilshift__.
         """
@@ -1081,7 +1084,7 @@ class Array:
         res = self._array.__rlshift__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imatmul__(self, other: Array, /) -> Array:
+    def __imatmul__(self, other: Array, /) -> Self:
         """
         Performs the operation __imatmul__.
         """
@@ -1107,7 +1110,7 @@ class Array:
         res = self._array.__rmatmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imod__(self, other: Array | float, /) -> Array:
+    def __imod__(self, other: Array | float, /) -> Self:
         """
         Performs the operation __imod__.
         """
@@ -1130,7 +1133,7 @@ class Array:
         res = self._array.__rmod__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __imul__(self, other: Array | complex, /) -> Array:
+    def __imul__(self, other: Array | complex, /) -> Self:
         """
         Performs the operation __imul__.
         """
@@ -1153,7 +1156,7 @@ class Array:
         res = self._array.__rmul__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ior__(self, other: Array | int, /) -> Array:
+    def __ior__(self, other: Array | int, /) -> Self:
         """
         Performs the operation __ior__.
         """
@@ -1176,7 +1179,7 @@ class Array:
         res = self._array.__ror__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ipow__(self, other: Array | complex, /) -> Array:
+    def __ipow__(self, other: Array | complex, /) -> Self:
         """
         Performs the operation __ipow__.
         """
@@ -1201,7 +1204,7 @@ class Array:
         # for 0-d arrays, so we use pow() here instead.
         return pow(other, self)
 
-    def __irshift__(self, other: Array | int, /) -> Array:
+    def __irshift__(self, other: Array | int, /) -> Self:
         """
         Performs the operation __irshift__.
         """
@@ -1224,7 +1227,7 @@ class Array:
         res = self._array.__rrshift__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __isub__(self, other: Array | complex, /) -> Array:
+    def __isub__(self, other: Array | complex, /) -> Self:
         """
         Performs the operation __isub__.
         """
@@ -1247,7 +1250,7 @@ class Array:
         res = self._array.__rsub__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __itruediv__(self, other: Array | complex, /) -> Array:
+    def __itruediv__(self, other: Array | complex, /) -> Self:
         """
         Performs the operation __itruediv__.
         """
@@ -1270,7 +1273,7 @@ class Array:
         res = self._array.__rtruediv__(other._array)
         return self.__class__._new(res, device=self.device)
 
-    def __ixor__(self, other: Array | int, /) -> Array:
+    def __ixor__(self, other: Array | int, /) -> Self:
         """
         Performs the operation __ixor__.
         """

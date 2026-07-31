@@ -269,10 +269,7 @@ assert set(linalg_main_namespace_examples) == (set(xp.__all__) & set(xp.linalg._
 @pytest.mark.parametrize('func_name', linalg_examples.keys())
 def test_linalg(func_name):
     func = linalg_examples[func_name]
-    if func_name in linalg_main_namespace_examples:
-        main_namespace_func = linalg_main_namespace_examples[func_name]
-    else:
-        main_namespace_func = lambda: None
+    main_namespace_func = linalg_main_namespace_examples.get(func_name, lambda: None)
 
     # First make sure the example actually works
     func()
