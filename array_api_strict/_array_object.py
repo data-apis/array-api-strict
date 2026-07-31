@@ -202,18 +202,19 @@ class Array:
         # to promote in the spec (even if the NumPy array operator would
         # promote them).
         res_dtype = _result_type(self.dtype, other.dtype)
-        # Note: NumPy will allow in-place operators in some cases where
-        # the type promoted operator does not match the left-hand side
-        # operand. For example,
+        if op.startswith("__i"):
+            # Note: NumPy will allow in-place operators in some cases where
+            # the type promoted operator does not match the left-hand side
+            # operand. For example,
 
-        # >>> a = np.array(1, dtype=np.int8)
-        # >>> a += np.array(1, dtype=np.int16)
+            # >>> a = np.array(1, dtype=np.int8)
+            # >>> a += np.array(1, dtype=np.int16)
 
-        # The spec explicitly disallows this.
-        if op.startswith("__i") and res_dtype != self.dtype:
-            raise TypeError(
-                f"Cannot perform {op} with dtypes {self.dtype} and {other.dtype}"
-            )
+            # The spec explicitly disallows this.
+            if res_dtype != self.dtype:
+                raise TypeError(
+                    f"Cannot perform {op} with dtypes {self.dtype} and {other.dtype}"
+                )
 
         return other
 
@@ -425,17 +426,18 @@ class Array:
         n_single_axes = len(single_axes)
         if n_ellipsis > 1:
             return  # handled by ndarray
-        # Note boolean masks must be the sole index, which we check for
-        # later on.
-        elif n_ellipsis == 0 and not key_has_mask and n_single_axes < self.ndim:
-            raise IndexError(
-                f"{self.ndim=}, but the multi-axes index only specifies "
-                f"{n_single_axes} dimensions. If this was intentional, "
-                "add a trailing ellipsis (...) which expands into as many "
-                "slices (:) as necessary - this is what np.ndarray arrays "
-                "implicitly do, but such flat indexing behaviour is not "
-                "specified in the Array API."
-            )
+        elif n_ellipsis == 0:
+            # Note boolean masks must be the sole index, which we check for
+            # later on.
+            if not key_has_mask and n_single_axes < self.ndim:
+                raise IndexError(
+                    f"{self.ndim=}, but the multi-axes index only specifies "
+                    f"{n_single_axes} dimensions. If this was intentional, "
+                    "add a trailing ellipsis (...) which expands into as many "
+                    "slices (:) as necessary - this is what np.ndarray arrays "
+                    "implicitly do, but such flat indexing behaviour is not "
+                    "specified in the Array API."
+                )
 
         if (key_has_index_array and (n_ellipsis > 0 or key_has_slices or key_has_mask)):
             raise IndexError(

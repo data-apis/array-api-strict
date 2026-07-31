@@ -292,10 +292,7 @@ def test_scalars():
 
         for s in [1, 1.0, 1j, BIG_INT, False]:
             for a in _array_vals():
-                for func1 in [
-                    lambda s, func=func, a=a: func(a, s),
-                    lambda s, func=func, a=a: func(s, a),
-                ]:
+                for func1 in [lambda s: func(a, s), lambda s: func(s, a)]:
 
                     if func_name in nocomplex and type(s) == complex:
                         allowed = False

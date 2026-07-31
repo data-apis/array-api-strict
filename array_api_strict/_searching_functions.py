@@ -79,9 +79,10 @@ def searchsorted(
     See its docstring for more information.
     """
     flags = get_array_api_strict_flags()
-    # scalar x2 support is new in 2025.12
-    if flags["api_version"] >= "2025.12" and isinstance(x2, bool | int | float | complex):
-        x2 = x1._promote_scalar(x2)
+    if flags["api_version"] >= "2025.12":
+        # scalar x2 support is new in 2025.12
+        if isinstance(x2, bool | int | float | complex):
+            x2 = x1._promote_scalar(x2)
 
     if x1.dtype not in _real_numeric_dtypes or x2.dtype not in _real_numeric_dtypes:
         raise TypeError("Only real numeric dtypes are allowed in searchsorted")

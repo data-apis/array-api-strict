@@ -78,7 +78,8 @@ def test_asarray_copy():
     for obj in [True, 0, 0.0, 0j, [0], [[0]]]:
         asarray(obj, copy=True) # No error
         asarray(obj, copy=None) # No error
-        assert_raises(ValueError, lambda obj=obj: asarray(obj, copy=False))
+        with assert_raises(ValueError):
+            asarray(obj, copy=False)
 
     # Buffer protocol
     a = np.array([1])
