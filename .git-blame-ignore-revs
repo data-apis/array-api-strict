@@ -1,0 +1,5 @@
+# MAINT: Ruff `safe-fixes` (#235)
+aa33a42e39cd278a4f51ac0507b493c3d543074d
+
+# MAINT: Adding ruff unsafe-fixes (#236)
+6558d184b48c626c89ced8e35d4431f75b3a3d06
