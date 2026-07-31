@@ -22,13 +22,13 @@ from enum import IntEnum
 from types import EllipsisType, ModuleType
 from typing import Any, Literal, SupportsIndex
 
+import numpy as np
+import numpy.typing as npt
+
 try:
     from typing import Self
 except ImportError:  # Python < 3.11
     from typing_extensions import Self
-
-import numpy as np
-import numpy.typing as npt
 
 from ._creation_functions import Undef, _undef, asarray
 from ._devices import CPU_DEVICE, Device, device_supports_dtype
@@ -448,9 +448,10 @@ class Array:
         else:
             ellipsis_start = None
             for pos, i in enumerate(nonexpanding_key):
-                if not (isinstance(i, (Array, np.ndarray))) and i == Ellipsis:
-                    ellipsis_start = pos
-                    break
+                if not (isinstance(i, (Array, np.ndarray))):
+                    if i == Ellipsis:
+                        ellipsis_start = pos
+                        break
             assert ellipsis_start is not None  # sanity check
             ellipsis_end = self.ndim - (n_single_axes - ellipsis_start)
             indexed_shape = (

@@ -23,8 +23,7 @@ from .._creation_functions import (
     zeros_like,
 )
 from .._devices import ALL_DEVICES, CPU_DEVICE, Device
-from .._dtypes import bool as xp_bool
-from .._dtypes import complex64, float32, float64, int32, int64
+from .._dtypes import bool as xp_bool, complex64, float32, float64, int32, int64
 from .._flags import set_array_api_strict_flags
 from .._info import __array_namespace_info__
 

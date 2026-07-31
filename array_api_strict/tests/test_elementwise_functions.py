@@ -20,9 +20,6 @@ from .._dtypes import (
     int64,
     uint64,
 )
-from .._dtypes import (
-    bool as xp_bool,
-)
 from .._elementwise_functions import bitwise_left_shift, bitwise_right_shift
 from .._info import __array_namespace_info__
 from .test_array_object import BIG_INT, _check_op_array_scalar
