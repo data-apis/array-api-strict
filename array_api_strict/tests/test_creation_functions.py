@@ -78,7 +78,8 @@ def test_asarray_copy():
     for obj in [True, 0, 0.0, 0j, [0], [[0]]]:
         asarray(obj, copy=True) # No error
         asarray(obj, copy=None) # No error
-        assert_raises(ValueError, lambda: asarray(obj, copy=False))
+        with assert_raises(ValueError):
+            asarray(obj, copy=False)
 
     # Buffer protocol
     a = np.array([1])
@@ -226,11 +227,11 @@ def test_meshgrid_dtype_errors():
 
 
 def _full(a, *args, **kwds):
-    return full(a, fill_value=42.0, *args, **kwds)
+    return full(a, *args, fill_value=42.0, **kwds)
 
 
 def _full_like(a, *args, **kwds):
-    return full_like(a, fill_value=42.0, *args, **kwds)
+    return full_like(a, *args, fill_value=42.0, **kwds)
 
 
 class TestDefaultDType:

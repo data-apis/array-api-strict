@@ -434,20 +434,20 @@ assert 'fft' not in globals()
 
     assert 'linalg' in xp.__all__
     assert 'fft' in xp.__all__
-    xp.linalg # No error
-    xp.fft # No error
+    xp.linalg # No error  # noqa: B018
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' in ns
 
     set_array_api_strict_flags(enabled_extensions=('linalg',))
     assert 'linalg' in xp.__all__
     assert 'fft' not in xp.__all__
-    xp.linalg # No error
+    xp.linalg # No error  # noqa: B018
     pytest.raises(AttributeError, lambda: xp.fft)
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' not in ns
 
@@ -455,9 +455,9 @@ assert 'fft' not in globals()
     assert 'linalg' not in xp.__all__
     assert 'fft' in xp.__all__
     pytest.raises(AttributeError, lambda: xp.linalg)
-    xp.fft # No error
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' not in ns
     assert 'fft' in ns
 
@@ -467,17 +467,17 @@ assert 'fft' not in globals()
     pytest.raises(AttributeError, lambda: xp.linalg)
     pytest.raises(AttributeError, lambda: xp.fft)
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' not in ns
     assert 'fft' not in ns
 
     reset_array_api_strict_flags()
     assert 'linalg' in xp.__all__
     assert 'fft' in xp.__all__
-    xp.linalg # No error
-    xp.fft # No error
+    xp.linalg # No error  # noqa: B018
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' in ns
 
