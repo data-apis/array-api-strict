@@ -42,21 +42,16 @@ ALL_DEVICES = (
 
 class DLDeviceType(IntEnum):
     """The DLPack device types, as defined by the DLPack ABI."""
-    kDLCPU = 1
-    kDLCUDA = 2
-    kDLCUDAHost = 3
-    kDLOpenCL = 4
-    kDLVulkan = 7
-    kDLMetal = 8
-    kDLVPI = 9
-    kDLROCM = 10
-    kDLROCMHost = 11
-    kDLExtDev = 12
-    kDLCUDAManaged = 13
-    kDLOneAPI = 14
-    kDLWebGPU = 15
-    kDLHexagon = 16
-    kDLMAIA = 17
+    CPU = 1
+    CUDA = 2
+    CUDA_HOST = 3
+    OPENCL = 4
+    VULKAN = 7
+    METAL = 8
+    VPI = 9
+    ROCM = 10
+    CUDA_MANAGED = 13
+    ONE_API = 14
 
 
 # All the devices of array_api_strict are fictitious and their data lives in host
@@ -68,11 +63,11 @@ class DLDeviceType(IntEnum):
 # CPU device can be exported at all, and from_dlpack recovers the logical device of
 # an array from this library without going through DLPack.
 _DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
-    device: (DLDeviceType.kDLCPU, 0) for device in ALL_DEVICES
+    device: (DLDeviceType.CPU, 0) for device in ALL_DEVICES
 }
 
 _DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
-    (int(DLDeviceType.kDLCPU), 0): CPU_DEVICE,
+    (int(DLDeviceType.CPU), 0): CPU_DEVICE,
 }
 
 

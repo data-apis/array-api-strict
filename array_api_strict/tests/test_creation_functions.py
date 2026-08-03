@@ -428,7 +428,7 @@ def test_from_dlpack_unknown_device():
             self._array = np.asarray([1, 2, 3])
 
         def __dlpack_device__(self):
-            return (DLDeviceType.kDLCUDA, 0)
+            return (DLDeviceType.CUDA, 0)
 
         def __dlpack__(self, **kwargs):
             return self._array.__dlpack__(**kwargs)

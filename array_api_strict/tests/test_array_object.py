@@ -766,7 +766,7 @@ def test_dlpack_device_numbers(device):
     a = asarray([1, 2, 3], device=device)
     # the data of every logical device lives in host memory, so they all report
     # the CPU device, which is device number zero
-    assert a.__dlpack_device__() == (DLDeviceType.kDLCPU, 0)
+    assert a.__dlpack_device__() == (DLDeviceType.CPU, 0)
 
 
 def test_dlpack_device_map_is_complete():
@@ -795,7 +795,7 @@ def test_dlpack_export_from_non_cpu_device(device):
     with pytest.raises(BufferError):
         a.__dlpack__(dl_device=a.__dlpack_device__())
     with pytest.raises(BufferError):
-        a.__dlpack__(dl_device=(DLDeviceType.kDLCPU, 0))
+        a.__dlpack__(dl_device=(DLDeviceType.CPU, 0))
     with pytest.raises(BufferError):
         np.from_dlpack(a, device="cpu")
 
@@ -813,7 +813,7 @@ def test_dlpack_export_from_cpu_device():
 
     a.__dlpack__(dl_device=a.__dlpack_device__())
     with pytest.raises(BufferError):
-        a.__dlpack__(dl_device=(DLDeviceType.kDLCUDA, 0))
+        a.__dlpack__(dl_device=(DLDeviceType.CUDA, 0))
 
 
 def test_pickle():
