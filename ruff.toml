@@ -4,4 +4,12 @@ ignore = [
   "E402",
   # Annoying style checks
   "E7",
+  # Keep nested with statements
+  "SIM117",
+  # Keep nested if statements
+  "SIM102",
+  # Allow lambdas in loops
+  "B023",
 ]
+[lint.isort]
+combine-as-imports = true

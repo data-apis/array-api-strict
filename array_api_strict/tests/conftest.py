@@ -1,8 +1,9 @@
 import os
 
-from .._flags import reset_array_api_strict_flags, ENVIRONMENT_VARIABLES
-
 import pytest
+
+from .._flags import ENVIRONMENT_VARIABLES, reset_array_api_strict_flags
+
 
 def pytest_configure(config):
     for env_var in ENVIRONMENT_VARIABLES:

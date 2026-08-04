@@ -1,8 +1,8 @@
 import pytest
 
-from .._flags import set_array_api_strict_flags
-
 import array_api_strict as xp
+
+from .._flags import set_array_api_strict_flags
 
 # TODO: Maybe all of these exceptions should be IndexError?
 

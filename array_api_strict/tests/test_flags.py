@@ -1,20 +1,66 @@
-import sys
 import subprocess
+import sys
 
-from .._flags import (set_array_api_strict_flags, get_array_api_strict_flags,
-                      reset_array_api_strict_flags)
-from .._fft import (fft, ifft, fftn, ifftn, rfft, irfft, rfftn, irfftn, hfft,
-                    ihfft, fftfreq, rfftfreq, fftshift, ifftshift)
-from .._linalg import (cholesky, cross, det, diagonal, eigh, eigvalsh, inv,
-                       matmul, matrix_norm, matrix_power, matrix_rank, matrix_transpose, outer, pinv,
-                       qr, slogdet, solve, svd, svdvals, tensordot, trace, vecdot, vector_norm)
-
-from .. import (asarray, unique_all, unique_counts, unique_inverse,
-                unique_values, nonzero, repeat)
+import pytest
 
 import array_api_strict as xp
 
-import pytest
+from .. import (
+    asarray,
+    nonzero,
+    repeat,
+    unique_all,
+    unique_counts,
+    unique_inverse,
+    unique_values,
+)
+from .._fft import (
+    fft,
+    fftfreq,
+    fftn,
+    fftshift,
+    hfft,
+    ifft,
+    ifftn,
+    ifftshift,
+    ihfft,
+    irfft,
+    irfftn,
+    rfft,
+    rfftfreq,
+    rfftn,
+)
+from .._flags import (
+    get_array_api_strict_flags,
+    reset_array_api_strict_flags,
+    set_array_api_strict_flags,
+)
+from .._linalg import (
+    cholesky,
+    cross,
+    det,
+    diagonal,
+    eigh,
+    eigvalsh,
+    inv,
+    matmul,
+    matrix_norm,
+    matrix_power,
+    matrix_rank,
+    matrix_transpose,
+    outer,
+    pinv,
+    qr,
+    slogdet,
+    solve,
+    svd,
+    svdvals,
+    tensordot,
+    trace,
+    vecdot,
+    vector_norm,
+)
+
 
 def test_flag_defaults():
     flags = get_array_api_strict_flags()
@@ -223,10 +269,7 @@ assert set(linalg_main_namespace_examples) == (set(xp.__all__) & set(xp.linalg._
 @pytest.mark.parametrize('func_name', linalg_examples.keys())
 def test_linalg(func_name):
     func = linalg_examples[func_name]
-    if func_name in linalg_main_namespace_examples:
-        main_namespace_func = linalg_main_namespace_examples[func_name]
-    else:
-        main_namespace_func = lambda: None
+    main_namespace_func = linalg_main_namespace_examples.get(func_name, lambda: None)
 
     # First make sure the example actually works
     func()
@@ -391,20 +434,20 @@ assert 'fft' not in globals()
 
     assert 'linalg' in xp.__all__
     assert 'fft' in xp.__all__
-    xp.linalg # No error
-    xp.fft # No error
+    xp.linalg # No error  # noqa: B018
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' in ns
 
     set_array_api_strict_flags(enabled_extensions=('linalg',))
     assert 'linalg' in xp.__all__
     assert 'fft' not in xp.__all__
-    xp.linalg # No error
+    xp.linalg # No error  # noqa: B018
     pytest.raises(AttributeError, lambda: xp.fft)
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' not in ns
 
@@ -412,9 +455,9 @@ assert 'fft' not in globals()
     assert 'linalg' not in xp.__all__
     assert 'fft' in xp.__all__
     pytest.raises(AttributeError, lambda: xp.linalg)
-    xp.fft # No error
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' not in ns
     assert 'fft' in ns
 
@@ -424,17 +467,17 @@ assert 'fft' not in globals()
     pytest.raises(AttributeError, lambda: xp.linalg)
     pytest.raises(AttributeError, lambda: xp.fft)
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' not in ns
     assert 'fft' not in ns
 
     reset_array_api_strict_flags()
     assert 'linalg' in xp.__all__
     assert 'fft' in xp.__all__
-    xp.linalg # No error
-    xp.fft # No error
+    xp.linalg # No error  # noqa: B018
+    xp.fft # No error  # noqa: B018
     ns = {}
-    exec('from array_api_strict import *', ns)
+    exec('from array_api_strict import *', ns)  # noqa: S102
     assert 'linalg' in ns
     assert 'fft' in ns
 

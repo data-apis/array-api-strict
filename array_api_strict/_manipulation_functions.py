@@ -122,8 +122,9 @@ def reshape(x: Array, /, shape: tuple[int, ...], *, copy: bool | None = None) ->
 
     reshaped = np.reshape(data, shape)
 
-    if copy is False and not np.shares_memory(data, reshaped):
-        raise AttributeError("Incompatible shape for in-place modification.")
+    # NB: `.size>0` works around that `x=np.asarray([]); np.shares_memory(x, x)` is False
+    if copy is False and data.size > 0 and not np.shares_memory(data, reshaped):
+        raise ValueError("Incompatible shape for a no-copy reshape.")
 
     return Array._new(reshaped, device=x.device)
 
@@ -141,7 +142,7 @@ def roll(
     See its docstring for more information.
     """
     if not isinstance(shift, int | tuple):
-        raise ValueError(
+        raise TypeError(
             f"`shift` can only be an int or a tuple, got {type(shift)=} instead."
         )
     return Array._new(np.roll(x._array, shift, axis=axis), device=x.device)

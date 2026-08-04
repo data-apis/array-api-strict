@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import array_api_strict as xp
+
 from .._devices import ALL_DEVICES, CPU_DEVICE
 
 torch = pytest.importorskip("torch")

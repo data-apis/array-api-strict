@@ -28,13 +28,13 @@ from ._flags import API_VERSION as __array_api_version__
 
 __all__ += ["__array_api_version__"]
 
-from ._constants import e, inf, nan, pi, newaxis
+from ._constants import e, inf, nan, newaxis, pi
 
-__all__ += ["e", "inf", "nan", "pi", "newaxis"]
+__all__ += ["e", "inf", "nan", "newaxis", "pi"]
 
 from ._creation_functions import (
-    asarray,
     arange,
+    asarray,
     empty,
     empty_like,
     eye,
@@ -52,8 +52,8 @@ from ._creation_functions import (
 )
 
 __all__ += [
-    "asarray",
     "arange",
+    "asarray",
     "empty",
     "empty_like",
     "eye",
@@ -77,8 +77,8 @@ from ._data_type_functions import (
     broadcast_to,
     can_cast,
     finfo,
-    isdtype,
     iinfo,
+    isdtype,
     result_type,
 )
 
@@ -89,12 +89,17 @@ __all__ += [
     "broadcast_to",
     "can_cast",
     "finfo",
-    "isdtype",
     "iinfo",
+    "isdtype",
     "result_type",
 ]
 
 from ._dtypes import (
+    bool,
+    complex64,
+    complex128,
+    float32,
+    float64,
     int8,
     int16,
     int32,
@@ -103,14 +108,14 @@ from ._dtypes import (
     uint16,
     uint32,
     uint64,
-    float32,
-    float64,
-    complex64,
-    complex128,
-    bool,
 )
 
 __all__ += [
+    "bool",
+    "complex64",
+    "complex128",
+    "float32",
+    "float64",
     "int8",
     "int16",
     "int32",
@@ -119,11 +124,6 @@ __all__ += [
     "uint16",
     "uint32",
     "uint64",
-    "float32",
-    "float64",
-    "complex64",
-    "complex128",
-    "bool",
 ]
 
 from ._elementwise_functions import (
@@ -137,8 +137,8 @@ from ._elementwise_functions import (
     atan2,
     atanh,
     bitwise_and,
-    bitwise_left_shift,
     bitwise_invert,
+    bitwise_left_shift,
     bitwise_or,
     bitwise_right_shift,
     bitwise_xor,
@@ -188,8 +188,8 @@ from ._elementwise_functions import (
     signbit,
     sin,
     sinh,
-    square,
     sqrt,
+    square,
     subtract,
     tan,
     tanh,
@@ -207,8 +207,8 @@ __all__ += [
     "atan2",
     "atanh",
     "bitwise_and",
-    "bitwise_left_shift",
     "bitwise_invert",
+    "bitwise_left_shift",
     "bitwise_or",
     "bitwise_right_shift",
     "bitwise_xor",
@@ -258,8 +258,8 @@ __all__ += [
     "signbit",
     "sin",
     "sinh",
-    "square",
     "sqrt",
+    "square",
     "subtract",
     "tan",
     "tanh",
@@ -276,9 +276,9 @@ __all__ += [
     "__array_namespace_info__",
 ]
 
-from ._linear_algebra_functions import matmul, tensordot, matrix_transpose, vecdot
+from ._linear_algebra_functions import matmul, matrix_transpose, tensordot, vecdot
 
-__all__ += ["matmul", "tensordot", "matrix_transpose", "vecdot"]
+__all__ += ["matmul", "matrix_transpose", "tensordot", "vecdot"]
 
 from ._manipulation_functions import (
     concat,
@@ -297,44 +297,68 @@ from ._manipulation_functions import (
 
 __all__ += ["concat", "expand_dims", "flip", "moveaxis", "permute_dims", "repeat", "reshape", "roll", "squeeze", "stack", "tile", "unstack"]
 
-from ._searching_functions import argmax, argmin, nonzero, count_nonzero, searchsorted, where
+from ._searching_functions import (
+    argmax,
+    argmin,
+    count_nonzero,
+    nonzero,
+    searchsorted,
+    where,
+)
 
-__all__ += ["argmax", "argmin", "nonzero", "count_nonzero", "searchsorted", "where"]
+__all__ += ["argmax", "argmin", "count_nonzero", "nonzero", "searchsorted", "where"]
 
-from ._set_functions import unique_all, unique_counts, unique_inverse, unique_values, isin
+from ._set_functions import (
+    isin,
+    unique_all,
+    unique_counts,
+    unique_inverse,
+    unique_values,
+)
 
-__all__ += ["unique_all", "unique_counts", "unique_inverse", "unique_values", "isin"]
+__all__ += ["isin", "unique_all", "unique_counts", "unique_inverse", "unique_values"]
 
 from ._sorting_functions import argsort, sort
 
 __all__ += ["argsort", "sort"]
 
-from ._statistical_functions import cumulative_sum, cumulative_prod, max, mean, min, prod, std, sum, var
+from ._statistical_functions import (
+    cumulative_prod,
+    cumulative_sum,
+    max,
+    mean,
+    min,
+    prod,
+    std,
+    sum,
+    var,
+)
 
-__all__ += ["cumulative_sum", "cumulative_prod", "max", "mean", "min", "prod", "std", "sum", "var"]
+__all__ += ["cumulative_prod", "cumulative_sum", "max", "mean", "min", "prod", "std", "sum", "var"]
 
 from ._utility_functions import all, any, diff
 
 __all__ += ["all", "any", "diff"]
 
 from ._array_object import Device
+
 __all__ += ["Device"]
 
 # Helper functions that are not part of the standard
 
 from ._flags import (
-    set_array_api_strict_flags,
+    ArrayAPIStrictFlags,
     get_array_api_strict_flags,
     reset_array_api_strict_flags,
-    ArrayAPIStrictFlags,
+    set_array_api_strict_flags,
 )
 
 __all__ += [
-    'set_array_api_strict_flags',
-    'get_array_api_strict_flags',
-    'reset_array_api_strict_flags',
     'ArrayAPIStrictFlags',
     '__version__',
+    'get_array_api_strict_flags',
+    'reset_array_api_strict_flags',
+    'set_array_api_strict_flags',
 ]
 
 try:

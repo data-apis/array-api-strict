@@ -1,9 +1,11 @@
 import cmath
+
 import pytest
 
-from .._flags import set_array_api_strict_flags, ArrayAPIStrictFlags
-
 import array_api_strict as xp
+
+from .._flags import ArrayAPIStrictFlags, set_array_api_strict_flags
+
 
 # sum, prod, and trace were changed in 2023.12 to not upcast floating-point dtypes
 # with dtype=None

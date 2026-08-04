@@ -5,11 +5,14 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
 from ._devices import (
-    Device, device_supports_dtype, get_default_dtypes, _device_from_dlpack_device,
-    check_device as _check_device
+    Device,
+    _device_from_dlpack_device,
+    check_device as _check_device,
+    device_supports_dtype,
+    get_default_dtypes,
 )
+from ._dtypes import DType, _all_dtypes, _np_dtype, bool as xp_bool
 from ._flags import get_array_api_strict_flags
 from ._typing import NestedSequence, SupportsBufferProtocol, SupportsDLPack
 
@@ -34,9 +37,8 @@ def _check_valid_dtype(dtype: DType | None, device: Device | None = None) -> Non
         if dtype not in _all_dtypes:
             raise ValueError(f"dtype must be one of the supported dtypes, got {dtype!r}")
 
-        if device is not None:
-            if not device_supports_dtype(device, dtype):
-                raise ValueError(f"Device {device!r} does not support dtype={dtype!r}.")
+        if device is not None and not device_supports_dtype(device, dtype):
+            raise ValueError(f"Device {device!r} does not support dtype={dtype!r}.")
 
 
 def _supports_buffer_protocol(obj: object) -> TypeIs[SupportsBufferProtocol]:
@@ -96,9 +98,8 @@ def asarray(
 
     if isinstance(obj, Array):
         return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype), device=device)
-    elif isinstance(obj, list | tuple):
-        if any(isinstance(x, Array) for x in obj):
-            raise TypeError("Nested Arrays are not allowed. Use `stack` instead.")
+    elif isinstance(obj, list | tuple) and any(isinstance(x, Array) for x in obj):
+        raise TypeError("Nested Arrays are not allowed. Use `stack` instead.")
 
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
         # Give a better error message in this case. NumPy would convert this

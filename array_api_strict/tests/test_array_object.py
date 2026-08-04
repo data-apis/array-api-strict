@@ -1,41 +1,40 @@
-import sys
-import warnings
 import operator
 import pickle
+import sys
+import warnings
 from builtins import all as all_
 
-from numpy.testing import assert_raises
 import numpy as np
 import pytest
+from numpy.testing import assert_raises
 
-from .. import ones, arange, reshape, asarray, result_type, all, equal, stack
+import array_api_strict
+
+from .. import all, arange, asarray, equal, ones, reshape, result_type, stack
 from .._array_object import Array
-from .._devices import (
-    ALL_DEVICES, CPU_DEVICE, Device, DLDeviceType, _DLPACK_DEVICE_FOR
-)
+from .._devices import _DLPACK_DEVICE_FOR, ALL_DEVICES, CPU_DEVICE, Device, DLDeviceType
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
-    _real_floating_dtypes,
-    _floating_dtypes,
     _complex_floating_dtypes,
+    _floating_dtypes,
     _integer_dtypes,
     _integer_or_boolean_dtypes,
-    _real_numeric_dtypes,
     _numeric_dtypes,
-    uint8,
+    _real_floating_dtypes,
+    _real_numeric_dtypes,
+    bool as bool_,
+    complex128,
+    float64,
     int8,
     int16,
     int32,
     int64,
+    uint8,
     uint64,
-    float64,
-    complex128,
-    bool as bool_,
 )
 from .._flags import set_array_api_strict_flags
 
-import array_api_strict
 
 def test_validate_index():
     # The indexing tests in the official array API test suite test that the
@@ -362,14 +361,12 @@ def test_operators():
                                 or y.dtype in _boolean_dtypes and x.dtype not in _boolean_dtypes
                                 or x.dtype in _floating_dtypes and y.dtype not in _floating_dtypes
                                 or y.dtype in _floating_dtypes and x.dtype not in _floating_dtypes
-                                ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
-                            # Ensure in-place operators only promote to the same dtype as the left operand.
-                            elif (
+                                ) or (
                                 _op.startswith("__i")
                                 and result_type(x.dtype, y.dtype) != x.dtype
                             ):
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                                with assert_raises(TypeError):
+                                    getattr(x, _op)(y)
                             # Ensure only those dtypes that are required for every operator are allowed.
                             elif (dtypes == "all" and (x.dtype in _boolean_dtypes and y.dtype in _boolean_dtypes
                                                       or x.dtype in _numeric_dtypes and y.dtype in _numeric_dtypes)
@@ -383,7 +380,8 @@ def test_operators():
                             ):
                                 getattr(x, _op)(y)
                             else:
-                                assert_raises(TypeError, lambda: getattr(x, _op)(y))
+                                with assert_raises(TypeError):
+                                    getattr(x, _op)(y)
                             # finally, test that array op ndarray raises
                             # XXX: as long as there is __array__ or __buffer__, __rop__s
                             #  still return ndarrays
@@ -403,7 +401,8 @@ def test_operators():
                 # Only test for no error
                 getattr(a, op)()
             else:
-                assert_raises(TypeError, lambda: getattr(a, op)())
+                with assert_raises(TypeError):
+                    getattr(a, op)()
 
     # Finally, matmul() must be tested separately, because it works a bit
     # different from the other operations.
@@ -422,9 +421,11 @@ def test_operators():
                     or type(s) == int and a.dtype in _integer_dtypes):
                     # Type promotion is valid, but @ is not allowed on 0-D
                     # inputs, so the error is a ValueError
-                    assert_raises(ValueError, lambda: getattr(a, _op)(s))
+                    with assert_raises(ValueError):
+                        getattr(a, _op)(s)
                 else:
-                    assert_raises(TypeError, lambda: getattr(a, _op)(s))
+                    with assert_raises(TypeError):
+                        getattr(a, _op)(s)
 
     for x in _matmul_array_vals():
         for y in _matmul_array_vals():
@@ -437,24 +438,33 @@ def test_operators():
                 or x.dtype in _boolean_dtypes
                 or y.dtype in _boolean_dtypes
                 ):
-                assert_raises(TypeError, lambda: x.__matmul__(y))
-                assert_raises(TypeError, lambda: y.__rmatmul__(x))
-                assert_raises(TypeError, lambda: x.__imatmul__(y))
+                with assert_raises(TypeError):
+                    x.__matmul__(y)
+                with assert_raises(TypeError):
+                    y.__rmatmul__(x)
+                with assert_raises(TypeError):
+                    x.__imatmul__(y)
             elif x.shape == () or y.shape == () or x.shape[1] != y.shape[0]:
-                assert_raises(ValueError, lambda: x.__matmul__(y))
-                assert_raises(ValueError, lambda: y.__rmatmul__(x))
+                with assert_raises(ValueError):
+                    x.__matmul__(y)
+                with assert_raises(ValueError):
+                    y.__rmatmul__(x)
                 if result_type(x.dtype, y.dtype) != x.dtype:
-                    assert_raises(TypeError, lambda: x.__imatmul__(y))
+                    with assert_raises(TypeError):
+                        x.__imatmul__(y)
                 else:
-                    assert_raises(ValueError, lambda: x.__imatmul__(y))
+                    with assert_raises(ValueError):
+                        x.__imatmul__(y)
             else:
                 x.__matmul__(y)
                 y.__rmatmul__(x)
                 if result_type(x.dtype, y.dtype) != x.dtype:
-                    assert_raises(TypeError, lambda: x.__imatmul__(y))
+                    with assert_raises(TypeError):
+                        x.__imatmul__(y)
                 elif y.shape[0] != y.shape[1]:
                     # This one fails because x @ y has a different shape from x
-                    assert_raises(ValueError, lambda: x.__imatmul__(y))
+                    with assert_raises(ValueError):
+                        x.__imatmul__(y)
                 else:
                     x.__imatmul__(y)
 

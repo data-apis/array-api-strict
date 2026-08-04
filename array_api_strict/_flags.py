@@ -14,9 +14,9 @@ library will only support one particular configuration of these flags.
 import functools
 import os
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from types import TracebackType
-from typing import Any, Collection, ParamSpec, TypeVar, cast
+from typing import Any, ParamSpec, TypeVar, cast
 
 import array_api_strict
 
