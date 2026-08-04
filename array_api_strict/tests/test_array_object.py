@@ -799,7 +799,8 @@ def test_dlpack_export_from_non_cpu_device(device):
     with pytest.raises(BufferError):
         np.from_dlpack(a, device="cpu")
 
-    # explicitly move the array to CPU_DEVICE before handing to to DLPack
+    # explicitly move the array to CPU_DEVICE before handing it to
+    # Numpy via DLPack
     a_np = np.from_dlpack(a.to_device(CPU_DEVICE))
     assert (a_np == a._array).all()
     assert a_np.dtype == a._array.dtype
