@@ -51,14 +51,3 @@ array_api_tests/test_dlpack.py::test_dunder_dlpack
 
 # NumPy 1.26: TypeError: numpy.from_dlpack() takes no keyword arguments
 array_api_tests/test_dlpack.py::test_from_dlpack
-
-# https://github.com/numpy/numpy/issues/32234 : macOS specific failures
-array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
-array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is 1 and imag(x_i) is +0) -> +infinity + 0j]
-array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is +infinity and imag(x_i) is NaN) -> +0 + NaN j]
-array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is NaN and imag(x_i) is +infinity) -> \xb10 + \u03c0j/2]
-array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is +infinity) -> +0 + NaN j]
-array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
-
-# https://github.com/numpy/numpy/issues/32234 : macOS specific failure
-array_api_tests/test_operators_and_elementwise_functions.py::test_sqrt
