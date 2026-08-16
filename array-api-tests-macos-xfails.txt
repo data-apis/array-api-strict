@@ -1,0 +1,12 @@
+# Additional failures on MacOS: all tests listed in `array-api-tests-xfails.txt` fail everywhere, plus those listed here.
+
+# https://github.com/numpy/numpy/issues/32234
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
+array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is +infinity) -> +0 + NaN j]
+array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
+array_api_tests/test_operators_and_elementwise_functions.py::test_sqrt
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is 1 and imag(x_i) is +0) -> +infinity + 0j]
+array_api_tests/test_special_cases.py::test_unary[atanh(isfinite(real(x_i)) and real(x_i) != 0 and imag(x_i) is NaN) -> NaN + NaN j]
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is +infinity and imag(x_i) is NaN) -> +0 + NaN j]
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is NaN and imag(x_i) is +infinity) -> \xb10 + \u03c0j/2]
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is NaN and isfinite(imag(x_i))) -> NaN + NaN j]

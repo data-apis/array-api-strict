@@ -1,0 +1,10 @@
+# Additional failures on Windows: all tests listed in `array-api-tests-xfails.txt` fail everywhere, plus those listed here.
+
+# https://github.com/numpy/numpy/issues/32234
+array_api_tests/test_special_cases.py::test_unary[atanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
+array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is +infinity) -> +0 + NaN j]
+array_api_tests/test_special_cases.py::test_unary[tanh(real(x_i) is +0 and imag(x_i) is NaN) -> +0 + NaN j]
+
+# https://github.com/numpy/numpy/pull/24224: Fixed in NumPy 2.0
+array_api_tests/test_creation_functions.py::test_arange
+array_api_tests/test_creation_functions.py::test_full

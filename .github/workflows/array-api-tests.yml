@@ -8,16 +8,20 @@ env:
 
 jobs:
   array-api-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.13', '3.14']
         numpy-version: ['1.26', 'latest', 'dev']
         exclude:
           - python-version: '3.10'
             numpy-version: 'latest'
           - python-version: '3.10'
-            numpy-version: 'dev'            
+            numpy-version: 'dev'
           - python-version: '3.13'
             numpy-version: '1.26'
           - python-version: '3.14'
@@ -55,9 +59,19 @@ jobs:
       env:
         ARRAY_API_TESTS_MODULE: array_api_strict
       run: |
+        SKIPS_FILES="--skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt"
+        case "${{ matrix.os }}" in
+          macos-latest)
+            SKIPS_FILES="${SKIPS_FILES} --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-macos-xfails.txt"
+            ;;
+          windows-latest)
+            SKIPS_FILES="${SKIPS_FILES} --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-windows-xfails.txt"
+            ;;
+        esac
+
         # Parameterizing this in the CI matrix is wasteful. Just do a loop here.
         for ARRAY_API_STRICT_API_VERSION in ${API_VERSIONS}; do
             export ARRAY_API_STRICT_API_VERSION
             cd ${GITHUB_WORKSPACE}/array-api-tests
-            pytest array_api_tests/ --skips-file ${GITHUB_WORKSPACE}/array-api-strict/array-api-tests-xfails.txt ${PYTEST_ARGS}
+            pytest array_api_tests/ ${SKIPS_FILES} ${PYTEST_ARGS}
         done
