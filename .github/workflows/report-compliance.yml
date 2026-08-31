@@ -1,0 +1,202 @@
+#/
+# @license MIT
+#
+# Copyright (c) 2026 Python Data APIs Consortium.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#/
+
+# Workflow name:
+name: report-compliance
+
+# Workflow triggers:
+on:
+  # Run daily:
+  schedule:
+    - cron: '0 12 * * *'
+
+  # Allow the workflow to be manually run:
+  workflow_dispatch:
+
+# Global permissions:
+permissions:
+  # Allow read-only access to the repository contents:
+  contents: read
+
+# Define global environment variables:
+env:
+  ARRAY_LIBRARY: 'array-api-strict'
+  ARRAY_LIBRARY_MODULE: 'array_api_strict'
+  ARRAY_API_VERSION: '2025.12'
+
+# Workflow jobs:
+jobs:
+
+  # Define a job for running Array API tests...
+  array_api_tests:
+
+    # Define a display name:
+    name: 'Demo Array API Tests'
+
+    # Define the type of virtual host machine:
+    runs-on: ubuntu-latest
+
+    # Define the sequence of job steps...
+    steps:
+
+      # Check out of the test suite repository:
+      - name: 'Checkout Array API test suite repository'
+
+        # Pin action to full length commit SHA:
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+        # Specify repository data:
+        with:
+          repository: data-apis/array-api-tests
+          submodules: 'true'
+          path: array-api-tests
+
+      # Install Python:
+      - name: 'Install Python'
+
+        # Pin action to full length commit SHA:
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+
+        # Specify Python info:
+        with:
+          python-version: '3.14'
+
+        timeout-minutes: 5
+
+      # Install dependencies:
+      - name: 'Install dependencies'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r ${GITHUB_WORKSPACE}/array-api-tests/requirements.txt
+          python -m pip install pytest-xdist
+
+        timeout-minutes: 10
+
+      # Install the array library to test:
+      - name: 'Install array library'
+        run: |
+          python -m pip install ${{ env.ARRAY_LIBRARY }}
+
+        timeout-minutes: 10
+
+      # Run the test suite:
+      - name: 'Run test suite'
+        id: tests
+
+        # Allow subsequent steps to execute even if this one fails:
+        continue-on-error: true
+
+        # Set requisite environment variables:
+        env:
+          # Specify the array library name to test:
+          ARRAY_API_TESTS_MODULE: ${{ env.ARRAY_LIBRARY_MODULE }}
+
+          # Specify the array API version to test against:
+          ARRAY_API_TESTS_VERSION: ${{ env.ARRAY_API_VERSION }}
+
+          ARRAY_API_STRICT_VERSION: ${{ env.ARRAY_API_VERSION }}
+
+        # Generate a JSON report:
+        run: |
+          cd ${GITHUB_WORKSPACE}/array-api-tests
+          python -m pytest array_api_tests/ --max-examples 500 -n 4 --derandomize --json-report
+
+        timeout-minutes: 360
+
+      # Add meta data to report:
+      - name: 'Add meta data'
+        run: |
+          cd "${GITHUB_WORKSPACE}/array-api-tests"
+          if [ ! -f .report.json ]; then
+              echo "::error::pytest did not produce .report.json"
+              exit 1
+          fi
+          library_version="$(python -c "import importlib.metadata; print(importlib.metadata.version('${{ env.ARRAY_LIBRARY }}'))")"
+
+          platform="$(python -c 'import platform; print(platform.platform())')"
+          system="$(python -c 'import platform; print(platform.system())')"
+          release="$(python -c 'import platform; print(platform.release())')"
+          machine="$(python -c 'import platform; print(platform.machine())')"
+          python_version="$(python -c 'import platform; print(platform.python_version())')"
+          test_suite="$(git rev-parse HEAD)"
+
+          jq \
+            --arg schema 'v1' \
+            --arg name '${{ env.ARRAY_LIBRARY }}' \
+            --arg version "${library_version}" \
+            --arg api_version '${{ env.ARRAY_API_VERSION }}' \
+            --arg timestamp "$(date --utc +'%Y-%m-%dT%H:%M:%SZ')" \
+            --arg platform "${platform}" \
+            --arg system "${system}" \
+            --arg release "${release}" \
+            --arg machine "${machine}" \
+            --arg execution_target 'cpu' \
+            --arg python_version "${python_version}" \
+            --arg test_suite "${test_suite}" \
+            '{
+              schema: $schema,
+              name: $name,
+              version: $version,
+              api_version: $api_version,
+              timestamp: $timestamp,
+              platform: {
+                description: $platform,
+                system: $system,
+                release: $release,
+                machine: $machine
+              },
+              execution_target: {
+                kind: $execution_target
+              },
+              python: $python_version,
+              test_suite: $test_suite,
+              data: {
+                duration: .duration,
+                exitcode: .exitcode,
+                summary: .summary,
+                tests: .tests
+              }
+            }' \
+            .report.json > array_api_compliance.json
+
+      # Upload the JSON report:
+      - name: 'Upload test suite results'
+
+        # Pin action to full length commit SHA:
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+
+        with:
+          # Define a name for the uploaded artifact:
+          name: 'array_api_compliance.json'
+
+          # Specify the path to the file to upload:
+          path: ${{ github.workspace }}/array-api-tests/array_api_compliance.json
+
+          # Specify what should happen if no files are found to upload:
+          if-no-files-found: error
+
+          # Specify the number of days to retain the artifact (default is 90 days):
+          retention-days: 45
+
+        timeout-minutes: 10
