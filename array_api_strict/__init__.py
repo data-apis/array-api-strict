@@ -303,10 +303,11 @@ from ._searching_functions import (
     count_nonzero,
     nonzero,
     searchsorted,
+    top_k,
     where,
 )
 
-__all__ += ["argmax", "argmin", "count_nonzero", "nonzero", "searchsorted", "where"]
+__all__ += ["argmax", "argmin", "count_nonzero", "nonzero", "searchsorted", "top_k", "where"]
 
 from ._set_functions import (
     isin,
