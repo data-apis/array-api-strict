@@ -116,6 +116,33 @@ def test_asarray_nested_arrays():
         asarray([1, asarray(1)])
 
 
+@pytest.mark.parametrize("outer", [list, tuple])
+@pytest.mark.parametrize("inner", [list, tuple])
+@pytest.mark.parametrize("array_value", [1, [1]])
+@pytest.mark.parametrize("depth", [2, 3])
+def test_asarray_deeply_nested_arrays(outer, inner, array_value, depth):
+    obj = asarray(array_value)
+    for _ in range(depth - 1):
+        obj = inner([obj])
+    obj = outer([obj])
+    with pytest.raises(TypeError, match="Nested Arrays are not allowed"):
+        asarray(obj)
+
+
+def test_asarray_nested_array_after_scalars():
+    with pytest.raises(TypeError, match="Nested Arrays are not allowed"):
+        asarray([[1, 2], [3, asarray(4)]])
+
+
+@pytest.mark.parametrize("outer", [list, tuple])
+@pytest.mark.parametrize("inner", [list, tuple])
+def test_asarray_nested_scalars(outer, inner):
+    obj = outer([inner([1, 2]), inner([3, 4])])
+    res = asarray(obj)
+    assert res.shape == (2, 2)
+    assert all(res == asarray([[1, 2], [3, 4]]))
+
+
 def test_asarray_device_inference():
     assert asarray([1, 2, 3]).device == CPU_DEVICE
 
