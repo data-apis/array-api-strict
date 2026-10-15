@@ -12,7 +12,7 @@ import array_api_strict
 
 from .. import all, arange, asarray, equal, ones, reshape, result_type, stack
 from .._array_object import Array
-from .._devices import CPU_DEVICE, Device
+from .._devices import _DLPACK_DEVICE_FOR, ALL_DEVICES, CPU_DEVICE, Device, DLDeviceType
 from .._dtypes import (
     _all_dtypes,
     _boolean_dtypes,
@@ -769,6 +769,65 @@ def test_dlpack_2023_12(api_version):
         a.__dlpack__(copy=False)
         a.__dlpack__(copy=True)
         a.__dlpack__(copy=None)
+
+
+@pytest.mark.parametrize("device", ALL_DEVICES)
+def test_dlpack_device_numbers(device):
+    a = asarray([1, 2, 3], device=device)
+    # the data of every logical device lives in host memory, so they all report
+    # the CPU device, which is device number zero
+    assert a.__dlpack_device__() == (DLDeviceType.CPU, 0)
+
+
+def test_dlpack_device_map_is_complete():
+    assert set(_DLPACK_DEVICE_FOR) == set(ALL_DEVICES)
+
+
+@pytest.mark.parametrize(
+    "device", [device for device in ALL_DEVICES if device != CPU_DEVICE]
+)
+def test_dlpack_export_from_non_cpu_device(device):
+    a = asarray([1, 2, 3], device=device)
+
+    with pytest.raises(BufferError):
+        a.__dlpack__()
+    with pytest.raises(BufferError):
+        np.from_dlpack(a)
+
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        return
+
+    # asking for a device explicitly does not help: the array has to be moved
+    # to the CPU device first. Even asking for the CPU device, which is what
+    # __dlpack_device__ reports, is refused: these devices are meant to
+    # represent a GPU or other accelerator, so the consumer would end up with
+    # the data on a device the array is not logically on.
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=a.__dlpack_device__())
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=(DLDeviceType.CPU, 0))
+    with pytest.raises(BufferError):
+        np.from_dlpack(a, device="cpu")
+
+    # explicitly move the array to CPU_DEVICE before handing it to
+    # Numpy via DLPack
+    a_np = np.from_dlpack(a.to_device(CPU_DEVICE))
+    assert (a_np == a._array).all()
+    assert a_np.dtype == a._array.dtype
+
+
+def test_dlpack_export_from_cpu_device():
+    a = asarray([1, 2, 3])
+
+    a.__dlpack__()
+    np.from_dlpack(a)
+
+    if np.lib.NumpyVersion(np.__version__) < "2.1.0":
+        return
+
+    a.__dlpack__(dl_device=a.__dlpack_device__())
+    with pytest.raises(BufferError):
+        a.__dlpack__(dl_device=(DLDeviceType.CUDA, 0))
 
 
 def test_pickle():
