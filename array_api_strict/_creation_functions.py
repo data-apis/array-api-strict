@@ -48,6 +48,16 @@ def _supports_buffer_protocol(obj: object) -> TypeIs[SupportsBufferProtocol]:
     return True
 
 
+def _contains_nested_array(obj: list[object] | tuple[object, ...]) -> bool:
+    from ._array_object import Array
+
+    return any(
+        isinstance(item, Array)
+        or isinstance(item, list | tuple) and _contains_nested_array(item)
+        for item in obj
+    )
+
+
 def asarray(
     obj: Array | complex | NestedSequence[complex] | SupportsBufferProtocol,
     /,
@@ -97,7 +107,7 @@ def asarray(
 
     if isinstance(obj, Array):
         return Array._new(np.array(obj._array, copy=copy, dtype=_np_dtype), device=device)
-    elif isinstance(obj, list | tuple) and any(isinstance(x, Array) for x in obj):
+    elif isinstance(obj, list | tuple) and _contains_nested_array(obj):
         raise TypeError("Nested Arrays are not allowed. Use `stack` instead.")
 
     if dtype is None and isinstance(obj, int) and (obj > 2 ** 64 or obj < -(2 ** 63)):
