@@ -1,3 +1,4 @@
+from enum import IntEnum
 from typing import Final
 
 from ._dtypes import (
@@ -49,6 +50,59 @@ NO_X64_DEVICE = Device("no_x64")
 ALL_DEVICES = (
     CPU_DEVICE, Device("device1"), Device("device2"), NO_FLOAT64_DEVICE, NO_X64_DEVICE
 )
+
+
+class DLDeviceType(IntEnum):
+    """The DLPack device types, as defined by the DLPack ABI."""
+    CPU = 1
+    CUDA = 2
+    CUDA_HOST = 3
+    OPENCL = 4
+    VULKAN = 7
+    METAL = 8
+    VPI = 9
+    ROCM = 10
+    CUDA_MANAGED = 13
+    ONE_API = 14
+
+
+# All the devices of array_api_strict are fictitious and their data lives in host
+# memory, so they all report the CPU device, which is device number zero. Reporting
+# anything else makes consumers such as pytorch dispatch to the machinery of a
+# device they cannot actually reach, see
+# https://github.com/data-apis/array-api-strict/issues/219
+# The logical devices cannot be told apart through DLPack, which is fine: only the
+# CPU device can be exported at all, and from_dlpack recovers the logical device of
+# an array from this library without going through DLPack.
+_DLPACK_DEVICE_FOR: Final[dict[Device, tuple[DLDeviceType, int]]] = {
+    device: (DLDeviceType.CPU, 0) for device in ALL_DEVICES
+}
+
+_DLPACK_DEVICE_TO_LOGICAL: Final[dict[tuple[int, int], Device]] = {
+    (int(DLDeviceType.CPU), 0): CPU_DEVICE,
+}
+
+
+def _normalize_dl_device(device_type: IntEnum | int, device_id: int) -> tuple[int, int]:
+    # `device_type` may be a member of another library's DLPack enum
+    return (int(device_type), device_id)
+
+
+def _device_from_dlpack_device(
+    device_type: IntEnum | int, device_id: int
+) -> Device:
+    key = _normalize_dl_device(device_type, device_id)
+    try:
+        return _DLPACK_DEVICE_TO_LOGICAL[key]
+    except KeyError:
+        try:
+            type_name = DLDeviceType(key[0]).name
+        except ValueError:
+            type_name = str(key[0])
+        raise BufferError(
+            f"No array_api_strict device matches the DLPack device "
+            f"({type_name}, {device_id})."
+        ) from None
 
 
 def check_device(device: Device | None) -> None:
