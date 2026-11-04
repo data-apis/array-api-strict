@@ -48,6 +48,3 @@ array_api_tests/test_special_cases.py::test_unary[sqrt(real(x_i) is +infinity an
 
 # NumPy 1.26 : NotImplementedError: The copy argument to __dlpack__ is not yet implemented
 array_api_tests/test_dlpack.py::test_dunder_dlpack
-
-# NumPy 1.26: TypeError: numpy.from_dlpack() takes no keyword arguments
-array_api_tests/test_dlpack.py::test_from_dlpack
