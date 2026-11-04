@@ -33,6 +33,13 @@ Repository = "https://github.com/data-apis/array-api-strict"
 [tool.setuptools_scm]
 version_file = "array_api_strict/_version.py"
 
+[tool.setuptools.package-data]
+array_api_strict = [
+    "../array-api-tests-macos-xfails.txt",
+    "../array-api-tests-windows-xfails.txt",
+    "../array-api-tests-xfails.txt",
+]
+
 [tool.mypy]
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
